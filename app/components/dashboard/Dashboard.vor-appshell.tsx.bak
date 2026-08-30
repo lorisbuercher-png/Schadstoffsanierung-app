@@ -1,0 +1,1061 @@
+"use client";
+
+import "./dashboard.css";
+import { useEffect, useMemo, useState } from "react";
+
+type Checkliste = {
+  code: string;
+  name: string;
+  status: string;
+};
+
+type Baustelle = {
+  id: string;
+  nummer: string;
+  projektname: string;
+  ort: string;
+  status?: string;
+  fortschritt?: number;
+  checklisten?: Checkliste[];
+};
+
+type KalenderEvent = {
+  id: string;
+  titel: string;
+  datum: string;
+  uhrzeit?: string;
+  baustelleId?: string;
+  notiz?: string;
+  typ: "Baustelle" | "Kontrolle" | "Freimessung" | "Gerät" | "Sonstiges";
+};
+
+const prio1Nummern = new Set([
+  6, 10, 12, 13, 19, 20, 23,
+  26, 29, 31, 33, 38, 42, 44,
+]);
+
+export default function Dashboard() {
+  const [baustellen, setBaustellen] = useState<Baustelle[]>([]);
+  const [personenInZone, setPersonenInZone] = useState(0);
+  const [offeneTageschecks, setOffeneTageschecks] = useState(0);
+  const [kritischeMaengel, setKritischeMaengel] = useState(0);
+  const [faelligeGeraete, setFaelligeGeraete] = useState(0);
+  const [suvaErfuellt, setSuvaErfuellt] = useState(0);
+  const [suvaGesamt, setSuvaGesamt] = useState(0);
+  const [events, setEvents] = useState<KalenderEvent[]>([]);
+  const [terminFormOffen, setTerminFormOffen] = useState(false);
+  const [terminTitel, setTerminTitel] = useState("");
+  const [terminDatum, setTerminDatum] = useState("");
+  const [terminZeit, setTerminZeit] = useState("");
+  const [terminTyp, setTerminTyp] =
+    useState<KalenderEvent["typ"]>("Baustelle");
+  const [terminBaustelle, setTerminBaustelle] = useState("");
+  const [terminNotiz, setTerminNotiz] = useState("");
+  const [ausgewaehlterTermin, setAusgewaehlterTermin] =
+    useState<KalenderEvent | null>(null);
+
+  const heute = new Date();
+  const heuteKey = heute.toISOString().slice(0, 10);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("baustellen");
+
+    let alle: Baustelle[] = [];
+
+    try {
+      alle = raw ? JSON.parse(raw) : [];
+    } catch {
+      alle = [];
+    }
+
+    if (!Array.isArray(alle)) {
+      alle = [];
+    }
+
+    setBaustellen(alle);
+
+    let zone = 0;
+    let tageschecksOffen = 0;
+    let maengelKritisch = 0;
+    let geraeteFaellig = 0;
+    let suvaOkay = 0;
+    let suvaTotal = 0;
+
+    for (const baustelle of alle) {
+      const id = baustelle.id;
+
+      // Tagescheck
+      const tagescheckRaw = localStorage.getItem(
+        `tagescheck-${id}-${heuteKey}`
+      );
+
+      if (!tagescheckRaw) {
+        tageschecksOffen++;
+      } else {
+        try {
+          const check = JSON.parse(tagescheckRaw);
+
+          if (check.status !== "arbeitsbereit") {
+            tageschecksOffen++;
+          }
+        } catch {
+          tageschecksOffen++;
+        }
+      }
+
+      // Zonenzutritt
+      const zoneRaw = localStorage.getItem(
+        `zonenzutritt-${id}-${heuteKey}`
+      );
+
+      if (zoneRaw) {
+        try {
+          const eintraege = JSON.parse(zoneRaw);
+
+          if (Array.isArray(eintraege)) {
+            const letzterStatus: Record<
+              string,
+              "eintritt" | "austritt"
+            > = {};
+
+            for (const eintrag of eintraege) {
+              if (!letzterStatus[eintrag.mitarbeiterId]) {
+                letzterStatus[eintrag.mitarbeiterId] =
+                  eintrag.typ;
+              }
+            }
+
+            zone += Object.values(letzterStatus).filter(
+              (status) => status === "eintritt"
+            ).length;
+          }
+        } catch {}
+      }
+
+      // Mängel
+      const maengelRaw = localStorage.getItem(`maengel-${id}`);
+
+      if (maengelRaw) {
+        try {
+          const maengel = JSON.parse(maengelRaw);
+
+          if (Array.isArray(maengel)) {
+            maengelKritisch += maengel.filter(
+              (mangel) =>
+                mangel.status !== "behoben" &&
+                mangel.prioritaet === "kritisch"
+            ).length;
+          }
+        } catch {}
+      }
+
+      // Geräte
+      const geraeteRaw = localStorage.getItem(`geraete-${id}`);
+
+      if (geraeteRaw) {
+        try {
+          const geraete = JSON.parse(geraeteRaw);
+
+          if (Array.isArray(geraete)) {
+            const heuteDatum = new Date();
+            heuteDatum.setHours(0, 0, 0, 0);
+
+            for (const geraet of geraete) {
+              if (!geraet.naechstePruefung) {
+                geraeteFaellig++;
+                continue;
+              }
+
+              const pruefung = new Date(
+                `${geraet.naechstePruefung}T00:00:00`
+              );
+
+              const diff = Math.ceil(
+                (pruefung.getTime() -
+                  heuteDatum.getTime()) /
+                  (1000 * 60 * 60 * 24)
+              );
+
+              if (diff <= 30) {
+                geraeteFaellig++;
+              }
+            }
+          }
+        } catch {}
+      }
+
+      // SUVA
+      const suvaRaw = localStorage.getItem(`suva-audit-${id}`);
+
+      if (suvaRaw) {
+        try {
+          const audit = JSON.parse(suvaRaw);
+
+          for (let nr = 1; nr <= 53; nr++) {
+            suvaTotal++;
+
+            if (audit[nr]?.status === "erfuellt") {
+              suvaOkay++;
+            }
+          }
+        } catch {}
+      }
+    }
+
+    setPersonenInZone(zone);
+    setOffeneTageschecks(tageschecksOffen);
+    setKritischeMaengel(maengelKritisch);
+    setFaelligeGeraete(geraeteFaellig);
+    setSuvaErfuellt(suvaOkay);
+    setSuvaGesamt(suvaTotal);
+
+    const eventRaw = localStorage.getItem("kalender-events");
+
+    try {
+      const daten = eventRaw ? JSON.parse(eventRaw) : [];
+      if (Array.isArray(daten)) setEvents(daten);
+    } catch {}
+  }, [heuteKey]);
+
+  const aktiveBaustellen = baustellen.length;
+
+  const gesamtArbeitsbereit =
+    kritischeMaengel === 0 &&
+    offeneTageschecks === 0;
+
+  const suvaProzent =
+    suvaGesamt > 0
+      ? Math.round((suvaErfuellt / suvaGesamt) * 100)
+      : 0;
+
+  const projekte = useMemo(() => {
+    return baustellen.slice(0, 5).map((baustelle) => {
+      const checklisten = baustelle.checklisten || [];
+
+      const abgeschlossen = checklisten.filter(
+        (c) => c.status === "Abgeschlossen"
+      ).length;
+
+      const progress =
+        checklisten.length > 0
+          ? Math.round(
+              (abgeschlossen / checklisten.length) * 100
+            )
+          : 0;
+
+      const auditRaw =
+        typeof window !== "undefined"
+          ? localStorage.getItem(
+              `suva-audit-${baustelle.id}`
+            )
+          : null;
+
+      let prioErfuellt = 0;
+      let prioOffen = 14;
+      let prioKritisch = 0;
+
+      if (auditRaw) {
+        try {
+          const audit = JSON.parse(auditRaw);
+
+          prioErfuellt = 0;
+          prioOffen = 0;
+          prioKritisch = 0;
+
+          for (const nr of prio1Nummern) {
+            const status =
+              audit[nr]?.status || "offen";
+
+            if (status === "erfuellt") {
+              prioErfuellt++;
+            } else if (status === "nicht-erfuellt") {
+              prioKritisch++;
+            } else {
+              prioOffen++;
+            }
+          }
+        } catch {}
+      }
+
+      const status =
+        prioKritisch > 0
+          ? "Nicht bereit"
+          : prioOffen > 0
+          ? "Prüfung offen"
+          : "Arbeitsbereit";
+
+      return {
+        id: baustelle.id,
+        nummer: baustelle.nummer,
+        name: baustelle.projektname,
+        ort: baustelle.ort,
+        progress,
+        status,
+        suva: `${prioErfuellt}/14`,
+      };
+    });
+  }, [baustellen]);
+
+  const kalender = useMemo(() => {
+    const jahr = heute.getFullYear();
+    const monat = heute.getMonth();
+
+    const erster = new Date(jahr, monat, 1);
+    const letzter = new Date(jahr, monat + 1, 0);
+
+    const startOffset =
+      (erster.getDay() + 6) % 7;
+
+    const tage: (number | null)[] = [];
+
+    for (let i = 0; i < startOffset; i++) {
+      tage.push(null);
+    }
+
+    for (let tag = 1; tag <= letzter.getDate(); tag++) {
+      tage.push(tag);
+    }
+
+    while (tage.length % 7 !== 0) {
+      tage.push(null);
+    }
+
+    return {
+      jahr,
+      monat,
+      tage,
+      name: heute.toLocaleDateString("de-CH", {
+        month: "long",
+        year: "numeric",
+      }),
+    };
+  }, []);
+
+  function terminSpeichern() {
+    if (!terminTitel.trim() || !terminDatum) {
+      alert("Bitte Titel und Datum eingeben.");
+      return;
+    }
+
+    const neuerTermin: KalenderEvent = {
+      id: crypto.randomUUID(),
+      titel: terminTitel.trim(),
+      datum: terminDatum,
+      uhrzeit: terminZeit,
+      typ: terminTyp,
+      baustelleId: terminBaustelle || undefined,
+      notiz: terminNotiz.trim() || undefined,
+    };
+
+    const neu = [...events, neuerTermin];
+
+    setEvents(neu);
+    localStorage.setItem(
+      "kalender-events",
+      JSON.stringify(neu)
+    );
+
+    setTerminTitel("");
+    setTerminDatum("");
+    setTerminZeit("");
+    setTerminTyp("Baustelle");
+    setTerminBaustelle("");
+    setTerminNotiz("");
+    setTerminFormOffen(false);
+  }
+
+  function terminOeffnen(event: KalenderEvent) {
+    setAusgewaehlterTermin(event);
+    setTerminTitel(event.titel);
+    setTerminDatum(event.datum);
+    setTerminZeit(event.uhrzeit || "");
+    setTerminTyp(event.typ);
+    setTerminBaustelle(event.baustelleId || "");
+    setTerminNotiz(event.notiz || "");
+    setTerminFormOffen(true);
+  }
+
+  function terminAktualisieren() {
+    if (!ausgewaehlterTermin) {
+      terminSpeichern();
+      return;
+    }
+
+    if (!terminTitel.trim() || !terminDatum) {
+      alert("Bitte Titel und Datum eingeben.");
+      return;
+    }
+
+    const neu = events.map((event) =>
+      event.id === ausgewaehlterTermin.id
+        ? {
+            ...event,
+            titel: terminTitel.trim(),
+            datum: terminDatum,
+            uhrzeit: terminZeit,
+            typ: terminTyp,
+            baustelleId: terminBaustelle || undefined,
+            notiz: terminNotiz.trim() || undefined,
+          }
+        : event
+    );
+
+    setEvents(neu);
+    localStorage.setItem(
+      "kalender-events",
+      JSON.stringify(neu)
+    );
+
+    setAusgewaehlterTermin(null);
+    setTerminTitel("");
+    setTerminDatum("");
+    setTerminZeit("");
+    setTerminTyp("Baustelle");
+    setTerminBaustelle("");
+    setTerminNotiz("");
+    setTerminFormOffen(false);
+  }
+
+  function terminLoeschen() {
+    if (!ausgewaehlterTermin) return;
+
+    const bestaetigt = confirm(
+      "Soll dieser Termin wirklich gelöscht werden?"
+    );
+
+    if (!bestaetigt) return;
+
+    const neu = events.filter(
+      (event) => event.id !== ausgewaehlterTermin.id
+    );
+
+    setEvents(neu);
+    localStorage.setItem(
+      "kalender-events",
+      JSON.stringify(neu)
+    );
+
+    setAusgewaehlterTermin(null);
+    setTerminTitel("");
+    setTerminDatum("");
+    setTerminZeit("");
+    setTerminTyp("Baustelle");
+    setTerminBaustelle("");
+    setTerminNotiz("");
+    setTerminFormOffen(false);
+  }
+
+  function eventFuerTag(tag: number) {
+    const datum = `${kalender.jahr}-${String(
+      kalender.monat + 1
+    ).padStart(2, "0")}-${String(tag).padStart(2, "0")}`;
+
+    return events.filter(
+      (event) => event.datum === datum
+    );
+  }
+
+  return (
+    <div className="dashboard-shell">
+
+      <aside className="dashboard-sidebar">
+
+        <div className="dashboard-logo">
+          <div className="dashboard-logo-mark">B&B</div>
+
+          <div>
+            <strong>SCHADSTOFF</strong>
+            <span>SANIERUNG</span>
+          </div>
+        </div>
+
+        <nav className="dashboard-nav">
+          <a href="/" className="active">
+            <span>⌂</span>
+            Übersicht
+          </a>
+
+          <a href="/baustellen">
+            <span>▦</span>
+            Baustellen
+          </a>
+
+          <a href="/instruktionen">
+            <span>✓</span>
+            Checklisten
+          </a>
+
+          <a href="/baustellen">
+            <span>▤</span>
+            Dokumente
+          </a>
+
+          <a href="/baustellen">
+            <span>⚙</span>
+            Geräte
+          </a>
+
+          <a href="/mitarbeiter">
+            <span>♧</span>
+            Mitarbeiter
+          </a>
+
+          <a href="/kalender">
+            <span>□</span>
+            Kalender
+          </a>
+        </nav>
+
+        <div className="dashboard-user">
+          <div className="dashboard-avatar">LB</div>
+          <div>
+            <strong>Loris Bürcher</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+
+      </aside>
+
+      <main className="dashboard-main">
+
+        <header className="dashboard-topbar">
+
+          <div className="dashboard-search">
+            <span>⌕</span>
+
+            <input
+              type="text"
+              placeholder="Baustellen, Dokumente, Mitarbeiter suchen..."
+            />
+          </div>
+
+          <div className="dashboard-top-actions">
+            <button className="dashboard-icon-button">
+              ◌
+            </button>
+
+            <div className="dashboard-avatar small">
+              LB
+            </div>
+          </div>
+
+        </header>
+
+        <div className="dashboard-content">
+
+          <section className="dashboard-heading">
+
+            <div>
+              <span className="dashboard-overline">
+                ÜBERSICHT
+              </span>
+
+              <h1>
+                Guten Morgen, Loris 👋
+              </h1>
+
+              <p>
+                Hier ist der aktuelle Stand deiner Baustellen.
+              </p>
+            </div>
+
+            <a
+              href="/baustellen/neu"
+              className="dashboard-primary-button"
+            >
+              + Neue Baustelle
+            </a>
+
+          </section>
+
+          <section className="dashboard-ready-card">
+
+            <div className="dashboard-ready-left">
+
+              <div className="dashboard-ready-icon">
+                {gesamtArbeitsbereit ? "✓" : "!"}
+              </div>
+
+              <div>
+                <span className="dashboard-overline light">
+                  HEUTIGE BEREITSCHAFT
+                </span>
+
+                <h2>
+                  {gesamtArbeitsbereit
+                    ? "Arbeitsbereit"
+                    : "Kontrolle erforderlich"}
+                </h2>
+
+                <p>
+                  {gesamtArbeitsbereit
+                    ? "Keine kritischen Anforderungen offen."
+                    : "Es bestehen offene oder kritische Punkte."}
+                </p>
+              </div>
+
+            </div>
+
+            <div className="dashboard-ready-stats">
+
+              <div>
+                <strong>{kritischeMaengel}</strong>
+                <span>Kritische Mängel</span>
+              </div>
+
+              <div>
+                <strong>{offeneTageschecks}</strong>
+                <span>Tageschecks offen</span>
+              </div>
+
+              <div>
+                <strong>{personenInZone}</strong>
+                <span>In Sanierungszone</span>
+              </div>
+
+              <div className="dashboard-suva-score">
+                <strong>{suvaProzent}%</strong>
+                <span>SUVA Audit</span>
+              </div>
+
+            </div>
+
+          </section>
+
+          <section className="dashboard-kpis">
+
+            <div className="dashboard-kpi-card">
+              <div className="dashboard-kpi-icon yellow">
+                ▦
+              </div>
+
+              <div>
+                <strong>{aktiveBaustellen}</strong>
+                <span>Aktive Baustellen</span>
+                <small>Aktuell erfasst</small>
+              </div>
+            </div>
+
+            <div className="dashboard-kpi-card">
+              <div className="dashboard-kpi-icon">
+                ✓
+              </div>
+
+              <div>
+                <strong>{offeneTageschecks}</strong>
+                <span>Tageschecks offen</span>
+                <small>Heute</small>
+              </div>
+            </div>
+
+            <div className="dashboard-kpi-card">
+              <div className="dashboard-kpi-icon">
+                ⇄
+              </div>
+
+              <div>
+                <strong>{personenInZone}</strong>
+                <span>Mitarbeiter in Zone</span>
+                <small>Live</small>
+              </div>
+            </div>
+
+            <div className="dashboard-kpi-card">
+              <div className="dashboard-kpi-icon">
+                ⚠
+              </div>
+
+              <div>
+                <strong>{faelligeGeraete}</strong>
+                <span>Geräteprüfung</span>
+                <small>Fällig / bald fällig</small>
+              </div>
+            </div>
+
+          </section>
+
+          <section className="dashboard-grid-main">
+
+            <div className="dashboard-card">
+
+              <div className="dashboard-card-header">
+
+                <div>
+                  <span className="dashboard-overline">
+                    PROJEKTE
+                  </span>
+
+                  <h3>
+                    Aktuelle Baustellen
+                  </h3>
+                </div>
+
+                <a href="/baustellen">
+                  Alle anzeigen →
+                </a>
+
+              </div>
+
+              <div className="dashboard-project-table">
+
+                <div className="dashboard-project-row header">
+                  <span>Baustelle</span>
+                  <span>Fortschritt</span>
+                  <span>SUVA</span>
+                  <span>Status</span>
+                </div>
+
+                {projekte.length === 0 && (
+                  <div
+                    style={{
+                      padding: "28px 0",
+                      color: "#8d9299",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Noch keine Baustellen angelegt.
+                  </div>
+                )}
+
+                {projekte.map((project) => (
+                  <a
+                    href={`/baustellen/${project.id}`}
+                    className="dashboard-project-row"
+                    key={project.id}
+                  >
+
+                    <div className="dashboard-project-name">
+                      <strong>{project.name}</strong>
+
+                      <span>
+                        {project.nummer} · {project.ort}
+                      </span>
+                    </div>
+
+                    <div className="dashboard-progress">
+
+                      <div className="dashboard-progress-track">
+                        <div
+                          className="dashboard-progress-bar"
+                          style={{
+                            width: `${project.progress}%`,
+                          }}
+                        />
+                      </div>
+
+                      <span>
+                        {project.progress}%
+                      </span>
+
+                    </div>
+
+                    <strong className="dashboard-suva-value">
+                      {project.suva}
+                    </strong>
+
+                    <span
+                      className={`dashboard-status ${
+                        project.status === "Arbeitsbereit"
+                          ? "green"
+                          : project.status === "Nicht bereit"
+                          ? "orange"
+                          : "yellow"
+                      }`}
+                    >
+                      {project.status}
+                    </span>
+
+                  </a>
+                ))}
+
+              </div>
+
+            </div>
+
+            <div className="dashboard-card dashboard-audit-card">
+
+              <div className="dashboard-card-header">
+
+                <div>
+                  <span className="dashboard-overline">
+                    SUVA 88319.D
+                  </span>
+
+                  <h3>
+                    Audit-Bereitschaft
+                  </h3>
+                </div>
+
+              </div>
+
+              <div className="dashboard-audit-circle">
+                <div>
+                  <strong>
+                    {suvaProzent}%
+                  </strong>
+                  <span>geprüft</span>
+                </div>
+              </div>
+
+              <div className="dashboard-audit-list">
+
+                <div>
+                  <span className="dashboard-dot green-dot" />
+                  <span>Erfüllt</span>
+                  <strong>
+                    {suvaErfuellt}
+                  </strong>
+                </div>
+
+                <div>
+                  <span className="dashboard-dot yellow-dot" />
+                  <span>Gesamt bewertet</span>
+                  <strong>
+                    {suvaGesamt}
+                  </strong>
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+          <section
+            id="kalender"
+            className="dashboard-card dashboard-calendar-card"
+          >
+
+            <div className="dashboard-card-header">
+
+              <div>
+                <span className="dashboard-overline">
+                  PLANUNG
+                </span>
+
+                <h3>
+                  Kalender
+                </h3>
+              </div>
+
+              <div className="dashboard-calendar-actions">
+                <strong className="dashboard-calendar-month">
+                  {kalender.name}
+                </strong>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAusgewaehlterTermin(null);
+                    setTerminTitel("");
+                    setTerminDatum("");
+                    setTerminZeit("");
+                    setTerminTyp("Baustelle");
+                    setTerminBaustelle("");
+                    setTerminNotiz("");
+                    setTerminFormOffen(!terminFormOffen);
+                  }}
+                  className="dashboard-calendar-add"
+                >
+                  + Termin
+                </button>
+              </div>
+
+            </div>
+
+            {terminFormOffen && (
+              <div className="dashboard-calendar-form">
+
+                <div>
+                  <label>Titel</label>
+                  <input
+                    value={terminTitel}
+                    onChange={(e) =>
+                      setTerminTitel(e.target.value)
+                    }
+                    placeholder="z.B. Baustellenstart"
+                  />
+                </div>
+
+                <div>
+                  <label>Datum</label>
+                  <input
+                    type="date"
+                    value={terminDatum}
+                    onChange={(e) =>
+                      setTerminDatum(e.target.value)
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>Uhrzeit</label>
+                  <input
+                    type="time"
+                    value={terminZeit}
+                    onChange={(e) =>
+                      setTerminZeit(e.target.value)
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>Terminart</label>
+                  <select
+                    value={terminTyp}
+                    onChange={(e) =>
+                      setTerminTyp(
+                        e.target.value as KalenderEvent["typ"]
+                      )
+                    }
+                  >
+                    <option>Baustelle</option>
+                    <option>Kontrolle</option>
+                    <option>Freimessung</option>
+                    <option>Gerät</option>
+                    <option>Sonstiges</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label>Baustelle</label>
+                  <select
+                    value={terminBaustelle}
+                    onChange={(e) =>
+                      setTerminBaustelle(e.target.value)
+                    }
+                  >
+                    <option value="">
+                      Keine / Allgemein
+                    </option>
+
+                    {baustellen.map((baustelle) => (
+                      <option
+                        key={baustelle.id}
+                        value={baustelle.id}
+                      >
+                        {baustelle.nummer} ·{" "}
+                        {baustelle.projektname}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="dashboard-calendar-note">
+                  <label>Notiz</label>
+                  <input
+                    value={terminNotiz}
+                    onChange={(e) =>
+                      setTerminNotiz(e.target.value)
+                    }
+                    placeholder="Optional"
+                  />
+                </div>
+
+                <div className="dashboard-calendar-form-actions">
+                  {ausgewaehlterTermin && (
+                    <button
+                      type="button"
+                      onClick={terminLoeschen}
+                      className="dashboard-calendar-delete"
+                    >
+                      Löschen
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={
+                      ausgewaehlterTermin
+                        ? terminAktualisieren
+                        : terminSpeichern
+                    }
+                    className="dashboard-calendar-save"
+                  >
+                    {ausgewaehlterTermin
+                      ? "Änderungen speichern"
+                      : "Termin speichern"}
+                  </button>
+                </div>
+
+              </div>
+            )}
+
+            <div className="dashboard-calendar-weekdays">
+              <span>Mo</span>
+              <span>Di</span>
+              <span>Mi</span>
+              <span>Do</span>
+              <span>Fr</span>
+              <span>Sa</span>
+              <span>So</span>
+            </div>
+
+            <div className="dashboard-calendar-grid">
+
+              {kalender.tage.map((tag, index) => {
+                if (!tag) {
+                  return (
+                    <div
+                      className="dashboard-calendar-day empty"
+                      key={`empty-${index}`}
+                    />
+                  );
+                }
+
+                const tagEvents = eventFuerTag(tag);
+
+                const istHeute =
+                  tag === heute.getDate();
+
+                return (
+                  <div
+                    className={`dashboard-calendar-day ${
+                      istHeute ? "today" : ""
+                    }`}
+                    key={tag}
+                  >
+
+                    <strong>
+                      {tag}
+                    </strong>
+
+                    <div className="dashboard-calendar-events">
+
+                      {tagEvents.slice(0, 2).map((event) => (
+                        <button
+                          key={event.id}
+                          type="button"
+                          onClick={() => terminOeffnen(event)}
+                          className="dashboard-calendar-event"
+                        >
+                          {event.uhrzeit
+                            ? `${event.uhrzeit} · `
+                            : ""}
+                          {event.titel}
+                        </button>
+                      ))}
+
+                      {tagEvents.length > 2 && (
+                        <small>
+                          +{tagEvents.length - 2}
+                        </small>
+                      )}
+
+                    </div>
+
+                  </div>
+                );
+              })}
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </main>
+
+    </div>
+  );
+}

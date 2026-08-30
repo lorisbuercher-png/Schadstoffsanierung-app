@@ -1,0 +1,574 @@
+"use client";
+
+import AppShell from "../../../components/ui/AppShell";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import SignaturePad from "../../../components/SignaturePad";
+
+type Position = {
+  id: string;
+  raum: string;
+  bauteil: string;
+  resultat: string;
+  bemerkung: string;
+};
+
+type Baustelle = {
+  id: string;
+  nummer: string;
+  projektname: string;
+  ort: string;
+};
+
+export default function VisuelleKontrolle() {
+  const params = useParams();
+  const id = params.id as string;
+
+  const [baustelle, setBaustelle] = useState<Baustelle | null>(null);
+
+  const [zone, setZone] = useState("");
+  const [sanierung, setSanierung] = useState("");
+  const [kontrolleur, setKontrolleur] = useState("");
+  const [firma, setFirma] = useState("");
+  const [datum, setDatum] = useState("");
+  const [zeit, setZeit] = useState("");
+
+  const [positionen, setPositionen] = useState<Position[]>([]);
+  const [schluss, setSchluss] = useState("");
+  const [nachkontrolle, setNachkontrolle] = useState(false);
+  const [nachkontrolleBemerkung, setNachkontrolleBemerkung] =
+    useState("");
+
+  const [unterschriftFachbauleitung, setUnterschriftFachbauleitung] =
+    useState("");
+
+  const [unterschriftSanierer, setUnterschriftSanierer] =
+    useState("");
+
+  const [unterschriftNachkontrolle, setUnterschriftNachkontrolle] =
+    useState("");
+
+  useEffect(() => {
+    const alle = JSON.parse(
+      localStorage.getItem("baustellen") || "[]"
+    );
+
+    const gefunden = alle.find(
+      (b: Baustelle) => b.id === id
+    );
+
+    setBaustelle(gefunden || null);
+
+    const gespeichert = JSON.parse(
+      localStorage.getItem(`as10-${id}`) || "{}"
+    );
+
+    setZone(gespeichert.zone || "");
+    setSanierung(gespeichert.sanierung || "");
+    setKontrolleur(gespeichert.kontrolleur || "");
+    setFirma(gespeichert.firma || "");
+    setDatum(gespeichert.datum || "");
+    setZeit(gespeichert.zeit || "");
+    setPositionen(gespeichert.positionen || []);
+    setSchluss(gespeichert.schluss || "");
+    setNachkontrolle(gespeichert.nachkontrolle || false);
+    setNachkontrolleBemerkung(
+      gespeichert.nachkontrolleBemerkung || ""
+    );
+
+    setUnterschriftFachbauleitung(
+      gespeichert.unterschriftFachbauleitung || ""
+    );
+
+    setUnterschriftSanierer(
+      gespeichert.unterschriftSanierer || ""
+    );
+
+    setUnterschriftNachkontrolle(
+      gespeichert.unterschriftNachkontrolle || ""
+    );
+  }, [id]);
+
+  function positionHinzufuegen() {
+    if (positionen.length >= 20) return;
+
+    setPositionen((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        raum: "",
+        bauteil: "",
+        resultat: "",
+        bemerkung: "",
+      },
+    ]);
+  }
+
+  function updatePosition(
+    positionId: string,
+    feld: keyof Position,
+    value: string
+  ) {
+    setPositionen((prev) =>
+      prev.map((p) =>
+        p.id === positionId
+          ? { ...p, [feld]: value }
+          : p
+      )
+    );
+  }
+
+  function entfernen(positionId: string) {
+    setPositionen((prev) =>
+      prev.filter((p) => p.id !== positionId)
+    );
+  }
+
+  function speichern() {
+    localStorage.setItem(
+      `as10-${id}`,
+      JSON.stringify({
+        zone,
+        sanierung,
+        kontrolleur,
+        firma,
+        datum,
+        zeit,
+        positionen,
+        schluss,
+        nachkontrolle,
+        nachkontrolleBemerkung,
+        unterschriftFachbauleitung,
+        unterschriftSanierer,
+        unterschriftNachkontrolle,
+      })
+    );
+
+    alert("AS10 gespeichert.");
+  }
+
+  if (!baustelle) {
+    return (
+      <main className="min-h-screen bg-slate-50 p-10">
+        Baustelle wird geladen...
+      </main>
+    );
+  }
+
+  return (
+    <AppShell
+      title="Visuelle Kontrolle"
+      subtitle="Kontrolle und Freigabe nach der Sanierung."
+      backHref={`/baustellen/${id}`}
+      backLabel="Zur Baustelle"
+    >
+
+      
+
+      <div className="mx-auto max-w-7xl space-y-6 p-6">
+
+        <div className="hidden print:block">
+          <div className="mb-6 border-b-4 border-yellow-400 pb-4">
+
+            <div className="flex items-end justify-between">
+
+              <div>
+                <div className="text-3xl font-black">
+                  B&B
+                </div>
+                <div className="text-sm font-bold uppercase">
+                  Schadstoffsanierung
+                </div>
+              </div>
+
+              <div className="text-right">
+
+                <div className="text-xl font-bold">
+                  AS10 · Visuelle Kontrolle
+                </div>
+
+                <div className="mt-1 text-sm">
+                  {baustelle.nummer} · {baustelle.projektname}
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <section className="rounded-2xl border bg-white p-6 shadow-sm">
+
+          <h2 className="text-lg font-bold">
+            Angaben zur Kontrolle
+          </h2>
+
+          <div className="mt-5 grid gap-5 md:grid-cols-3">
+
+            <Feld
+              label="Objekt / Adresse"
+              value={baustelle.ort}
+              onChange={() => {}}
+              disabled
+            />
+
+            <Feld
+              label="Zone / Lage"
+              value={zone}
+              onChange={setZone}
+            />
+
+            <Feld
+              label="Sanierung"
+              value={sanierung}
+              onChange={setSanierung}
+            />
+
+            <Feld
+              label="Kontrolle durch"
+              value={kontrolleur}
+              onChange={setKontrolleur}
+            />
+
+            <Feld
+              label="Firma"
+              value={firma}
+              onChange={setFirma}
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+
+              <Feld
+                label="Datum"
+                type="date"
+                value={datum}
+                onChange={setDatum}
+              />
+
+              <Feld
+                label="Zeit"
+                type="time"
+                value={zeit}
+                onChange={setZeit}
+              />
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <section className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+
+          <div className="flex items-center justify-between border-b p-5">
+
+            <div>
+              <h2 className="text-lg font-bold">
+                A – Visuelle Kontrolle
+              </h2>
+
+              <p className="text-sm text-slate-500">
+                Kontrollpositionen: {positionen.length} / 20
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={positionHinzufuegen}
+              disabled={positionen.length >= 20}
+              className="rounded-xl bg-yellow-400 px-5 py-3 font-bold text-black hover:bg-[#12464c] disabled:opacity-40"
+            >
+              + Position
+            </button>
+
+          </div>
+
+          {positionen.length === 0 ? (
+
+            <div className="p-10 text-center">
+
+              <p className="text-slate-500">
+                Noch keine Kontrollposition erfasst.
+              </p>
+
+              <button
+                type="button"
+                onClick={positionHinzufuegen}
+                className="mt-4 rounded-xl bg-yellow-400 px-5 py-3 font-bold text-black"
+              >
+                Erste Position erfassen
+              </button>
+
+            </div>
+
+          ) : (
+
+            <div className="divide-y">
+
+              {positionen.map((position, index) => (
+
+                <div key={position.id} className="p-5">
+
+                  <div className="mb-4 flex items-center justify-between">
+
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 font-bold text-black">
+                      {index + 1}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => entfernen(position.id)}
+                      className="text-sm font-semibold text-red-600"
+                    >
+                      Entfernen
+                    </button>
+
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+
+                    <Feld
+                      label="Raum"
+                      value={position.raum}
+                      onChange={(value) =>
+                        updatePosition(
+                          position.id,
+                          "raum",
+                          value
+                        )
+                      }
+                    />
+
+                    <Feld
+                      label="Bauteil"
+                      value={position.bauteil}
+                      onChange={(value) =>
+                        updatePosition(
+                          position.id,
+                          "bauteil",
+                          value
+                        )
+                      }
+                    />
+
+                  </div>
+
+                  <div className="mt-4">
+
+                    <label className="mb-2 block text-sm font-semibold">
+                      Resultat
+                    </label>
+
+                    <div className="grid gap-2 sm:grid-cols-3">
+
+                      {[
+                        "Konform",
+                        "Akzeptable Reste",
+                        "Nachreinigung nötig",
+                      ].map((option) => (
+
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() =>
+                            updatePosition(
+                              position.id,
+                              "resultat",
+                              option
+                            )
+                          }
+                          className={`rounded-xl border px-4 py-3 text-sm font-semibold ${
+                            position.resultat === option
+                              ? "border-yellow-400 bg-yellow-400 text-black"
+                              : "border-slate-300 bg-white hover:bg-slate-50"
+                          }`}
+                        >
+                          {option}
+                        </button>
+
+                      ))}
+
+                    </div>
+
+                  </div>
+
+                  <div className="mt-4">
+
+                    <label className="mb-2 block text-sm font-semibold">
+                      Bemerkung
+                    </label>
+
+                    <textarea
+                      rows={2}
+                      value={position.bemerkung}
+                      onChange={(e) =>
+                        updatePosition(
+                          position.id,
+                          "bemerkung",
+                          e.target.value
+                        )
+                      }
+                      className="w-full rounded-xl border border-slate-300 p-3 outline-none focus:border-yellow-500"
+                      placeholder="Bemerkung zur Kontrollposition..."
+                    />
+
+                  </div>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          )}
+
+        </section>
+
+        <section className="rounded-2xl border bg-white p-6 shadow-sm">
+
+          <h2 className="text-lg font-bold">
+            Bemerkungen / Schlussfolgerungen
+          </h2>
+
+          <textarea
+            rows={5}
+            value={schluss}
+            onChange={(e) => setSchluss(e.target.value)}
+            className="mt-4 w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-yellow-500"
+            placeholder="Schlussfolgerungen der visuellen Kontrolle..."
+          />
+
+        </section>
+
+        <section className="rounded-2xl border bg-white p-6 shadow-sm">
+
+          <h2 className="text-lg font-bold">
+            B – Nachkontrolle
+          </h2>
+
+          <label className="mt-5 flex cursor-pointer items-start gap-4 rounded-xl border p-4">
+
+            <input
+              type="checkbox"
+              checked={nachkontrolle}
+              onChange={(e) =>
+                setNachkontrolle(e.target.checked)
+              }
+              className="mt-1 h-5 w-5"
+            />
+
+            <div>
+
+              <div className="font-semibold">
+                Beanstandete Elemente wurden nachgereinigt
+              </div>
+
+              <div className="mt-1 text-sm text-slate-500">
+                Die Zone kann zurückgebaut werden.
+              </div>
+
+            </div>
+
+          </label>
+
+          <textarea
+            rows={3}
+            value={nachkontrolleBemerkung}
+            onChange={(e) =>
+              setNachkontrolleBemerkung(e.target.value)
+            }
+            className="mt-4 w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-yellow-500"
+            placeholder="Bemerkungen zur Nachkontrolle..."
+          />
+
+        </section>
+
+        <section className="rounded-2xl border bg-white p-6 shadow-sm">
+
+          <h2 className="text-lg font-bold">
+            Unterschriften
+          </h2>
+
+          <div className="mt-6 grid gap-8 lg:grid-cols-2">
+
+            <SignaturePad
+              label="Fachbauleitung"
+              value={unterschriftFachbauleitung}
+              onChange={setUnterschriftFachbauleitung}
+            />
+
+            <SignaturePad
+              label="Sanierer"
+              value={unterschriftSanierer}
+              onChange={setUnterschriftSanierer}
+            />
+
+          </div>
+
+          <div className="mt-8">
+
+            <SignaturePad
+              label="Fachbauleitung Nachkontrolle"
+              value={unterschriftNachkontrolle}
+              onChange={setUnterschriftNachkontrolle}
+            />
+
+          </div>
+
+        </section>
+
+        <div className="sticky bottom-4 rounded-2xl border bg-white p-4 shadow-lg">
+
+          <div className="flex justify-end">
+
+            <button
+              type="button"
+              onClick={speichern}
+              className="rounded-xl bg-yellow-400 px-6 py-3 font-bold text-black hover:bg-[#12464c]"
+            >
+              AS10 speichern
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </AppShell>
+  );
+}
+
+function Feld({
+  label,
+  value,
+  onChange,
+  type = "text",
+  disabled = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <div>
+
+      <label className="mb-2 block text-sm font-semibold">
+        {label}
+      </label>
+
+      <input
+        type={type}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-yellow-500 disabled:bg-slate-100"
+      />
+
+    </div>
+  );
+}

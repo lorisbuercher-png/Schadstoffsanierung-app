@@ -1,0 +1,507 @@
+"use client";
+
+import AppShell from "../../../components/ui/AppShell";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+
+type Eintrag = {
+  id: string;
+  name: string;
+  maske: string;
+  eintritt: string;
+  austritt: string;
+};
+
+type Baustelle = {
+  id: string;
+  nummer: string;
+  projektname: string;
+  ort: string;
+};
+
+type Mitarbeiter = {
+  id: string;
+  vorname: string;
+  nachname: string;
+  funktion: string;
+  aktiv: boolean;
+};
+
+
+const kontrollpunkte = [
+  "Ausgebildeter Spezialist ist permanent vor Ort",
+  "Mitarbeiter sind für Asbest und allgemeine Arbeitssicherheit instruiert",
+  "In der Zone tragen alle permanent eine P3-Maske mit Druckluft",
+  "Alle tragen die richtige weitere Schutzausrüstung",
+  "Zone entspricht dem Sanierungsplan",
+  "Zone ist dicht",
+  "Unterdruck-Messgerät löst bei 20 Pa Alarm aus",
+  "Mindestens 8-facher Luftwechsel in allen Bereichen",
+  "Abluft UHG wird nach aussen geführt",
+  "Abluft Staubsauger wird nach aussen oder in die Zone geführt",
+  "Dusche funktioniert und warmes Wasser ist vorhanden",
+  "Abfälle werden sauber verpackt und sicher gelagert",
+  "Akustischer / visueller Alarm funktioniert",
+];
+
+export default function Journal() {
+  const params = useParams();
+  const id = params.id as string;
+
+  const [baustelle, setBaustelle] = useState<Baustelle | null>(null);
+
+  const [datum, setDatum] = useState("");
+  const [zone, setZone] = useState("");
+  const [vorarbeiter, setVorarbeiter] = useState("");
+  const [arbeit, setArbeit] = useState("");
+
+  const [eintraege, setEintraege] = useState<Eintrag[]>([]);
+  const [team, setTeam] = useState<Mitarbeiter[]>([]);
+
+  const [kontrolle, setKontrolle] =
+    useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    const alle = JSON.parse(
+      localStorage.getItem("baustellen") || "[]"
+    );
+
+    const gefunden = alle.find(
+      (b: Baustelle) => b.id === id
+    );
+
+    setBaustelle(gefunden || null);
+
+    const alleMitarbeiter = JSON.parse(
+      localStorage.getItem("mitarbeiter") || "[]"
+    );
+
+    const teamIds = JSON.parse(
+      localStorage.getItem(`baustellen-mitarbeiter-${id}`) || "[]"
+    );
+
+    setTeam(
+      alleMitarbeiter.filter(
+        (m: Mitarbeiter) => teamIds.includes(m.id)
+      )
+    );
+
+    const gespeichert = JSON.parse(
+      localStorage.getItem(`journal-${id}`) || "{}"
+    );
+
+    if (gespeichert.datum) setDatum(gespeichert.datum);
+    if (gespeichert.zone) setZone(gespeichert.zone);
+    if (gespeichert.vorarbeiter)
+      setVorarbeiter(gespeichert.vorarbeiter);
+    if (gespeichert.arbeit) setArbeit(gespeichert.arbeit);
+    if (gespeichert.eintraege)
+      setEintraege(gespeichert.eintraege);
+    if (gespeichert.kontrolle)
+      setKontrolle(gespeichert.kontrolle);
+  }, [id]);
+
+  function mitarbeiterHinzufuegen() {
+    setEintraege((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: "",
+        maske: "P3 Druckluft",
+        eintritt: "",
+        austritt: "",
+      },
+    ]);
+  }
+
+  function updateEintrag(
+    eintragId: string,
+    feld: keyof Eintrag,
+    value: string
+  ) {
+    setEintraege((prev) =>
+      prev.map((e) =>
+        e.id === eintragId
+          ? { ...e, [feld]: value }
+          : e
+      )
+    );
+  }
+
+  function entfernen(eintragId: string) {
+    setEintraege((prev) =>
+      prev.filter((e) => e.id !== eintragId)
+    );
+  }
+
+  function speichern() {
+    localStorage.setItem(
+      `journal-${id}`,
+      JSON.stringify({
+        datum,
+        zone,
+        vorarbeiter,
+        arbeit,
+        eintraege,
+        kontrolle,
+      })
+    );
+
+    alert("Baustellen-Journal gespeichert.");
+  }
+
+  if (!baustelle) {
+    return (
+      <main className="min-h-screen bg-slate-50 p-10">
+        Baustelle wird geladen...
+      </main>
+    );
+  }
+
+  return (
+    <AppShell
+      title="Baustellenjournal"
+      subtitle="Tägliche Arbeiten, Personal und Ereignisse dokumentieren."
+      backHref={`/baustellen/${id}`}
+      backLabel="Zur Baustelle"
+    >
+
+      
+
+      <div className="mx-auto max-w-7xl space-y-6 p-6">
+
+        <div className="hidden print:block">
+          <div className="mb-6 border-b-4 border-yellow-400 pb-4">
+
+            <div className="flex items-end justify-between">
+
+              <div>
+                <div className="text-3xl font-black">
+                  B&B
+                </div>
+                <div className="text-sm font-bold uppercase">
+                  Schadstoffsanierung
+                </div>
+              </div>
+
+              <div className="text-right">
+
+                <div className="text-xl font-bold">
+                  AS9 · Baustellen-Journal
+                </div>
+
+                <div className="mt-1 text-sm">
+                  {baustelle.nummer} · {baustelle.projektname}
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <section className="rounded-2xl border bg-white p-6 shadow-sm">
+
+          <h2 className="text-lg font-bold">
+            Tagesangaben
+          </h2>
+
+          <div className="mt-5 grid gap-5 md:grid-cols-3">
+
+            <Feld
+              label="Datum"
+              type="date"
+              value={datum}
+              onChange={setDatum}
+            />
+
+            <Feld
+              label="Zone"
+              value={zone}
+              onChange={setZone}
+            />
+
+            <Feld
+              label="Vorarbeiter"
+              value={vorarbeiter}
+              onChange={setVorarbeiter}
+            />
+
+          </div>
+
+          <div className="mt-5">
+
+            <label className="mb-2 block text-sm font-semibold">
+              Ausgeführte Arbeit
+            </label>
+
+            <textarea
+              rows={4}
+              value={arbeit}
+              onChange={(e) => setArbeit(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-yellow-500"
+              placeholder="Heute ausgeführte Arbeiten..."
+            />
+
+          </div>
+
+        </section>
+
+        <section className="rounded-2xl border bg-white shadow-sm">
+
+          <div className="flex items-center justify-between border-b p-5">
+
+            <div>
+              <h2 className="text-lg font-bold">
+                Schleusen-Log
+              </h2>
+
+              <p className="text-sm text-slate-500">
+                Eintritt und Austritt der Mitarbeitenden
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={mitarbeiterHinzufuegen}
+              className="rounded-xl bg-yellow-400 px-5 py-3 font-bold text-black hover:bg-[#12464c]"
+            >
+              + Mitarbeiter
+            </button>
+
+          </div>
+
+          {eintraege.length === 0 ? (
+
+            <div className="p-8 text-center text-slate-500">
+              Noch keine Mitarbeitenden eingetragen.
+            </div>
+
+          ) : (
+
+            <div className="overflow-x-auto">
+
+              <table className="w-full text-left">
+
+                <thead className="bg-slate-50 text-sm">
+                  <tr>
+                    <th className="p-4">Name</th>
+                    <th className="p-4">Maske</th>
+                    <th className="p-4">Eintritt</th>
+                    <th className="p-4">Austritt</th>
+                    <th className="p-4"></th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y">
+
+                  {eintraege.map((e) => (
+
+                    <tr key={e.id}>
+
+                      <td className="p-3">
+
+                        <select
+                          value={e.name}
+                          onChange={(event) =>
+                            updateEintrag(
+                              e.id,
+                              "name",
+                              event.target.value
+                            )
+                          }
+                          className="w-full rounded-lg border p-2"
+                        >
+                          <option value="">
+                            Mitarbeiter auswählen
+                          </option>
+
+                          {team.map((m) => (
+                            <option
+                              key={m.id}
+                              value={`${m.vorname} ${m.nachname}`}
+                            >
+                              {m.vorname} {m.nachname} · {m.funktion}
+                            </option>
+                          ))}
+                        </select>
+
+                      </td>
+
+                      <td className="p-3">
+
+                        <select
+                          value={e.maske}
+                          onChange={(event) =>
+                            updateEintrag(
+                              e.id,
+                              "maske",
+                              event.target.value
+                            )
+                          }
+                          className="w-full rounded-lg border p-2"
+                        >
+                          <option>P3 Druckluft</option>
+                          <option>Vollmaske</option>
+                          <option>Andere</option>
+                        </select>
+
+                      </td>
+
+                      <td className="p-3">
+                        <input
+                          type="time"
+                          value={e.eintritt}
+                          onChange={(event) =>
+                            updateEintrag(
+                              e.id,
+                              "eintritt",
+                              event.target.value
+                            )
+                          }
+                          className="rounded-lg border p-2"
+                        />
+                      </td>
+
+                      <td className="p-3">
+                        <input
+                          type="time"
+                          value={e.austritt}
+                          onChange={(event) =>
+                            updateEintrag(
+                              e.id,
+                              "austritt",
+                              event.target.value
+                            )
+                          }
+                          className="rounded-lg border p-2"
+                        />
+                      </td>
+
+                      <td className="p-3">
+                        <button
+                          type="button"
+                          onClick={() => entfernen(e.id)}
+                          className="text-sm font-semibold text-red-600"
+                        >
+                          Entfernen
+                        </button>
+                      </td>
+
+                    </tr>
+
+                  ))}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          )}
+
+        </section>
+
+        <section className="rounded-2xl border bg-white shadow-sm">
+
+          <div className="border-b p-5">
+
+            <h2 className="text-lg font-bold">
+              Tägliche Kontrolle Sanierungszone
+            </h2>
+
+            <p className="text-sm text-slate-500">
+              Vor Arbeitsbeginn kontrollieren
+            </p>
+
+          </div>
+
+          <div className="divide-y">
+
+            {kontrollpunkte.map((punkt, index) => (
+
+              <label
+                key={punkt}
+                className="flex cursor-pointer items-center gap-4 p-4 hover:bg-slate-50"
+              >
+
+                <input
+                  type="checkbox"
+                  checked={Boolean(kontrolle[index])}
+                  onChange={(e) =>
+                    setKontrolle({
+                      ...kontrolle,
+                      [index]: e.target.checked,
+                    })
+                  }
+                  className="h-5 w-5"
+                />
+
+                <span className="font-bold text-yellow-600">
+                  {index + 1}
+                </span>
+
+                <span>
+                  {punkt}
+                </span>
+
+              </label>
+
+            ))}
+
+          </div>
+
+        </section>
+
+        <div className="sticky bottom-4 rounded-2xl border bg-white p-4 shadow-lg">
+
+          <div className="flex justify-end">
+
+            <button
+              type="button"
+              onClick={speichern}
+              className="rounded-xl bg-yellow-400 px-6 py-3 font-bold text-black hover:bg-[#12464c]"
+            >
+              Journal speichern
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </AppShell>
+  );
+}
+
+function Feld({
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+}) {
+  return (
+    <div>
+
+      <label className="mb-2 block text-sm font-semibold">
+        {label}
+      </label>
+
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-yellow-500"
+      />
+
+    </div>
+  );
+}
