@@ -169,14 +169,14 @@ export default function ZonenzutrittPage() {
 
       
 
-      <div className="mx-auto max-w-6xl space-y-5 p-6">
+      <div className="bb-workspace max-w-6xl space-y-5">
 
         <section className="rounded-[18px] border border-slate-200 bg-white p-6 text-slate-900">
 
           <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
 
             <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                 MITARBEITER
               </div>
 
@@ -206,7 +206,7 @@ export default function ZonenzutrittPage() {
               <button
                 type="button"
                 onClick={() => buchen("eintritt")}
-                className="min-w-[150px] rounded-xl bg-[#17565d] px-6 py-4 font-black text-black hover:bg-[#12464c]"
+                className="min-w-[150px] rounded-xl bg-[#e77818] px-6 py-4 font-black text-white hover:bg-[#c96210]"
               >
                 → Eintritt
               </button>
@@ -229,7 +229,7 @@ export default function ZonenzutrittPage() {
 
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                   LIVE
                 </div>
 
@@ -285,7 +285,7 @@ export default function ZonenzutrittPage() {
 
                     </div>
 
-                    <span className="rounded-full bg-green-600 px-3 py-2 text-[10px] font-black text-white">
+                    <span className="rounded-full bg-green-600 px-3 py-2 text-xs font-black text-white">
                       IN ZONE
                     </span>
                   </div>
@@ -298,7 +298,7 @@ export default function ZonenzutrittPage() {
           <section className="rounded-[22px] border border-slate-200 bg-white p-6 shadow-sm">
 
             <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                 HEUTE
               </div>
 
@@ -337,7 +337,7 @@ export default function ZonenzutrittPage() {
                   </div>
 
                   <span
-                    className={`rounded-full px-3 py-2 text-[10px] font-black ${
+                    className={`rounded-full px-3 py-2 text-xs font-black ${
                       eintrag.typ === "eintritt"
                         ? "bg-green-100 text-green-700"
                         : "bg-slate-100 text-slate-700"
@@ -358,7 +358,7 @@ export default function ZonenzutrittPage() {
         <section className="rounded-[22px] border border-slate-200 bg-white p-6 shadow-sm">
 
           <div>
-            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
               BACKUP
             </div>
 
@@ -376,7 +376,7 @@ export default function ZonenzutrittPage() {
             <select
               value={auswahl}
               onChange={(e) => setAuswahl(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#17565d]"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#e77818]"
             >
               <option value="">
                 Mitarbeiter auswählen...
@@ -396,7 +396,7 @@ export default function ZonenzutrittPage() {
                   e.target.value as "eintritt" | "austritt"
                 )
               }
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#17565d]"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#e77818]"
             >
               <option value="eintritt">Eintritt</option>
               <option value="austritt">Austritt</option>
@@ -406,13 +406,13 @@ export default function ZonenzutrittPage() {
               type="time"
               value={nachtragZeit}
               onChange={(e) => setNachtragZeit(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#17565d]"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#e77818]"
             />
 
             <button
               type="button"
               onClick={nachtragen}
-              className="rounded-xl bg-[#17565d] px-5 py-3 font-black text-white hover:bg-[#12464c] hover:text-white"
+              className="rounded-xl bg-[#e77818] px-5 py-3 font-black text-white hover:bg-[#c96210] hover:text-white"
             >
               Nachtragen
             </button>

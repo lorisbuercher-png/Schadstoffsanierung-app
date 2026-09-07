@@ -467,7 +467,7 @@ export default function Zonenplan() {
 
       
 
-      <div className="mx-auto max-w-[1600px] p-6">
+      <div className="bb-workspace max-w-[1600px]">
 
         <div className="grid gap-6 xl:grid-cols-[520px_1fr]">
 
@@ -485,7 +485,7 @@ export default function Zonenplan() {
 
               <div className="mt-4 flex flex-wrap gap-3">
 
-                <label className="cursor-pointer rounded-xl bg-[#17565d] px-4 py-2 text-sm font-bold text-white">
+                <label className="cursor-pointer rounded-xl bg-[#e77818] px-4 py-2 text-sm font-bold text-white">
                   + Grundriss wählen
 
                   <input
@@ -527,7 +527,7 @@ export default function Zonenplan() {
                 <button
                   type="button"
                   onClick={ausLuftbilanzUebernehmen}
-                  className="rounded-xl bg-[#17565d] px-4 py-2 text-sm font-bold text-white"
+                  className="rounded-xl bg-[#e77818] px-4 py-2 text-sm font-bold text-white"
                 >
                   Aus Luftbilanz übernehmen
                 </button>
@@ -546,7 +546,7 @@ export default function Zonenplan() {
                     onClick={() =>
                       hinzufuegen(typ as ElementTyp)
                     }
-                    className="rounded-xl bg-[#17565d] px-4 py-2 text-sm font-bold text-black hover:bg-[#12464c]"
+                    className="rounded-xl bg-[#e77818] px-4 py-2 text-sm font-bold text-white hover:bg-[#c96210]"
                   >
                     + {typ}
                   </button>
@@ -617,7 +617,7 @@ export default function Zonenplan() {
 
                     <div className="flex items-center justify-between">
 
-                      <span className="rounded-lg bg-[#17565d] px-3 py-1 text-xs font-bold text-white">
+                      <span className="rounded-lg bg-[#e77818] px-3 py-1 text-xs font-bold text-white">
                         {element.typ}
                       </span>
 
@@ -722,7 +722,7 @@ export default function Zonenplan() {
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="print:hidden rounded-xl bg-[#17565d] px-5 py-3 font-bold text-white"
+                className="print:hidden rounded-xl bg-[#e77818] px-5 py-3 font-bold text-white"
               >
                 Als PDF
               </button>
@@ -892,7 +892,7 @@ export default function Zonenplan() {
 
                 <Legende
                   text="Sanierungszone"
-                  klasse="bg-[#dceced] border-[#17565d]"
+                  klasse="bg-[#ffe7d1] border-[#e77818]"
                 />
 
                 <Legende
@@ -928,7 +928,7 @@ export default function Zonenplan() {
           <button
             type="button"
             onClick={speichern}
-            className="rounded-xl bg-[#17565d] px-6 py-3 font-bold text-black hover:bg-[#12464c]"
+            className="rounded-xl bg-[#e77818] px-6 py-3 font-bold text-white hover:bg-[#c96210]"
           >
             Zonenplan speichern
           </button>

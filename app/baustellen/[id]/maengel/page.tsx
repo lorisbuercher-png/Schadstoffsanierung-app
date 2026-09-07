@@ -158,7 +158,7 @@ export default function MaengelPage() {
 
       
 
-      <div className="mx-auto max-w-6xl space-y-5 p-6">
+      <div className="bb-workspace max-w-6xl space-y-5">
 
         <section className="grid gap-4 sm:grid-cols-3">
 
@@ -198,10 +198,10 @@ export default function MaengelPage() {
         </section>
 
         {formularOffen && (
-          <section className="rounded-[22px] border border-[#17565d] bg-white p-6 shadow-sm">
+          <section className="rounded-[22px] border border-[#e77818] bg-white p-6 shadow-sm">
 
             <div className="mb-5">
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#a56c0c]">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#a56c0c]">
                 NEUER MANGEL
               </div>
               <h2 className="mt-1 text-xl font-black">
@@ -220,7 +220,7 @@ export default function MaengelPage() {
                   value={titel}
                   onChange={(e) => setTitel(e.target.value)}
                   placeholder="z.B. Folienabtrennung beschädigt"
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#17565d]"
+                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#e77818]"
                 />
               </div>
 
@@ -233,7 +233,7 @@ export default function MaengelPage() {
                   value={beschreibung}
                   onChange={(e) => setBeschreibung(e.target.value)}
                   placeholder="Feststellung und erforderliche Massnahme..."
-                  className="mt-2 min-h-28 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-4 outline-none focus:border-[#17565d]"
+                  className="mt-2 min-h-28 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-4 outline-none focus:border-[#e77818]"
                 />
               </div>
 
@@ -316,7 +316,7 @@ export default function MaengelPage() {
               <button
                 type="button"
                 onClick={mangelErstellen}
-                className="rounded-xl bg-[#17565d] px-5 py-3 text-sm font-black text-white"
+                className="rounded-xl bg-[#e77818] px-5 py-3 text-sm font-black text-white"
               >
                 Mangel speichern
               </button>
@@ -382,7 +382,7 @@ export default function MaengelPage() {
                           : mangel.prioritaet === "kritisch"
                           ? "bg-red-600 text-white"
                           : mangel.prioritaet === "hoch"
-                          ? "bg-[#17565d] text-white"
+                          ? "bg-[#e77818] text-white"
                           : "bg-slate-900 text-white"
                       }`}
                     >
@@ -394,11 +394,11 @@ export default function MaengelPage() {
 
                         <strong>{mangel.titel}</strong>
 
-                        <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase">
+                        <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-black uppercase">
                           {mangel.prioritaet}
                         </span>
 
-                        <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold">
+                        <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-bold">
                           {mangel.quelle}
                         </span>
 

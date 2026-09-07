@@ -194,14 +194,14 @@ export default function DokumentePage() {
 
       
 
-      <div className="mx-auto max-w-[1500px] space-y-5 p-6">
+      <div className="bb-workspace max-w-[1500px] space-y-5">
 
         <section className="rounded-[18px] border border-slate-200 bg-white p-6 text-slate-900">
 
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
 
             <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                 BAUSTELLENORDNER
               </div>
 
@@ -232,7 +232,7 @@ export default function DokumentePage() {
           <aside className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
 
             <div className="mb-4">
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                 STRUKTUR
               </div>
 
@@ -246,7 +246,7 @@ export default function DokumentePage() {
               onClick={() => setAktiverOrdner(null)}
               className={`mb-2 flex w-full items-center justify-between rounded-xl px-4 py-3 text-left ${
                 aktiverOrdner === null
-                  ? "bg-[#17565d] text-white"
+                  ? "bg-[#e77818] text-white"
                   : "bg-slate-50 hover:bg-slate-100"
               }`}
             >
@@ -277,11 +277,11 @@ export default function DokumentePage() {
                     onClick={() => setAktiverOrdner(eintrag.id)}
                     className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition ${
                       aktiverOrdner === eintrag.id
-                        ? "bg-[#fff2cc] ring-1 ring-[#17565d]"
+                        ? "bg-[#fff2cc] ring-1 ring-[#e77818]"
                         : "hover:bg-slate-50"
                     }`}
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#17565d] text-xs font-black text-white">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e77818] text-xs font-black text-white">
                       {eintrag.nummer}
                     </div>
 
@@ -291,13 +291,13 @@ export default function DokumentePage() {
                         {eintrag.name}
                       </strong>
 
-                      <span className="block truncate text-[11px] text-slate-500">
+                      <span className="block truncate text-xs text-slate-500">
                         {eintrag.beschreibung}
                       </span>
 
                     </div>
 
-                    <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black">
+                    <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-black">
                       {anzahl}
                     </span>
                   </button>
@@ -314,7 +314,7 @@ export default function DokumentePage() {
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
 
                 <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                     {aktuellerOrdner
                       ? `ORDNER ${aktuellerOrdner.nummer}`
                       : "GESAMTÜBERSICHT"}
@@ -338,7 +338,7 @@ export default function DokumentePage() {
                   value={suche}
                   onChange={(e) => setSuche(e.target.value)}
                   placeholder="Dokument suchen..."
-                  className="min-w-[260px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#17565d]"
+                  className="min-w-[260px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[#e77818]"
                 />
 
               </div>
@@ -363,7 +363,7 @@ export default function DokumentePage() {
                     </p>
                   </div>
 
-                  <label className="cursor-pointer rounded-xl bg-[#17565d] px-5 py-3 text-sm font-black text-black hover:bg-[#12464c]">
+                  <label className="cursor-pointer rounded-xl bg-[#e77818] px-5 py-3 text-sm font-black text-white hover:bg-[#c96210]">
                     + Datei hinzufügen
 
                     <input
@@ -390,7 +390,7 @@ export default function DokumentePage() {
 
             <section className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm">
 
-              <div className="grid grid-cols-[1fr_160px_120px_70px] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">
+              <div className="grid grid-cols-[1fr_160px_120px_70px] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.1em] text-slate-500">
                 <span>Dokument</span>
                 <span>Ordner</span>
                 <span>Datum</span>

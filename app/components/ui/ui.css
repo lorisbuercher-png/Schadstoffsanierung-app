@@ -71,7 +71,7 @@ textarea {
   height: 48px;
   border-radius: 14px;
   background:
-    linear-gradient(135deg, #244f59 0 40%, #93a4aa 40% 65%, #e4e8e9 65%);
+    linear-gradient(135deg, #2b2f35 0 40%, #93a4aa 40% 65%, #e4e8e9 65%);
   color: transparent;
   position: relative;
 }
@@ -97,7 +97,7 @@ textarea {
 
 .bb-brand-text span {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 12px;
   color: #2f3740;
 }
 
@@ -202,7 +202,7 @@ textarea {
   border-radius: 999px;
   background: #e96f16;
   color: white;
-  font-size: 10px;
+  font-size: 12px;
   display: grid;
   place-items: center;
   font-weight: 800;
@@ -362,7 +362,7 @@ textarea {
 .bb-field label {
   display: block;
   margin-bottom: 8px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: #313b45;
 }
@@ -581,7 +581,7 @@ textarea {
   border-radius: 8px;
   background: transparent;
   color: #68727d;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -638,7 +638,7 @@ textarea {
 .bb-project-number {
   margin-bottom: 5px;
   color: var(--bb-accent);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -656,7 +656,7 @@ textarea {
   gap: 9px 17px;
   margin-top: 9px;
   color: var(--bb-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .bb-project-status {
@@ -672,7 +672,7 @@ textarea {
   border-radius: 999px;
   background: var(--bb-blue-soft);
   color: #397ca8;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -698,7 +698,7 @@ textarea {
   justify-content: space-between;
   margin-bottom: 7px;
   color: var(--bb-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .bb-progress-header strong {
@@ -840,7 +840,7 @@ textarea {
 .bb-form-section-header p {
   margin: 4px 0 0;
   color: var(--bb-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .bb-section-icon.green {
@@ -879,7 +879,7 @@ textarea {
 
 .bb-summary-label {
   color: var(--bb-accent);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -908,7 +908,7 @@ textarea {
 
 .bb-create-summary dt {
   color: var(--bb-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .bb-create-summary dd {
@@ -916,7 +916,7 @@ textarea {
   max-width: 150px;
   text-align: right;
   color: #353f49;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -940,7 +940,7 @@ textarea {
   border-radius: 11px;
   background: #f7f8fa;
   color: #68727d;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.55;
 }
 
@@ -1023,7 +1023,7 @@ textarea {
   min-height: 36px;
   padding: 0 13px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -1065,8 +1065,8 @@ textarea {
   flex: 0 0 82px;
   display: grid;
   place-items: center;
-  border: 9px solid #e7f0f0;
-  border-top-color: #17565d;
+  border: 9px solid #ffe4cc;
+  border-top-color: #e77818;
   border-radius: 50%;
 }
 
@@ -1076,7 +1076,7 @@ textarea {
 
 .bb-daily-progress-card span {
   color: #899399;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -1091,7 +1091,7 @@ textarea {
 .bb-daily-progress-card p {
   margin: 0;
   color: var(--bb-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .bb-daily-date-card {
@@ -1104,14 +1104,14 @@ textarea {
 .bb-daily-date-card label {
   margin-bottom: 8px;
   color: #3f4b51;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
 }
 
 .bb-daily-date-card small {
   margin-top: 10px;
   color: #929ba0;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -1137,8 +1137,8 @@ textarea {
 }
 
 .bb-daily-checklist header span {
-  color: #17565d;
-  font-size: 9px;
+  color: #e77818;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1153,8 +1153,8 @@ textarea {
   min-width: 52px;
   padding: 8px 10px;
   border-radius: 9px;
-  background: #edf4f4;
-  color: #17565d;
+  background: #fff1e4;
+  color: #e77818;
   font-size: 12px;
   text-align: center;
 }
@@ -1210,7 +1210,7 @@ textarea {
 
 .bb-daily-item-number {
   color: #a0a8ac;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -1227,7 +1227,7 @@ textarea {
 .bb-daily-item-copy small {
   margin-top: 5px;
   color: #7d888d;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -1236,7 +1236,7 @@ textarea {
   border-radius: 999px;
   background: #fff0e5;
   color: #c06010;
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -1261,7 +1261,7 @@ textarea {
 .bb-daily-message {
   padding: 12px;
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.5;
 }
@@ -1285,13 +1285,13 @@ textarea {
 
 .bb-daily-hint strong {
   color: #a7500a;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .bb-daily-hint p {
   margin: 6px 0 0;
   color: #7a6252;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.55;
 }
 
@@ -1366,7 +1366,7 @@ textarea {
 
 .bb-employee-toolbar > div:first-child span {
   color: #8c969b;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -1401,9 +1401,9 @@ textarea {
   display: grid;
   place-items: center;
   border-radius: 13px;
-  background: #e9f2f2;
-  color: #17565d;
-  font-size: 11px;
+  background: #fff1e4;
+  color: #e77818;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -1421,13 +1421,13 @@ textarea {
 .bb-employee-contact span {
   margin-top: 4px;
   color: #8a9499;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .bb-employee-contact strong {
   margin-top: 4px;
   color: #536067;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .bb-employee-status {
@@ -1438,7 +1438,7 @@ textarea {
   min-height: 31px;
   border: 0;
   border-radius: 999px;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
   cursor: pointer;
 }
@@ -1562,7 +1562,7 @@ textarea {
   border-radius: 9px;
   background: var(--bb-accent-soft);
   color: #bd600f;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -1583,7 +1583,7 @@ textarea {
 .bb-instruction-project strong,
 .bb-instruction-date strong {
   overflow: hidden;
-  font-size: 11px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1594,7 +1594,7 @@ textarea {
   overflow: hidden;
   margin-top: 5px;
   color: #869095;
-  font-size: 9px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1653,8 +1653,8 @@ textarea {
 }
 
 .bb-upload-dropzone:hover {
-  border-color: #17565d;
-  background: #f5f9f9;
+  border-color: #e77818;
+  background: #f8f9fa;
 }
 
 .bb-upload-dropzone input {
@@ -1668,8 +1668,8 @@ textarea {
   place-items: center;
   margin-bottom: 12px;
   border-radius: 12px;
-  background: #e9f3f3;
-  color: #17565d;
+  background: #fff1e4;
+  color: #e77818;
   font-size: 20px;
   font-weight: 800;
 }
@@ -1681,7 +1681,7 @@ textarea {
 .bb-upload-dropzone p {
   margin: 6px 0 15px;
   color: #879196;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .bb-upload-button {
@@ -1690,9 +1690,9 @@ textarea {
   align-items: center;
   padding: 0 14px;
   border-radius: 9px;
-  background: #17565d;
+  background: #e77818;
   color: white;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -1722,7 +1722,7 @@ textarea {
   border-radius: 8px;
   background: #f0f3f4;
   color: #68757b;
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -1740,7 +1740,7 @@ textarea {
 
 .bb-upload-info strong {
   overflow: hidden;
-  font-size: 10px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1748,7 +1748,7 @@ textarea {
 .bb-upload-info span {
   margin-top: 4px;
   color: #8a9499;
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .bb-upload-file button {
@@ -1777,7 +1777,7 @@ textarea {
 
 .bb-signature-header label {
   color: #313b45;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -1786,7 +1786,7 @@ textarea {
   align-items: center;
   gap: 6px;
   color: #90999d;
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -1825,7 +1825,7 @@ textarea {
   display: grid;
   place-items: center;
   color: #b1b9bc;
-  font-size: 9px;
+  font-size: 12px;
   pointer-events: none;
 }
 
@@ -1844,7 +1844,7 @@ textarea {
   border: 0;
   background: transparent;
   color: #a34a4a;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -1873,7 +1873,7 @@ textarea {
     border: 1px solid var(--bb-border);
     border-radius: 10px;
     background: white;
-    color: #24454b;
+    color: #3f454d;
     font-size: 18px;
     cursor: pointer;
   }
@@ -2022,7 +2022,7 @@ textarea {
 
 .bb-document-toolbar > div:first-child span {
   color: #8c969b;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: .09em;
   text-transform: uppercase;
@@ -2062,8 +2062,8 @@ textarea {
   display: grid;
   place-items: center;
   border-radius: 13px;
-  background: #eaf3f3;
-  color: #17565d;
+  background: #fff1e4;
+  color: #e77818;
   font-size: 18px;
 }
 
@@ -2075,7 +2075,7 @@ textarea {
 
 .bb-document-project > span {
   color: #d56b13;
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -2092,7 +2092,7 @@ textarea {
 .bb-document-project small {
   margin-top: 4px;
   color: #899399;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .bb-document-count {
@@ -2108,7 +2108,7 @@ textarea {
 .bb-document-count span {
   margin-top: 3px;
   color: #8b9599;
-  font-size: 8px;
+  font-size: 12px;
 }
 
 @media (max-width: 700px) {
@@ -2161,7 +2161,7 @@ textarea {
 
 .bb-equipment-toolbar > div:first-child span {
   color: #8c969b;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: .09em;
   text-transform: uppercase;
@@ -2201,8 +2201,8 @@ textarea {
   display: grid;
   place-items: center;
   border-radius: 13px;
-  background: #eaf3f3;
-  color: #17565d;
+  background: #fff1e4;
+  color: #e77818;
   font-size: 17px;
 }
 
@@ -2216,7 +2216,7 @@ textarea {
 .bb-equipment-name span,
 .bb-equipment-project span {
   color: #d56b13;
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -2226,7 +2226,7 @@ textarea {
 .bb-equipment-project strong {
   margin-top: 5px;
   overflow: hidden;
-  font-size: 11px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2234,7 +2234,7 @@ textarea {
 .bb-equipment-name small {
   margin-top: 4px;
   color: #899399;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .bb-equipment-status {
@@ -2245,7 +2245,7 @@ textarea {
   min-height: 31px;
   padding: 0 10px;
   border-radius: 999px;
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -2303,8 +2303,8 @@ textarea {
 
 /* 2026 workflow redesign: one quiet system for office and site */
 :root {
-  --bb-petrol: #155a60;
-  --bb-petrol-dark: #123e43;
+  --bb-petrol: #e77818;
+  --bb-petrol-dark: #bd600f;
   --bb-surface: rgba(255, 255, 255, .94);
   --bb-line: rgba(23, 62, 67, .11);
 }
@@ -2355,13 +2355,13 @@ textarea {
 
 .bb-sidebar-role span {
   color: #8a9598;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: .13em;
   text-transform: uppercase;
 }
 
-.bb-sidebar-role strong { color: #18363a; font-size: 13px; }
+.bb-sidebar-role strong { color: #181b20; font-size: 13px; }
 
 .bb-nav { display: flex; flex: 1; flex-direction: column; gap: 4px; margin-top: 8px; }
 .bb-nav a {
@@ -2383,21 +2383,21 @@ textarea {
 .bb-nav a.priority:not(.active) { color: #9f3531; }
 .bb-nav-icon { width: 20px; height: 20px; flex: 0 0 auto; }
 .bb-nav-label { flex: 1; }
-.bb-nav-badge { min-width: 23px; height: 23px; display: grid; place-items: center; padding: 0 6px; border-radius: 999px; background: #de3b33; color: white; font-size: 9px; }
+.bb-nav-badge { min-width: 23px; height: 23px; display: grid; place-items: center; padding: 0 6px; border-radius: 999px; background: #de3b33; color: white; font-size: 12px; }
 
-.bb-sidebar-footer { display: flex; align-items: center; gap: 10px; padding: 17px 10px 5px; border-top: 1px solid #edf0ef; color: #68787b; font-size: 10px; }
+.bb-sidebar-footer { display: flex; align-items: center; gap: 10px; padding: 17px 10px 5px; border-top: 1px solid #edf0ef; color: #68787b; font-size: 12px; }
 .bb-sidebar-footer .bb-nav-icon { color: var(--bb-petrol); }
 .bb-main { min-width: 0; background-color: #f6f7f5; background-image: linear-gradient(rgba(21,90,96,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(21,90,96,.018) 1px,transparent 1px),radial-gradient(circle at 86% 10%,rgba(229,237,232,.85),transparent 31%),radial-gradient(circle at 15% 90%,rgba(247,238,222,.55),transparent 28%); background-size: 42px 42px,42px 42px,auto,auto; }
 .bb-topbar { position: sticky; top: 0; z-index: 30; height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(18px,3vw,44px); border-bottom: 1px solid var(--bb-line); background: rgba(250,251,250,.88); backdrop-filter: blur(17px); }
 .bb-topbar-left,.bb-topbar-actions { display:flex; align-items:center; gap:13px; }
-.bb-topbar-context { display:flex; align-items:center; gap:9px; color:#66777a; font-size:11px; font-weight:700; letter-spacing:.03em; }
+.bb-topbar-context { display:flex; align-items:center; gap:9px; color:#66777a; font-size: 12px; font-weight:700; letter-spacing:.03em; }
 .bb-live-dot { width:7px; height:7px; border-radius:50%; background:#48a96e; box-shadow:0 0 0 4px rgba(72,169,110,.12); }
 .bb-role-switch { display:flex; padding:3px; border:1px solid #dfe5e4; border-radius:11px; background:#f0f3f2; }
-.bb-role-switch button { min-height:32px; padding:0 13px; border:0; border-radius:8px; background:transparent; color:#6d7a7e; font-size:10px; font-weight:750; cursor:pointer; }
+.bb-role-switch button { min-height:32px; padding:0 13px; border:0; border-radius:8px; background:transparent; color:#6d7a7e; font-size: 12px; font-weight:750; cursor:pointer; }
 .bb-role-switch button.active { background:white; color:var(--bb-petrol-dark); box-shadow:0 2px 8px rgba(20,50,54,.09); }
 .bb-icon-button { position:relative; width:38px; height:38px; display:grid; place-items:center; border:1px solid #e0e5e4; border-radius:11px; background:white; color:#526367; cursor:pointer; }
-.bb-notification-dot { position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; display:grid; place-items:center; padding:0 4px; border:2px solid white; border-radius:999px; background:#dc3d34; color:white; font-size:8px; font-weight:800; }
-.bb-user-avatar { width:38px; height:38px; display:grid; place-items:center; border-radius:50%; background:var(--bb-petrol-dark); color:white; font-size:10px; font-weight:800; }
+.bb-notification-dot { position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; display:grid; place-items:center; padding:0 4px; border:2px solid white; border-radius:999px; background:#dc3d34; color:white; font-size: 12px; font-weight:800; }
+.bb-user-avatar { width:38px; height:38px; display:grid; place-items:center; border-radius:50%; background:var(--bb-petrol-dark); color:white; font-size: 12px; font-weight:800; }
 .bb-content { max-width:none; min-height:calc(100vh - 72px); padding:clamp(26px,4vw,54px); }
 .bb-mobile-menu,.bb-sidebar-close,.bb-sidebar-overlay,.bb-bottom-nav { display:none; }
 
@@ -2420,10 +2420,333 @@ textarea {
   .bb-nav a { justify-content:flex-start; padding:0 13px; }
   .bb-sidebar-close { position:absolute; right:10px; top:10px; z-index:2; width:32px; height:32px; display:grid; place-items:center; border:0; border-radius:9px; background:#f0f3f2; color:#526367; font-size:20px; }
   .bb-sidebar-overlay { position:fixed; inset:0; z-index:35; display:block; border:0; background:rgba(10,31,34,.32); backdrop-filter:blur(2px); }
-  .bb-mobile-menu { width:38px; height:38px; display:grid; place-items:center; border:1px solid #dfe4e3; border-radius:10px; background:white; color:#355257; }
+  .bb-mobile-menu { width:38px; height:38px; display:grid; place-items:center; border:1px solid #dfe4e3; border-radius:10px; background:white; color:#4d535c; }
   .bb-topbar { height:64px; padding:0 14px; }.bb-topbar-context { display:none; }.bb-content { min-height:calc(100vh - 64px); padding:24px 14px 90px; }
-  .bb-role-switch button { padding:0 9px; font-size:9px; }.bb-icon-button { display:none; }.bb-user-avatar { width:34px; height:34px; }
+  .bb-role-switch button { padding:0 9px; font-size: 12px; }.bb-icon-button { display:none; }.bb-user-avatar { width:34px; height:34px; }
   .bb-role-vorarbeiter .bb-mobile-menu { display:none; }
   .bb-bottom-nav { position:fixed; left:9px; right:9px; bottom:9px; z-index:50; height:66px; display:grid; grid-template-columns:repeat(4,1fr); padding:6px; border:1px solid rgba(28,62,67,.12); border-radius:17px; background:rgba(255,255,255,.96); box-shadow:0 14px 40px rgba(18,49,53,.18); backdrop-filter:blur(16px); }
-  .bb-bottom-nav a { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:3px; border-radius:11px; color:#778589; font-size:8px; font-weight:700; text-decoration:none; }.bb-bottom-nav a.active { background:#eaf2f1; color:var(--bb-petrol); }.bb-bottom-nav .bb-nav-icon { width:19px; height:19px; }
+  .bb-bottom-nav a { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:3px; border-radius:11px; color:#778589; font-size: 12px; font-weight:700; text-decoration:none; }.bb-bottom-nav a.active { background:#eaf2f1; color:var(--bb-petrol); }.bb-bottom-nav .bb-nav-icon { width:19px; height:19px; }
+}
+
+/* Unified B&B interface: one visual language across office and site workflows */
+:root {
+  --bb-bg: #f4f5f7;
+  --bb-card: #ffffff;
+  --bb-border: #e1e4e8;
+  --bb-text: #181b20;
+  --bb-muted: #69717d;
+  --bb-accent: #e77818;
+  --bb-accent-hover: #c96210;
+  --bb-accent-soft: #fff1e4;
+  --bb-green: #278449;
+  --bb-green-soft: #eaf6ee;
+  --bb-blue: #397ca8;
+  --bb-blue-soft: #eaf3f9;
+  --bb-petrol: #e77818;
+  --bb-petrol-dark: #bd600f;
+  --bb-surface: rgba(255, 255, 255, 0.96);
+  --bb-line: rgba(24, 27, 32, 0.1);
+  --bb-shadow: 0 14px 38px rgba(22, 25, 31, 0.06);
+}
+
+.bb-shell {
+  grid-template-columns: 260px minmax(0, 1fr);
+  background: var(--bb-bg);
+}
+
+.bb-sidebar {
+  padding: 20px 16px 18px;
+  border-right: 0;
+  background: #17191d;
+  color: #ffffff;
+  box-shadow: 12px 0 36px rgba(17, 19, 23, 0.1);
+}
+
+.bb-brand-logo {
+  min-height: 86px;
+  margin: 0 2px 4px;
+  padding: 8px 12px 16px;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.bb-brand-logo img {
+  width: 184px;
+  height: 62px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: #ffffff;
+  object-position: center;
+}
+
+.bb-sidebar-role {
+  margin: 18px 12px 9px;
+}
+
+.bb-sidebar-role span {
+  color: #9298a2;
+  font-size: 12px;
+}
+
+.bb-sidebar-role strong {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.bb-nav {
+  gap: 5px;
+}
+
+.bb-nav a {
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  color: #b6bbc3;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.bb-nav a:hover {
+  background: #24272d;
+  color: #ffffff;
+}
+
+.bb-nav a.active {
+  background: linear-gradient(135deg, #ee8529, var(--bb-accent));
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(231, 120, 24, 0.22);
+}
+
+.bb-nav a.active::before {
+  display: none;
+}
+
+.bb-nav a.priority:not(.active) {
+  color: #ff9c96;
+}
+
+.bb-nav-badge {
+  min-width: 24px;
+  height: 24px;
+  background: #dc3d34;
+  font-size: 12px;
+}
+
+.bb-sidebar-footer {
+  border-top-color: rgba(255, 255, 255, 0.1);
+  color: #9ca2aa;
+  font-size: 12px;
+}
+
+.bb-sidebar-footer .bb-nav-icon {
+  color: #f39a4e;
+}
+
+.bb-main {
+  background-color: var(--bb-bg);
+  background-image:
+    radial-gradient(circle at 92% 2%, rgba(231, 120, 24, 0.065), transparent 28%),
+    linear-gradient(rgba(24, 27, 32, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 27, 32, 0.018) 1px, transparent 1px);
+  background-size: auto, 44px 44px, 44px 44px;
+}
+
+.bb-topbar {
+  height: 74px;
+  border-bottom-color: var(--bb-border);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.bb-topbar-context {
+  color: #555d68;
+  font-size: 13px;
+}
+
+.bb-live-dot {
+  background: var(--bb-accent);
+  box-shadow: 0 0 0 4px rgba(231, 120, 24, 0.12);
+}
+
+.bb-role-switch {
+  border-color: #e0e3e7;
+  background: #f1f2f4;
+}
+
+.bb-role-switch button {
+  min-height: 34px;
+  color: #68707b;
+  font-size: 12px;
+}
+
+.bb-role-switch button.active {
+  color: #181b20;
+}
+
+.bb-icon-button {
+  border-color: #e0e3e7;
+  color: #515965;
+}
+
+.bb-user-avatar {
+  background: #24272d;
+  font-size: 12px;
+}
+
+.bb-content {
+  width: 100%;
+  max-width: 1540px;
+  margin: 0 auto;
+  padding: clamp(28px, 3.2vw, 48px);
+}
+
+.bb-page-header {
+  margin-bottom: 28px;
+}
+
+.bb-page-header h1 {
+  color: #181b20;
+  font-size: clamp(30px, 3vw, 44px);
+}
+
+.bb-back-link {
+  color: var(--bb-accent-hover);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.bb-card,
+.bb-project-panel,
+.bb-employee-panel,
+.bb-equipment-panel,
+.bb-document-panel,
+.bb-instruction-panel,
+.bb-calendar,
+.bb-calendar-agenda {
+  border-color: var(--bb-border);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: var(--bb-shadow);
+}
+
+.bb-primary-button {
+  background: var(--bb-accent);
+  color: #ffffff;
+  box-shadow: 0 9px 22px rgba(231, 120, 24, 0.18);
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bb-primary-button:hover {
+  background: var(--bb-accent-hover);
+  box-shadow: 0 11px 26px rgba(201, 98, 16, 0.22);
+  transform: translateY(-1px);
+}
+
+.bb-secondary-button:hover {
+  border-color: #c7cbd1;
+  background: #f7f8f9;
+}
+
+.bb-input,
+.bb-select,
+.bb-textarea,
+.bb-search input {
+  border-color: #d8dce2;
+  background: #ffffff;
+}
+
+.bb-workspace {
+  width: 100%;
+  margin-inline: auto;
+  color: var(--bb-text);
+}
+
+.bb-workspace > section,
+.bb-workspace > form > section {
+  border-color: var(--bb-border);
+  box-shadow: var(--bb-shadow);
+}
+
+.bb-workspace input:not([type="checkbox"]):not([type="radio"]),
+.bb-workspace select,
+.bb-workspace textarea {
+  min-height: 46px;
+  border-color: #d8dce2;
+  background-color: #ffffff;
+}
+
+.bb-workspace input:focus,
+.bb-workspace select:focus,
+.bb-workspace textarea:focus {
+  border-color: var(--bb-accent) !important;
+  box-shadow: 0 0 0 3px rgba(231, 120, 24, 0.11);
+}
+
+.bb-workspace button,
+.bb-workspace a {
+  touch-action: manipulation;
+}
+
+@media (max-width: 1000px) {
+  .bb-shell {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .bb-brand-logo img {
+    width: 62px;
+    padding-inline: 5px;
+    object-fit: cover;
+    object-position: left center;
+  }
+}
+
+@media (max-width: 700px) {
+  .bb-sidebar {
+    width: min(300px, 88vw);
+    background: #17191d;
+    box-shadow: 20px 0 60px rgba(10, 12, 15, 0.32);
+  }
+
+  .bb-sidebar-close {
+    background: #2a2d33;
+    color: #ffffff;
+  }
+
+  .bb-sidebar-overlay {
+    background: rgba(10, 12, 15, 0.5);
+  }
+
+  .bb-topbar {
+    height: 64px;
+  }
+
+  .bb-mobile-menu {
+    border-color: #dfe2e6;
+    color: #25282d;
+  }
+
+  .bb-content {
+    padding: 22px 14px 92px;
+  }
+
+  .bb-role-switch button {
+    font-size: 12px;
+  }
+
+  .bb-bottom-nav {
+    border-color: rgba(24, 27, 32, 0.12);
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 14px 40px rgba(17, 19, 23, 0.18);
+  }
+
+  .bb-bottom-nav a {
+    color: #717985;
+    font-size: 12px;
+  }
+
+  .bb-bottom-nav a.active {
+    background: var(--bb-accent-soft);
+    color: var(--bb-accent-hover);
+  }
+
+  .bb-workspace {
+    padding: 0 !important;
+  }
 }

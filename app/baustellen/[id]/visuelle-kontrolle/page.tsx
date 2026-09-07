@@ -166,10 +166,10 @@ export default function VisuelleKontrolle() {
 
       
 
-      <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <div className="bb-workspace max-w-7xl space-y-6">
 
         <div className="hidden print:block">
-          <div className="mb-6 border-b-4 border-[#17565d] pb-4">
+          <div className="mb-6 border-b-4 border-[#e77818] pb-4">
 
             <div className="flex items-end justify-between">
 
@@ -278,7 +278,7 @@ export default function VisuelleKontrolle() {
               type="button"
               onClick={positionHinzufuegen}
               disabled={positionen.length >= 20}
-              className="rounded-xl bg-[#17565d] px-5 py-3 font-bold text-black hover:bg-[#12464c] disabled:opacity-40"
+              className="rounded-xl bg-[#e77818] px-5 py-3 font-bold text-white hover:bg-[#c96210] disabled:opacity-40"
             >
               + Position
             </button>
@@ -296,7 +296,7 @@ export default function VisuelleKontrolle() {
               <button
                 type="button"
                 onClick={positionHinzufuegen}
-                className="mt-4 rounded-xl bg-[#17565d] px-5 py-3 font-bold text-black"
+                className="mt-4 rounded-xl bg-[#e77818] px-5 py-3 font-bold text-white"
               >
                 Erste Position erfassen
               </button>
@@ -313,7 +313,7 @@ export default function VisuelleKontrolle() {
 
                   <div className="mb-4 flex items-center justify-between">
 
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#17565d] font-bold text-black">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e77818] font-bold text-white">
                       {index + 1}
                     </span>
 
@@ -381,7 +381,7 @@ export default function VisuelleKontrolle() {
                           }
                           className={`rounded-xl border px-4 py-3 text-sm font-semibold ${
                             position.resultat === option
-                              ? "border-[#17565d] bg-[#17565d] text-white"
+                              ? "border-[#e77818] bg-[#e77818] text-white"
                               : "border-slate-300 bg-white hover:bg-slate-50"
                           }`}
                         >
@@ -410,7 +410,7 @@ export default function VisuelleKontrolle() {
                           e.target.value
                         )
                       }
-                      className="w-full rounded-xl border border-slate-300 p-3 outline-none focus:border-[#17565d]"
+                      className="w-full rounded-xl border border-slate-300 p-3 outline-none focus:border-[#e77818]"
                       placeholder="Bemerkung zur Kontrollposition..."
                     />
 
@@ -436,7 +436,7 @@ export default function VisuelleKontrolle() {
             rows={5}
             value={schluss}
             onChange={(e) => setSchluss(e.target.value)}
-            className="mt-4 w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-[#17565d]"
+            className="mt-4 w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-[#e77818]"
             placeholder="Schlussfolgerungen der visuellen Kontrolle..."
           />
 
@@ -479,7 +479,7 @@ export default function VisuelleKontrolle() {
             onChange={(e) =>
               setNachkontrolleBemerkung(e.target.value)
             }
-            className="mt-4 w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-[#17565d]"
+            className="mt-4 w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-[#e77818]"
             placeholder="Bemerkungen zur Nachkontrolle..."
           />
 
@@ -526,7 +526,7 @@ export default function VisuelleKontrolle() {
             <button
               type="button"
               onClick={speichern}
-              className="rounded-xl bg-[#17565d] px-6 py-3 font-bold text-black hover:bg-[#12464c]"
+              className="rounded-xl bg-[#e77818] px-6 py-3 font-bold text-white hover:bg-[#c96210]"
             >
               AS10 speichern
             </button>
@@ -566,7 +566,7 @@ function Feld({
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#17565d] disabled:bg-slate-100"
+        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#e77818] disabled:bg-slate-100"
       />
 
     </div>

@@ -169,10 +169,10 @@ export default function Journal() {
 
       
 
-      <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <div className="bb-workspace max-w-7xl space-y-6">
 
         <div className="hidden print:block">
-          <div className="mb-6 border-b-4 border-[#17565d] pb-4">
+          <div className="mb-6 border-b-4 border-[#e77818] pb-4">
 
             <div className="flex items-end justify-between">
 
@@ -241,7 +241,7 @@ export default function Journal() {
               rows={4}
               value={arbeit}
               onChange={(e) => setArbeit(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-[#17565d]"
+              className="w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-[#e77818]"
               placeholder="Heute ausgeführte Arbeiten..."
             />
 
@@ -266,7 +266,7 @@ export default function Journal() {
             <button
               type="button"
               onClick={mitarbeiterHinzufuegen}
-              className="rounded-xl bg-[#17565d] px-5 py-3 font-bold text-black hover:bg-[#12464c]"
+              className="rounded-xl bg-[#e77818] px-5 py-3 font-bold text-white hover:bg-[#c96210]"
             >
               + Mitarbeiter
             </button>
@@ -439,7 +439,7 @@ export default function Journal() {
                   className="h-5 w-5"
                 />
 
-                <span className="font-bold text-[#17565d]">
+                <span className="font-bold text-[#e77818]">
                   {index + 1}
                 </span>
 
@@ -462,7 +462,7 @@ export default function Journal() {
             <button
               type="button"
               onClick={speichern}
-              className="rounded-xl bg-[#17565d] px-6 py-3 font-bold text-black hover:bg-[#12464c]"
+              className="rounded-xl bg-[#e77818] px-6 py-3 font-bold text-white hover:bg-[#c96210]"
             >
               Journal speichern
             </button>
@@ -499,7 +499,7 @@ function Feld({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#17565d]"
+        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#e77818]"
       />
 
     </div>

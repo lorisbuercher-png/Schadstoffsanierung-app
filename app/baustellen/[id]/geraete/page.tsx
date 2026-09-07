@@ -174,7 +174,7 @@ export default function GeraetePage() {
 
       
 
-      <div className="mx-auto max-w-6xl space-y-5 p-6">
+      <div className="bb-workspace max-w-6xl space-y-5">
 
         <section className="grid gap-4 sm:grid-cols-4">
 
@@ -234,10 +234,10 @@ export default function GeraetePage() {
         )}
 
         {formularOffen && (
-          <section className="rounded-[22px] border border-[#17565d] bg-white p-6 shadow-sm">
+          <section className="rounded-[22px] border border-[#e77818] bg-white p-6 shadow-sm">
 
             <div className="mb-5">
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#9d6810]">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#9d6810]">
                 NEUES GERÄT
               </div>
 
@@ -256,7 +256,7 @@ export default function GeraetePage() {
                   value={nummer}
                   onChange={(e) => setNummer(e.target.value)}
                   placeholder="z.B. UHG-04"
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#17565d]"
+                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#e77818]"
                 />
               </div>
 
@@ -379,7 +379,7 @@ export default function GeraetePage() {
               <button
                 type="button"
                 onClick={geraetErstellen}
-                className="rounded-xl bg-[#17565d] px-5 py-3 text-sm font-black text-white"
+                className="rounded-xl bg-[#e77818] px-5 py-3 text-sm font-black text-white"
               >
                 Gerät speichern
               </button>
@@ -435,7 +435,7 @@ export default function GeraetePage() {
                           status.farbe === "rot"
                             ? "bg-red-600 text-white"
                             : status.farbe === "gelb"
-                            ? "bg-[#17565d] text-white"
+                            ? "bg-[#e77818] text-white"
                             : "bg-green-600 text-white"
                         }`}
                       >
@@ -449,7 +449,7 @@ export default function GeraetePage() {
                             {geraet.nummer} · {geraet.bezeichnung}
                           </strong>
 
-                          <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black">
+                          <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-black">
                             {geraet.typ}
                           </span>
 
