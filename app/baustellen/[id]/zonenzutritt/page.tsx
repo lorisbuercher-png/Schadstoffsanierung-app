@@ -10,6 +10,13 @@ type Mitarbeiter = {
   name: string;
 };
 
+type GespeicherterMitarbeiter = {
+  id?: string | number;
+  name?: string;
+  vorname?: string;
+  nachname?: string;
+};
+
 type Zutritt = {
   id: string;
   mitarbeiterId: string;
@@ -58,13 +65,17 @@ export default function ZonenzutrittPage() {
         const daten = JSON.parse(gespeicherteMitarbeiter);
 
         if (Array.isArray(daten) && daten.length > 0) {
-          const normalisiert = daten.map((m: any, index: number) => ({
-            id: String(m.id ?? index),
-            name:
-              m.name ??
-              `${m.vorname ?? ""} ${m.nachname ?? ""}`.trim() ??
-              `Mitarbeiter ${index + 1}`,
-          }));
+          const normalisiert = daten.map(
+            (m: GespeicherterMitarbeiter, index: number) => {
+              const vollerName =
+                m.name || `${m.vorname ?? ""} ${m.nachname ?? ""}`.trim();
+
+              return {
+                id: String(m.id ?? index),
+                name: vollerName || `Mitarbeiter ${index + 1}`,
+              };
+            }
+          );
 
           setMitarbeiter(normalisiert);
         }

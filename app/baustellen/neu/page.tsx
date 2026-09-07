@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AppShell from "../../components/ui/AppShell";
 
@@ -431,9 +432,9 @@ export default function NeueBaustelle() {
         </aside>
 
         <div className="bb-form-footer">
-          <a href="/baustellen" className="bb-secondary-button bb-button-link">
+          <Link href="/baustellen" className="bb-secondary-button bb-button-link">
             Abbrechen
-          </a>
+          </Link>
 
           <button
             type="submit"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 export type DateiEintrag = {
   id: string;
@@ -85,7 +86,13 @@ export default function FileUpload({
             <article key={datei.id} className="bb-upload-file">
               <div className="bb-upload-preview">
                 {datei.dataUrl ? (
-                  <img src={datei.dataUrl} alt={datei.name} />
+                  <Image
+                    src={datei.dataUrl}
+                    alt={datei.name}
+                    width={160}
+                    height={120}
+                    unoptimized
+                  />
                 ) : (
                   <span>PDF</span>
                 )}

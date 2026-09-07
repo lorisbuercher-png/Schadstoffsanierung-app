@@ -2,6 +2,7 @@
 
 import "./dashboard.css";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import AppShell, { type AppRole } from "../ui/AppShell";
 
 type Baustelle = {
@@ -68,7 +69,7 @@ export default function Dashboard() {
   const [role, setRole] = useState<AppRole>("admin");
   const [status, setStatus] = useState<SiteStatus[]>([]);
   const [mitarbeiter, setMitarbeiter] = useState(0);
-  const heute = useMemo(datumKey, []);
+  const [heute] = useState(datumKey);
 
   useEffect(() => {
     const gespeichert = localStorage.getItem("bb-role");
@@ -136,7 +137,7 @@ function AdminDashboard({ sites, mitarbeiter, zahlen }: { sites: SiteStatus[]; m
   return <div className="dash admin-dashboard">
     <header className="dash-hero">
       <div><span className="dash-eyebrow">Geschäftsleitung · Live-Übersicht</span><h1>Guten Morgen, Loris.</h1><p>Das Wichtigste zuerst: Sicherheit, offene Punkte und laufende Baustellen.</p></div>
-      <a className="dash-primary-button" href="/baustellen/neu">+ Neue Baustelle</a>
+      <Link className="dash-primary-button" href="/baustellen/neu">+ Neue Baustelle</Link>
     </header>
 
     <section className="admin-kpis" aria-label="Wichtige Kennzahlen">
@@ -156,40 +157,40 @@ function AdminDashboard({ sites, mitarbeiter, zahlen }: { sites: SiteStatus[]; m
           {(site.suvaKritisch > 0 || site.suvaOffen > 0) && <span><b>{site.suvaKritisch || site.suvaOffen}</b> SUVA-Punkte {site.suvaKritisch ? "nicht erfüllt" : "offen"}</span>}
           {site.maengelKritisch > 0 && <span className="critical"><b>{site.maengelKritisch}</b> Mängel Prio 1</span>}
         </div>
-        <div className="priority-actions"><a href={`/baustellen/${site.baustelle.id}/suva-audit`}>SUVA prüfen</a><a href={`/baustellen/${site.baustelle.id}/maengel`}>Mängel öffnen {icon("arrow")}</a></div>
+        <div className="priority-actions"><Link href={`/baustellen/${site.baustelle.id}/suva-audit`}>SUVA prüfen</Link><Link href={`/baustellen/${site.baustelle.id}/maengel`}>Mängel öffnen {icon("arrow")}</Link></div>
       </article>)}</div> : <div className="empty-success">{icon("check")}<div><strong>Keine kritischen Punkte offen</strong><span>Alle Baustellen sind aktuell ohne Prio-1-Sperre.</span></div></div>}
     </section>
 
     <div className="admin-lower-grid">
-      <section className="dash-panel" id="baustellenstatus"><div className="panel-heading"><div><span className="dash-eyebrow">Betrieb</span><h2>Baustellenstatus</h2></div><a className="text-link" href="/baustellen">Alle anzeigen →</a></div>
-        <div className="site-table"><div className="site-table-head"><span>Baustelle</span><span>Freigabe heute</span><span>Team</span><span>Status</span></div>{sites.length ? sites.slice(0, 5).map((site) => <a href={`/baustellen/${site.baustelle.id}`} className="site-table-row" key={site.baustelle.id}><span><strong>{site.baustelle.projektname}</strong><small>{site.baustelle.nummer || "–"} · {site.baustelle.ort || "–"}</small></span><span className={site.tagescheckOffen ? "status-open" : "status-ok"}>{site.tagescheckOffen ? "Offen" : "Erteilt"}</span><span>{site.personenInZone} in Zone</span><span><i className={site.suvaKritisch || site.maengelKritisch ? "red" : site.suvaOffen ? "amber" : "green"} />{site.suvaKritisch || site.maengelKritisch ? "Gesperrt" : site.suvaOffen ? "Zu prüfen" : "Bereit"}</span></a>) : <div className="empty-row">Noch keine Baustelle erfasst.</div>}</div>
+      <section className="dash-panel" id="baustellenstatus"><div className="panel-heading"><div><span className="dash-eyebrow">Betrieb</span><h2>Baustellenstatus</h2></div><Link className="text-link" href="/baustellen">Alle anzeigen →</Link></div>
+        <div className="site-table"><div className="site-table-head"><span>Baustelle</span><span>Freigabe heute</span><span>Team</span><span>Status</span></div>{sites.length ? sites.slice(0, 5).map((site) => <Link href={`/baustellen/${site.baustelle.id}`} className="site-table-row" key={site.baustelle.id}><span><strong>{site.baustelle.projektname}</strong><small>{site.baustelle.nummer || "–"} · {site.baustelle.ort || "–"}</small></span><span className={site.tagescheckOffen ? "status-open" : "status-ok"}>{site.tagescheckOffen ? "Offen" : "Erteilt"}</span><span>{site.personenInZone} in Zone</span><span><i className={site.suvaKritisch || site.maengelKritisch ? "red" : site.suvaOffen ? "amber" : "green"} />{site.suvaKritisch || site.maengelKritisch ? "Gesperrt" : site.suvaOffen ? "Zu prüfen" : "Bereit"}</span></Link>) : <div className="empty-row">Noch keine Baustelle erfasst.</div>}</div>
       </section>
-      <aside className="dash-panel team-panel"><div className="panel-heading"><div><span className="dash-eyebrow">Heute draussen</span><h2>Team-Einsatz</h2></div></div><div className="team-big-number">{zahlen.personen}</div><p>Personen aktuell in einer Sanierungszone</p><div className="team-stat"><span>Aktive Mitarbeitende</span><strong>{mitarbeiter}</strong></div><div className="team-stat"><span>Offene Tageschecks</span><strong>{zahlen.tageschecks}</strong></div><a className="dash-secondary-button" href="/mitarbeiter">Mitarbeiter öffnen</a></aside>
+      <aside className="dash-panel team-panel"><div className="panel-heading"><div><span className="dash-eyebrow">Heute draussen</span><h2>Team-Einsatz</h2></div></div><div className="team-big-number">{zahlen.personen}</div><p>Personen aktuell in einer Sanierungszone</p><div className="team-stat"><span>Aktive Mitarbeitende</span><strong>{mitarbeiter}</strong></div><div className="team-stat"><span>Offene Tageschecks</span><strong>{zahlen.tageschecks}</strong></div><Link className="dash-secondary-button" href="/mitarbeiter">Mitarbeiter öffnen</Link></aside>
     </div>
   </div>;
 }
 
 function Kpi({ iconName, label, value, note, tone = "normal", href }: { iconName: "shield" | "alert" | "site" | "clock"; label: string; value: number; note: string; tone?: "normal" | "danger" | "warning"; href: string }) {
-  return <a href={href} className={`admin-kpi ${tone}`}><span className="kpi-icon">{icon(iconName)}</span><span className="kpi-copy"><small>{label}</small><strong>{value}</strong><em>{note}</em></span><span className="kpi-arrow">{icon("arrow")}</span></a>;
+  return <Link href={href} className={`admin-kpi ${tone}`}><span className="kpi-icon">{icon(iconName)}</span><span className="kpi-copy"><small>{label}</small><strong>{value}</strong><em>{note}</em></span><span className="kpi-arrow">{icon("arrow")}</span></Link>;
 }
 
 function VorarbeiterDashboard({ site }: { site?: SiteStatus }) {
-  if (!site) return <div className="dash foreman-dashboard"><header className="dash-hero"><div><span className="dash-eyebrow">Baustellenmodus</span><h1>Guten Morgen, Loris.</h1><p>Heute ist noch keine aktive Baustelle zugewiesen.</p></div></header><section className="dash-panel empty-project"><span>{icon("site")}</span><h2>Baustelle auswählen</h2><p>Erfasse eine Baustelle oder öffne die Baustellenübersicht.</p><a className="dash-primary-button" href="/baustellen">Zu den Baustellen</a></section></div>;
+  if (!site) return <div className="dash foreman-dashboard"><header className="dash-hero"><div><span className="dash-eyebrow">Baustellenmodus</span><h1>Guten Morgen, Loris.</h1><p>Heute ist noch keine aktive Baustelle zugewiesen.</p></div></header><section className="dash-panel empty-project"><span>{icon("site")}</span><h2>Baustelle auswählen</h2><p>Erfasse eine Baustelle oder öffne die Baustellenübersicht.</p><Link className="dash-primary-button" href="/baustellen">Zu den Baustellen</Link></section></div>;
 
   const blocker = site.suvaKritisch + site.maengelKritisch + (site.tagescheckOffen ? 1 : 0) + (site.zonenplanFehlt ? 1 : 0);
   const bereit = blocker === 0;
   return <div className="dash foreman-dashboard">
-    <header className="dash-hero foreman-hero"><div><span className="dash-eyebrow">Baustellenmodus · Heute</span><h1>Guten Morgen, Loris.</h1><p>Du siehst nur das, was du für den heutigen Arbeitstag brauchst.</p></div><a className="site-selector" href="/baustellen"><span>{icon("site")}</span><div><small>Aktuelle Baustelle</small><strong>{site.baustelle.projektname}</strong><em>{site.baustelle.ort || site.baustelle.nummer || ""}</em></div>{icon("arrow")}</a></header>
+    <header className="dash-hero foreman-hero"><div><span className="dash-eyebrow">Baustellenmodus · Heute</span><h1>Guten Morgen, Loris.</h1><p>Du siehst nur das, was du für den heutigen Arbeitstag brauchst.</p></div><Link className="site-selector" href="/baustellen"><span>{icon("site")}</span><div><small>Aktuelle Baustelle</small><strong>{site.baustelle.projektname}</strong><em>{site.baustelle.ort || site.baustelle.nummer || ""}</em></div>{icon("arrow")}</Link></header>
 
     <section className={`release-card ${bereit ? "ready" : "blocked"}`}>
       <div className="release-status"><span className="release-icon">{icon(bereit ? "check" : "alert")}</span><div><span className="dash-eyebrow">Arbeitsfreigabe</span><h2>{bereit ? "Baustelle ist arbeitsbereit" : "Freigabe ausstehend"}</h2><p>{bereit ? "Alle sicherheitsrelevanten Schritte sind erledigt." : "Vor Arbeitsbeginn müssen die folgenden Punkte bestätigt werden."}</p></div></div>
       {!bereit && <div className="blocker-list">
-        {(site.suvaKritisch > 0 || site.suvaOffen > 0) && <a href={`/baustellen/${site.baustelle.id}/suva-audit`}><span>{icon("shield")}</span><div><strong>Sicherheitsprüfung</strong><small>{site.suvaKritisch ? `${site.suvaKritisch} Prio-1-Punkte nicht erfüllt` : `${site.suvaOffen} Prio-1-Punkte zu bestätigen`}</small></div><b>Jetzt prüfen</b>{icon("arrow")}</a>}
-        {site.maengelKritisch > 0 && <a href={`/baustellen/${site.baustelle.id}/maengel`}><span>{icon("alert")}</span><div><strong>Mangel Prio 1</strong><small>{site.maengelKritisch} kritische {site.maengelKritisch === 1 ? "Meldung" : "Meldungen"} offen</small></div><b>Öffnen</b>{icon("arrow")}</a>}
-        {site.zonenplanFehlt && <a href={`/baustellen/${site.baustelle.id}/zonenplan`}><span>{icon("site")}</span><div><strong>Zonenplan hinterlegen</strong><small>Foto oder PDF wird für die Freigabe benötigt</small></div><b>Erfassen</b>{icon("arrow")}</a>}
-        {site.tagescheckOffen && <a href={`/baustellen/${site.baustelle.id}/tagescheck`}><span>{icon("check")}</span><div><strong>Tagescheck abschliessen</strong><small>Zone, Unterdruck, PSA und Fluchtwege prüfen</small></div><b>Starten</b>{icon("arrow")}</a>}
+        {(site.suvaKritisch > 0 || site.suvaOffen > 0) && <Link href={`/baustellen/${site.baustelle.id}/suva-audit`}><span>{icon("shield")}</span><div><strong>Sicherheitsprüfung</strong><small>{site.suvaKritisch ? `${site.suvaKritisch} Prio-1-Punkte nicht erfüllt` : `${site.suvaOffen} Prio-1-Punkte zu bestätigen`}</small></div><b>Jetzt prüfen</b>{icon("arrow")}</Link>}
+        {site.maengelKritisch > 0 && <Link href={`/baustellen/${site.baustelle.id}/maengel`}><span>{icon("alert")}</span><div><strong>Mangel Prio 1</strong><small>{site.maengelKritisch} kritische {site.maengelKritisch === 1 ? "Meldung" : "Meldungen"} offen</small></div><b>Öffnen</b>{icon("arrow")}</Link>}
+        {site.zonenplanFehlt && <Link href={`/baustellen/${site.baustelle.id}/zonenplan`}><span>{icon("site")}</span><div><strong>Zonenplan hinterlegen</strong><small>Foto oder PDF wird für die Freigabe benötigt</small></div><b>Erfassen</b>{icon("arrow")}</Link>}
+        {site.tagescheckOffen && <Link href={`/baustellen/${site.baustelle.id}/tagescheck`}><span>{icon("check")}</span><div><strong>Tagescheck abschliessen</strong><small>Zone, Unterdruck, PSA und Fluchtwege prüfen</small></div><b>Starten</b>{icon("arrow")}</Link>}
       </div>}
-      <div className="release-footer"><span>{bereit ? "Zonenzutritt freigegeben" : "Zonenzutritt bleibt bis zur Freigabe gesperrt"}</span><a className={bereit ? "dash-primary-button" : "dash-primary-button danger"} href={bereit ? `/baustellen/${site.baustelle.id}/zonenzutritt` : `/baustellen/${site.baustelle.id}/tagescheck`}>{bereit ? "Team einchecken" : "Freigabe starten"}</a></div>
+      <div className="release-footer"><span>{bereit ? "Zonenzutritt freigegeben" : "Zonenzutritt bleibt bis zur Freigabe gesperrt"}</span><Link className={bereit ? "dash-primary-button" : "dash-primary-button danger"} href={bereit ? `/baustellen/${site.baustelle.id}/zonenzutritt` : `/baustellen/${site.baustelle.id}/tagescheck`}>{bereit ? "Team einchecken" : "Freigabe starten"}</Link></div>
     </section>
 
     <section className="today-section"><div className="panel-heading"><div><span className="dash-eyebrow">Geführter Ablauf</span><h2>Dein Arbeitstag</h2></div><span className="today-date">Heute</span></div><div className="workflow-grid">
@@ -199,10 +200,10 @@ function VorarbeiterDashboard({ site }: { site?: SiteStatus }) {
       <WorkflowStep number="4" title="Arbeit dokumentieren" note="Fotos, Fortschritt, Rapport" href={`/baustellen/${site.baustelle.id}/journal`} iconName="journal" />
     </div></section>
 
-    <section className="quick-actions"><a href={`/baustellen/${site.baustelle.id}/maengel`}>{icon("alert")}<span><strong>Mangel melden</strong><small>Foto und Priorität erfassen</small></span>{icon("arrow")}</a><a href={`/baustellen/${site.baustelle.id}/journal`}>{icon("journal")}<span><strong>Tagesrapport</strong><small>Arbeit und Stunden abschliessen</small></span>{icon("arrow")}</a><a href={`/baustellen/${site.baustelle.id}/zonenplan`}>{icon("site")}<span><strong>Zonenplan</strong><small>Plan für die Arbeit vor Ort</small></span>{icon("arrow")}</a></section>
+    <section className="quick-actions"><Link href={`/baustellen/${site.baustelle.id}/maengel`}>{icon("alert")}<span><strong>Mangel melden</strong><small>Foto und Priorität erfassen</small></span>{icon("arrow")}</Link><Link href={`/baustellen/${site.baustelle.id}/journal`}>{icon("journal")}<span><strong>Tagesrapport</strong><small>Arbeit und Stunden abschliessen</small></span>{icon("arrow")}</Link><Link href={`/baustellen/${site.baustelle.id}/zonenplan`}>{icon("site")}<span><strong>Zonenplan</strong><small>Plan für die Arbeit vor Ort</small></span>{icon("arrow")}</Link></section>
   </div>;
 }
 
 function WorkflowStep({ number, title, note, done, locked, href, iconName }: { number: string; title: string; note: string; done?: boolean; locked?: boolean; href: string; iconName: "team" | "shield" | "clock" | "journal" }) {
-  return <a href={locked ? "#" : href} className={`workflow-step ${done ? "done" : ""} ${locked ? "locked" : ""}`} aria-disabled={locked}><span className="step-number">{done ? "✓" : number}</span><span className="step-icon">{icon(iconName)}</span><span><strong>{title}</strong><small>{note}</small></span>{icon("arrow")}</a>;
+  return <Link href={locked ? "#" : href} className={`workflow-step ${done ? "done" : ""} ${locked ? "locked" : ""}`} aria-disabled={locked}><span className="step-number">{done ? "✓" : number}</span><span className="step-icon">{icon(iconName)}</span><span><strong>{title}</strong><small>{note}</small></span>{icon("arrow")}</Link>;
 }
