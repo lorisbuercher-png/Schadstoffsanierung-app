@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import AppShell from "../components/ui/AppShell";
 
 type Baustelle = {
@@ -84,10 +85,10 @@ export default function Baustellen() {
       title="Baustellen"
       subtitle="Alle Sanierungsprojekte zentral verwalten und überwachen."
       action={
-        <a href="/baustellen/neu" className="bb-primary-button bb-button-link">
+        <Link href="/baustellen/neu" className="bb-primary-button bb-button-link">
           <span>＋</span>
           Neue Baustelle
-        </a>
+        </Link>
       }
     >
       <section className="bb-project-stats">
@@ -166,12 +167,12 @@ export default function Baustellen() {
             </p>
 
             {baustellen.length === 0 && (
-              <a
+              <Link
                 href="/baustellen/neu"
                 className="bb-primary-button bb-button-link"
               >
                 ＋ Erste Baustelle erstellen
-              </a>
+              </Link>
             )}
           </div>
         ) : (
@@ -185,7 +186,7 @@ export default function Baustellen() {
               const klasse = statusKlasse(status);
 
               return (
-                <a
+                <Link
                   key={baustelle.id}
                   href={`/baustellen/${baustelle.id}`}
                   className="bb-project-row"
@@ -230,7 +231,7 @@ export default function Baustellen() {
                   </div>
 
                   <span className="bb-project-arrow">›</span>
-                </a>
+                </Link>
               );
             })}
           </div>

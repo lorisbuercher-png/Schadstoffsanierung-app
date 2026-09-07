@@ -3,6 +3,8 @@
 import "./ui.css";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export type AppRole = "admin" | "vorarbeiter";
@@ -87,10 +89,10 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
     <div className={`bb-shell bb-role-${role}`}>
       <aside className={`bb-sidebar ${menuOffen ? "mobile-open" : ""}`}>
         <button type="button" className="bb-sidebar-close" onClick={() => setMenuOffen(false)} aria-label="Menü schliessen">×</button>
-        <a href="/" className="bb-brand bb-brand-logo" aria-label="B&B Schadstoffsanierung – Übersicht"><img src="/bb-logo.png" alt="B&B Schadstoffsanierung" /></a>
+        <Link href="/" className="bb-brand bb-brand-logo" aria-label="B&B Schadstoffsanierung – Übersicht"><Image src="/bb-logo.png" alt="B&B Schadstoffsanierung" width={546} height={300} priority /></Link>
         <div className="bb-sidebar-role"><span>{role === "admin" ? "Geschäftsleitung" : "Baustellenmodus"}</span><strong>{role === "admin" ? "Admin-Cockpit" : "Vorarbeiter"}</strong></div>
         <nav className="bb-nav" aria-label="Hauptnavigation">
-          {navigation.map((eintrag) => <a key={eintrag.label} href={eintrag.href} onClick={() => setMenuOffen(false)} className={`${istAktiv(eintrag.href) ? "active" : ""} ${eintrag.priority ? "priority" : ""}`}><Icon name={eintrag.icon} /><span className="bb-nav-label">{eintrag.label}</span>{!!eintrag.badge && <b className="bb-nav-badge">{eintrag.badge}</b>}</a>)}
+          {navigation.map((eintrag) => <Link key={eintrag.label} href={eintrag.href} onClick={() => setMenuOffen(false)} className={`${istAktiv(eintrag.href) ? "active" : ""} ${eintrag.priority ? "priority" : ""}`}><Icon name={eintrag.icon} /><span className="bb-nav-label">{eintrag.label}</span>{!!eintrag.badge && <b className="bb-nav-badge">{eintrag.badge}</b>}</Link>)}
         </nav>
         <div className="bb-sidebar-footer"><Icon name="shield" /><span>Sicherheit hat Priorität</span></div>
       </aside>
@@ -108,10 +110,10 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
         </header>
 
         <div className="bb-content">
-          {(title || backHref || action) && <section className="bb-page-header"><div>{backHref && <a href={backHref} className="bb-back-link">← {backLabel}</a>}{title && <h1>{title}</h1>}{subtitle && <p>{subtitle}</p>}</div>{action && <div className="bb-page-header-action">{action}</div>}</section>}
+          {(title || backHref || action) && <section className="bb-page-header"><div>{backHref && <Link href={backHref} className="bb-back-link">← {backLabel}</Link>}{title && <h1>{title}</h1>}{subtitle && <p>{subtitle}</p>}</div>{action && <div className="bb-page-header-action">{action}</div>}</section>}
           {children}
         </div>
-        {role === "vorarbeiter" && <nav className="bb-bottom-nav" aria-label="Mobile Navigation">{foremanNavigation.map((item) => <a key={item.label} href={item.href} className={istAktiv(item.href) ? "active" : ""}><Icon name={item.icon} /><span>{item.label}</span></a>)}</nav>}
+        {role === "vorarbeiter" && <nav className="bb-bottom-nav" aria-label="Mobile Navigation">{foremanNavigation.map((item) => <Link key={item.label} href={item.href} className={istAktiv(item.href) ? "active" : ""}><Icon name={item.icon} /><span>{item.label}</span></Link>)}</nav>}
       </main>
     </div>
   );
