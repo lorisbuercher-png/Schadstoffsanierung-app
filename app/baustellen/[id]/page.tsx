@@ -297,9 +297,11 @@ export default function BaustellenDetail() {
 
   if (!baustelle) {
     return (
-      <main className="min-h-screen bg-[#f6f7f8] p-10 text-slate-950">
-        Baustelle wird geladen...
-      </main>
+      <AppShell title="Baustelle" backHref="/baustellen" backLabel="Baustellen">
+        <section className="bb-card p-8 text-sm font-semibold text-slate-600">
+          Baustelle wird geladen …
+        </section>
+      </AppShell>
     );
   }
 
@@ -366,7 +368,7 @@ export default function BaustellenDetail() {
         </div>
       }
     >
-      <div className="space-y-5">
+      <div className="bb-workspace space-y-5">
 
         {/* STATUSLEISTE */}
         <section className="overflow-hidden rounded-[20px] border border-slate-200 bg-white text-[#18212b] shadow-sm">
@@ -375,12 +377,12 @@ export default function BaustellenDetail() {
 
             <div className="flex items-center gap-5">
 
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#e9f3f3] text-3xl font-black text-[#17565d]">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#fff1e4] text-3xl font-black text-[#e77818]">
                 ✓
               </div>
 
               <div>
-                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                   Baustellenstatus
                 </div>
 
@@ -492,7 +494,7 @@ export default function BaustellenDetail() {
             </div>
 
             <div
-              className={`mt-1 text-[10px] font-bold ${
+              className={`mt-1 text-xs font-bold ${
                 tagescheckKritisch
                   ? "text-red-600"
                   : tagescheckStatus.status === "arbeitsbereit"
@@ -513,7 +515,7 @@ export default function BaustellenDetail() {
             className={`rounded-2xl border p-4 text-center shadow-sm transition ${
               personenInZone > 0
                 ? "border-green-200 bg-green-50"
-                : "border-slate-200 bg-white hover:border-[#17565d]"
+                : "border-slate-200 bg-white hover:border-[#e77818]"
             }`}
           >
             <div className="text-2xl">
@@ -525,7 +527,7 @@ export default function BaustellenDetail() {
             </div>
 
             <div
-              className={`mt-1 text-[10px] font-bold ${
+              className={`mt-1 text-xs font-bold ${
                 personenInZone > 0
                   ? "text-green-600"
                   : "text-slate-500"
@@ -552,7 +554,7 @@ export default function BaustellenDetail() {
             </div>
 
             <div
-              className={`mt-1 text-[10px] font-bold ${
+              className={`mt-1 text-xs font-bold ${
                 anzahlMitarbeiter > 0
                   ? "text-green-600"
                   : "text-[#a95310]"
@@ -569,7 +571,7 @@ export default function BaustellenDetail() {
             className={`rounded-2xl border p-4 text-center shadow-sm transition ${
               anzahlDokumente > 0
                 ? "border-[#f1c59f] bg-[#fff8f1]"
-                : "border-slate-200 bg-white hover:border-[#17565d]"
+                : "border-slate-200 bg-white hover:border-[#e77818]"
             }`}
           >
             <div className="text-2xl">▤</div>
@@ -579,7 +581,7 @@ export default function BaustellenDetail() {
             </div>
 
             <div
-              className={`mt-1 text-[10px] font-bold ${
+              className={`mt-1 text-xs font-bold ${
                 anzahlDokumente > 0
                   ? "text-[#a95310]"
                   : "text-slate-500"
@@ -608,7 +610,7 @@ export default function BaustellenDetail() {
             </div>
 
             <div
-              className={`mt-1 text-[10px] font-bold ${
+              className={`mt-1 text-xs font-bold ${
                 journalHeute
                   ? "text-green-600"
                   : "text-[#a95310]"
@@ -637,7 +639,7 @@ export default function BaustellenDetail() {
             </div>
 
             <div
-              className={`mt-1 text-[10px] font-bold ${
+              className={`mt-1 text-xs font-bold ${
                 anzahlZonenplaene > 0
                   ? "text-green-600"
                   : "text-[#a95310]"
@@ -680,7 +682,7 @@ export default function BaustellenDetail() {
             </div>
 
             <div
-              className={`mt-1 text-[10px] font-bold ${
+              className={`mt-1 text-xs font-bold ${
                 kontrolleStatus.nachkontrolle
                   ? "text-red-600"
                   : kontrolleStatus.abgeschlossen
@@ -707,7 +709,7 @@ export default function BaustellenDetail() {
                 ? "border-[#f1c59f] bg-[#fff8f1]"
                 : geraeteStatus.total > 0
                 ? "border-green-200 bg-green-50"
-                : "border-slate-200 bg-white hover:border-[#17565d]"
+                : "border-slate-200 bg-white hover:border-[#e77818]"
             }`}
           >
             <div
@@ -733,7 +735,7 @@ export default function BaustellenDetail() {
             </div>
 
             <div
-              className={`mt-1 text-[10px] font-bold ${
+              className={`mt-1 text-xs font-bold ${
                 geraeteStatus.abgelaufen > 0
                   ? "text-red-600"
                   : geraeteStatus.baldFaellig > 0
@@ -784,7 +786,7 @@ export default function BaustellenDetail() {
             </div>
 
             <div
-              className={`mt-1 text-[10px] font-bold ${
+              className={`mt-1 text-xs font-bold ${
                 maengelStatus.kritisch > 0
                   ? "text-red-600"
                   : maengelStatus.offen > 0
@@ -831,7 +833,7 @@ export default function BaustellenDetail() {
             </div>
 
             <div
-              className={`mt-1 text-[10px] font-bold ${
+              className={`mt-1 text-xs font-bold ${
                 suvaStatus.prio1NichtErfuellt > 0
                   ? "text-red-600"
                   : suvaStatus.prio1Offen > 0
@@ -861,7 +863,7 @@ export default function BaustellenDetail() {
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
 
               <div>
-                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                   STANDARDPROZESS
                 </div>
 
@@ -882,7 +884,7 @@ export default function BaustellenDetail() {
 
             <div className="mt-6 h-2 overflow-hidden rounded-full bg-slate-100">
               <div
-                className="h-full rounded-full bg-[#17565d] transition-all"
+                className="h-full rounded-full bg-[#e77818] transition-all"
                 style={{ width: `${prozent}%` }}
               />
             </div>
@@ -900,7 +902,7 @@ export default function BaustellenDetail() {
                 return (
                   <div
                     key={checkliste.code}
-                    className="group flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-[#17565d] md:flex-row md:items-center"
+                    className="group flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-[#e77818] md:flex-row md:items-center"
                   >
 
                     <div className="flex items-center gap-4">
@@ -911,7 +913,7 @@ export default function BaustellenDetail() {
                             ? "bg-green-100 text-green-700"
                             : bearbeitung
                             ? "bg-[#fff0e4] text-[#a95310]"
-                            : "bg-[#17565d] text-white"
+                            : "bg-[#e77818] text-white"
                         }`}
                       >
                         {fertig ? "✓" : index + 1}
@@ -945,7 +947,7 @@ export default function BaustellenDetail() {
 
                       <a
                         href={linkFuer(checkliste.code)}
-                        className="rounded-xl bg-[#17565d] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#e77818] hover:text-white"
+                        className="rounded-xl bg-[#e77818] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#e77818] hover:text-white"
                       >
                         Öffnen →
                       </a>
@@ -965,7 +967,7 @@ export default function BaustellenDetail() {
             {/* SUVA */}
             <section className="rounded-[22px] border border-slate-200 bg-white p-6 shadow-sm">
 
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                 SUVA 88319.D
               </div>
 
@@ -1045,7 +1047,7 @@ export default function BaustellenDetail() {
 
               <a
                 href={`/baustellen/${id}/suva-audit`}
-                className="mt-6 block w-full rounded-xl bg-[#17565d] px-4 py-3 text-center text-sm font-black text-white hover:bg-[#12464c]"
+                className="mt-6 block w-full rounded-xl bg-[#e77818] px-4 py-3 text-center text-sm font-black text-white hover:bg-[#c96210]"
               >
                 SUVA Audit öffnen
               </a>
@@ -1055,7 +1057,7 @@ export default function BaustellenDetail() {
             {/* NÄCHSTE AUFGABEN */}
             <section className="rounded-[22px] border border-slate-200 bg-white p-6 shadow-sm">
 
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                 HEUTE
               </div>
 

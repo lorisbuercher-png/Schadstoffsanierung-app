@@ -86,7 +86,7 @@ export default function BaustellenMitarbeiter() {
 
       
 
-      <div className="mx-auto max-w-6xl p-6">
+      <div className="bb-workspace max-w-6xl">
 
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
 
@@ -112,7 +112,7 @@ export default function BaustellenMitarbeiter() {
 
               <a
                 href="/mitarbeiter"
-                className="mt-4 inline-block rounded-xl bg-[#17565d] px-5 py-3 font-bold text-black"
+                className="mt-4 inline-block rounded-xl bg-[#e77818] px-5 py-3 font-bold text-white"
               >
                 Mitarbeiter erfassen
               </a>
@@ -131,7 +131,7 @@ export default function BaustellenMitarbeiter() {
                   <label
                     key={m.id}
                     className={`flex cursor-pointer items-center gap-4 p-5 ${
-                      aktiv ? "bg-[#f5f9f9]" : ""
+                      aktiv ? "bg-[#f8f9fa]" : ""
                     }`}
                   >
 
@@ -155,7 +155,7 @@ export default function BaustellenMitarbeiter() {
                     </div>
 
                     {aktiv && (
-                      <span className="rounded-full bg-[#17565d] px-3 py-1 text-xs font-bold text-black">
+                      <span className="rounded-full bg-[#e77818] px-3 py-1 text-xs font-bold text-white">
                         Zugewiesen
                       </span>
                     )}
@@ -173,7 +173,7 @@ export default function BaustellenMitarbeiter() {
             <button
               type="button"
               onClick={speichern}
-              className="rounded-xl bg-[#17565d] px-6 py-3 font-bold text-black hover:bg-[#12464c]"
+              className="rounded-xl bg-[#e77818] px-6 py-3 font-bold text-white hover:bg-[#c96210]"
             >
               Team speichern
             </button>

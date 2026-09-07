@@ -176,7 +176,7 @@ export default function Sanierungsplan() {
 
       
 
-      <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <div className="bb-workspace max-w-7xl space-y-6">
 
         <section className="rounded-2xl border bg-white p-6 shadow-sm">
 
@@ -184,7 +184,7 @@ export default function Sanierungsplan() {
 
             <div>
 
-              <div className="text-sm font-bold text-[#17565d]">
+              <div className="text-sm font-bold text-[#e77818]">
                 1
               </div>
 
@@ -194,7 +194,7 @@ export default function Sanierungsplan() {
 
             </div>
 
-            <span className="rounded-full bg-[#eaf3f3] px-4 py-2 text-sm font-bold text-[#17565d]">
+            <span className="rounded-full bg-[#fff1e4] px-4 py-2 text-sm font-bold text-[#e77818]">
               Version {version}
             </span>
 
@@ -255,7 +255,7 @@ export default function Sanierungsplan() {
 
           <div className="border-b p-6">
 
-            <div className="text-sm font-bold text-[#17565d]">
+            <div className="text-sm font-bold text-[#e77818]">
               2
             </div>
 
@@ -384,7 +384,7 @@ export default function Sanierungsplan() {
           <button
             type="button"
             onClick={speichern}
-            className="rounded-xl bg-[#17565d] px-6 py-3 font-bold text-black hover:bg-[#12464c]"
+            className="rounded-xl bg-[#e77818] px-6 py-3 font-bold text-white hover:bg-[#c96210]"
           >
             Sanierungsplan speichern
           </button>
@@ -422,7 +422,7 @@ function Feld({
         value={value}
         disabled={disabled}
         onChange={(e) => onChange?.(e.target.value)}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#17565d] disabled:bg-slate-100"
+        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#e77818] disabled:bg-slate-100"
       />
 
     </div>

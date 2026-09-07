@@ -504,14 +504,14 @@ export default function SuvaAuditPage() {
 
       
 
-      <div className="mx-auto max-w-[1400px] space-y-5 p-6">
+      <div className="bb-workspace max-w-[1400px] space-y-5">
 
         <section className="rounded-[20px] border border-slate-200 bg-white p-6 text-slate-900">
 
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
 
             <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                 AUDIT-BEREITSCHAFT
               </div>
 
@@ -580,7 +580,7 @@ export default function SuvaAuditPage() {
         {prio1NichtErfuellt > 0 && (
           <section className="rounded-[22px] border-2 border-red-500 bg-red-600 p-5 text-white">
 
-            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-red-100">
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-red-100">
               SUVA PRIO 1
             </div>
 
@@ -600,7 +600,7 @@ export default function SuvaAuditPage() {
         {prio1NichtErfuellt === 0 && prio1Offen > 0 && (
           <section className="rounded-[22px] border border-[#efc39f] bg-[#fff8f1] p-5">
 
-            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#a95310]">
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-[#a95310]">
               SUVA PRIO 1
             </div>
 
@@ -619,7 +619,7 @@ export default function SuvaAuditPage() {
         {arbeitsbereit && (
           <section className="rounded-[22px] border border-green-200 bg-green-50 p-5">
 
-            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-green-700">
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-green-700">
               SUVA PRIO 1
             </div>
 
@@ -655,7 +655,7 @@ export default function SuvaAuditPage() {
 
             <div className="px-2 pb-4">
 
-              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                 KONTROLLBEREICHE
               </div>
 
@@ -690,7 +690,7 @@ export default function SuvaAuditPage() {
                       {bereich}
                     </span>
 
-                    <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black">
+                    <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-black">
                       {status.fertig}/{status.total}
                     </span>
 
@@ -724,7 +724,7 @@ export default function SuvaAuditPage() {
 
                   <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
 
-                    <div className="text-[10px] font-black uppercase tracking-[0.16em] text-[#b77a13]">
+                    <div className="text-xs font-black uppercase tracking-[0.16em] text-[#b77a13]">
                       SUVA
                     </div>
 
@@ -774,7 +774,7 @@ export default function SuvaAuditPage() {
                                     ? "bg-green-600 text-white"
                                     : antwort.status === "nicht-erfuellt"
                                     ? "bg-red-600 text-white"
-                                    : "bg-[#17565d] text-white"
+                                    : "bg-[#e77818] text-white"
                                 }`}
                               >
                                 {antwort.status === "erfuellt"
@@ -786,18 +786,18 @@ export default function SuvaAuditPage() {
 
                                 <div className="flex flex-wrap items-center gap-2">
 
-                                  <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+                                  <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">
                                     Kontrollpunkt {punkt.nr}
                                   </div>
 
                                   {istPrio1 && (
-                                    <span className="rounded-full bg-red-600 px-2 py-1 text-[9px] font-black tracking-wide text-white">
+                                    <span className="rounded-full bg-red-600 px-2 py-1 text-xs font-black tracking-wide text-white">
                                       PRIO 1
                                     </span>
                                   )}
 
                                   {nachkontrolleErforderlich && (
-                                    <span className="rounded-full bg-[#17565d] px-2 py-1 text-[9px] font-black tracking-wide text-black">
+                                    <span className="rounded-full bg-[#e77818] px-2 py-1 text-xs font-black tracking-wide text-white">
                                       NACHKONTROLLE
                                     </span>
                                   )}
@@ -880,7 +880,7 @@ export default function SuvaAuditPage() {
                             antwort.notiz) && (
                             <div className="mt-4 pl-0 xl:pl-[60px]">
 
-                              <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
+                              <label className="mb-2 block text-xs font-black uppercase tracking-[0.12em] text-slate-500">
                                 Feststellung / Massnahme / Notiz
                               </label>
 
@@ -902,7 +902,7 @@ export default function SuvaAuditPage() {
                                   antwort.status ===
                                   "nicht-erfuellt"
                                     ? "border-red-200 bg-white focus:border-red-400"
-                                    : "border-slate-200 bg-slate-50 focus:border-[#17565d]"
+                                    : "border-slate-200 bg-slate-50 focus:border-[#e77818]"
                                 }`}
                               />
 
@@ -961,7 +961,7 @@ export default function SuvaAuditPage() {
             <button
               type="button"
               onClick={speichern}
-              className="rounded-xl bg-[#17565d] px-6 py-4 text-sm font-black text-black hover:bg-[#12464c]"
+              className="rounded-xl bg-[#e77818] px-6 py-4 text-sm font-black text-white hover:bg-[#c96210]"
             >
               Audit speichern
             </button>

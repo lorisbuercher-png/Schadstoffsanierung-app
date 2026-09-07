@@ -738,7 +738,7 @@ export default function ChecklistenSeite() {
         </a>
 
         <div className="mx-auto mt-8 max-w-3xl rounded-2xl border bg-white p-8">
-          <div className="font-bold text-[#17565d]">{code}</div>
+          <div className="font-bold text-[#e77818]">{code}</div>
           <h1 className="mt-1 text-2xl font-bold">{checkliste.name}</h1>
           <p className="mt-4 text-slate-500">
             Diese Original-Checkliste bauen wir als Nächstes ein.
@@ -758,10 +758,10 @@ export default function ChecklistenSeite() {
 
       
 
-      <div className="mx-auto max-w-6xl space-y-6 p-6">
+      <div className="bb-workspace max-w-6xl space-y-6">
 
         <div className="hidden print:block">
-          <div className="mb-6 border-b-4 border-[#17565d] pb-4">
+          <div className="mb-6 border-b-4 border-[#e77818] pb-4">
             <div className="flex items-end justify-between">
               <div>
                 <div className="text-3xl font-black tracking-tight">
@@ -816,7 +816,7 @@ export default function ChecklistenSeite() {
         {(code === "AS5" || code === "AS7") && (
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
-              <div className="text-[10px] font-black uppercase tracking-[0.14em] text-[#17565d]">
+              <div className="text-xs font-black uppercase tracking-[0.14em] text-[#e77818]">
                 Instruktion
               </div>
               <h2 className="mt-1 text-lg font-bold">
@@ -890,7 +890,7 @@ export default function ChecklistenSeite() {
 
                         <div className="flex gap-3">
 
-                          <span className="font-bold text-[#17565d]">
+                          <span className="font-bold text-[#e77818]">
                             {frageId}
                           </span>
 
@@ -911,7 +911,7 @@ export default function ChecklistenSeite() {
                             )
                           }
                           placeholder="Bemerkung..."
-                          className="mt-4 w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:border-[#17565d]"
+                          className="mt-4 w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:border-[#e77818]"
                         />
 
                       </div>
@@ -932,7 +932,7 @@ export default function ChecklistenSeite() {
                             }
                             className={`rounded-xl border px-3 py-3 text-sm font-semibold ${
                               wert.antwort === option
-                                ? "border-[#17565d] bg-[#17565d] text-white"
+                                ? "border-[#e77818] bg-[#e77818] text-white"
                                 : "border-slate-300 bg-white hover:bg-slate-50"
                             }`}
                           >
@@ -1056,7 +1056,7 @@ export default function ChecklistenSeite() {
             <button
               type="button"
               onClick={() => speichern(true)}
-              className="rounded-xl bg-[#17565d] px-6 py-3 font-semibold text-white"
+              className="rounded-xl bg-[#e77818] px-6 py-3 font-semibold text-white"
             >
               {code} abschliessen
             </button>
@@ -1093,7 +1093,7 @@ function Feld({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#17565d]"
+        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#e77818]"
       />
 
     </div>

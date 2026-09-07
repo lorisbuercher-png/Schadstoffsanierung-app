@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #18212b;
+  --background: #f4f5f7;
+  --foreground: #181b20;
   color-scheme: light;
 }
 
@@ -28,6 +28,11 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+}
+
+::selection {
+  background: rgba(231, 120, 24, 0.2);
+  color: #181b20;
 }
 
 button,
