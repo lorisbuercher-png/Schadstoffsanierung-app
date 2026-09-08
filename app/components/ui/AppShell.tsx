@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import useActiveSite from "./useActiveSite";
 
 export type AppRole = "admin" | "vorarbeiter";
 
@@ -43,6 +44,8 @@ function Icon({ name }: { name: IconName }) {
 
 export default function AppShell({ children, title, subtitle, backHref, backLabel = "Zurück", action, role: controlledRole, onRoleChange, suvaBadge = 0, maengelBadge = 0 }: AppShellProps) {
   const pathname = usePathname();
+  const { selectedId } = useActiveSite();
+  const siteHref = selectedId ? `/baustellen/${encodeURIComponent(selectedId)}` : "";
   const [menuOffen, setMenuOffen] = useState(false);
   const [localRole, setLocalRole] = useState<AppRole>("admin");
   const role = controlledRole ?? localRole;
@@ -73,7 +76,7 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
   ];
   const foremanNavigation: NavItem[] = [
     { href: "/", icon: "home", label: "Heute" },
-    { href: "/mitarbeiter", icon: "team", label: "Team" },
+    { href: siteHref ? `${siteHref}/mitarbeiter` : "/", icon: "team", label: "Team" },
     { href: "/baustellen", icon: "site", label: "Baustelle" },
     { href: "/kalender", icon: "clock", label: "Planung" },
   ];
@@ -82,7 +85,8 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
   function istAktiv(href: string) {
     if (href.includes("#")) return false;
     if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
+    if (href === "/baustellen" && siteHref && pathname.startsWith(`${siteHref}/mitarbeiter`)) return false;
+    return pathname === href || pathname.startsWith(`${href}/`);
   }
 
   return (
@@ -92,7 +96,7 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
         <Link href="/" className="bb-brand bb-brand-logo" aria-label="B&B Schadstoffsanierung – Übersicht"><Image src="/bb-logo.png" alt="B&B Schadstoffsanierung" width={546} height={300} priority /></Link>
         <div className="bb-sidebar-role"><span>{role === "admin" ? "Geschäftsleitung" : "Baustellenmodus"}</span><strong>{role === "admin" ? "Admin-Cockpit" : "Vorarbeiter"}</strong></div>
         <nav className="bb-nav" aria-label="Hauptnavigation">
-          {navigation.map((eintrag) => <Link key={eintrag.label} href={eintrag.href} onClick={() => setMenuOffen(false)} className={`${istAktiv(eintrag.href) ? "active" : ""} ${eintrag.priority ? "priority" : ""}`}><Icon name={eintrag.icon} /><span className="bb-nav-label">{eintrag.label}</span>{!!eintrag.badge && <b className="bb-nav-badge">{eintrag.badge}</b>}</Link>)}
+          {navigation.filter((item) => role !== "vorarbeiter" || item.label !== "Team" || siteHref).map((eintrag) => <Link key={eintrag.label} href={eintrag.href} onClick={() => setMenuOffen(false)} className={`${istAktiv(eintrag.href) ? "active" : ""} ${eintrag.priority ? "priority" : ""}`}><Icon name={eintrag.icon} /><span className="bb-nav-label">{eintrag.label}</span>{!!eintrag.badge && <b className="bb-nav-badge">{eintrag.badge}</b>}</Link>)}
         </nav>
         <div className="bb-sidebar-footer"><Icon name="shield" /><span>Sicherheit hat Priorität</span></div>
       </aside>
@@ -113,7 +117,7 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
           {(title || backHref || action) && <section className="bb-page-header"><div>{backHref && <Link href={backHref} className="bb-back-link">← {backLabel}</Link>}{title && <h1>{title}</h1>}{subtitle && <p>{subtitle}</p>}</div>{action && <div className="bb-page-header-action">{action}</div>}</section>}
           {children}
         </div>
-        {role === "vorarbeiter" && <nav className="bb-bottom-nav" aria-label="Mobile Navigation">{foremanNavigation.map((item) => <Link key={item.label} href={item.href} className={istAktiv(item.href) ? "active" : ""}><Icon name={item.icon} /><span>{item.label}</span></Link>)}</nav>}
+        {role === "vorarbeiter" && <nav className="bb-bottom-nav" aria-label="Mobile Navigation">{foremanNavigation.filter((item) => item.label !== "Team" || siteHref).map((item) => <Link key={item.label} href={item.href} className={istAktiv(item.href) ? "active" : ""}><Icon name={item.icon} /><span>{item.label}</span></Link>)}</nav>}
       </main>
     </div>
   );
