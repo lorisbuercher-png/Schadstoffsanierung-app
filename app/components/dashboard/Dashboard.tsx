@@ -141,7 +141,7 @@ function AdminDashboard({ sites, mitarbeiter, zahlen }: { sites: SiteStatus[]; m
     </header>
 
     <section className="admin-kpis" aria-label="Wichtige Kennzahlen">
-      <Kpi iconName="shield" label="SUVA · Prio 1" value={zahlen.suvaKritisch || zahlen.suvaOffen} note={zahlen.suvaKritisch ? `${zahlen.suvaKritisch} nicht erfüllt` : `${zahlen.suvaOffen} zu prüfen`} tone="danger" href="#admin-suva" />
+      <Kpi iconName="shield" label="SUVA-Checkliste" value={zahlen.suvaKritisch || zahlen.suvaOffen} note={zahlen.suvaKritisch ? `${zahlen.suvaKritisch} nicht erfüllt` : `${zahlen.suvaOffen} zu prüfen`} tone="danger" href="#admin-suva" />
       <Kpi iconName="alert" label="Offene Mängel" value={zahlen.maengelOffen} note={`${zahlen.maengelKritisch} Prio 1`} tone="warning" href="#admin-maengel" />
       <Kpi iconName="site" label="Aktive Baustellen" value={sites.length} note={`${zahlen.personen} Personen in Zone`} href="/baustellen" />
       <Kpi iconName="clock" label="Tagesfreigaben" value={zahlen.tageschecks} note="heute noch offen" href="#baustellenstatus" />
