@@ -96,7 +96,9 @@ const LEER: Record<CheckKey, boolean> = {
 };
 
 function heuteKey() {
-  return new Date().toISOString().slice(0, 10);
+  const heute = new Date();
+  const offset = heute.getTimezoneOffset();
+  return new Date(heute.getTime() - offset * 60_000).toISOString().slice(0, 10);
 }
 
 export default function TagescheckPage() {
@@ -363,6 +365,24 @@ export default function TagescheckPage() {
                 ? "✓ Tagescheck gespeichert"
                 : "Tagescheck speichern"}
             </button>
+
+            {gespeichert && arbeitsbereit && (
+              <a
+                href={`/baustellen/${id}/zonenzutritt`}
+                className="bb-secondary-button bb-button-link mt-3 w-full justify-center"
+              >
+                Weiter zum Zonenzutritt →
+              </a>
+            )}
+
+            {gespeichert && !arbeitsbereit && (
+              <a
+                href={`/baustellen/${id}/maengel`}
+                className="mt-3 block text-center text-sm font-black text-red-700"
+              >
+                Abweichung als Mangel erfassen →
+              </a>
+            )}
           </section>
 
           <section className="bb-daily-hint">
