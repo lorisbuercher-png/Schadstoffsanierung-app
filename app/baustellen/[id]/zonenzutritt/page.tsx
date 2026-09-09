@@ -35,8 +35,8 @@ const demoMitarbeiter: Mitarbeiter[] = [
 ];
 
 export default function ZonenzutrittPage() {
-  const params = useParams();
-  const id = params.id as string;
+  const params = useParams<{ id: string }>();
+  const id = params.id;
 
   const [mitarbeiter, setMitarbeiter] =
     useState<Mitarbeiter[]>(demoMitarbeiter);
@@ -47,7 +47,7 @@ export default function ZonenzutrittPage() {
   const [nachtragTyp, setNachtragTyp] =
     useState<"eintritt" | "austritt">("eintritt");
 
-  const heute = new Date().toISOString().slice(0, 10);
+  const heute = heuteKey();
 
   const storageKey = `zonenzutritt-${id}-${heute}`;
 
@@ -420,7 +420,27 @@ export default function ZonenzutrittPage() {
           </div>
         </section>
 
+        <div className="sticky bottom-4 z-20 rounded-[20px] border border-slate-200 bg-white/95 p-4 shadow-xl backdrop-blur">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-sm font-black text-slate-900">Zutritte sind automatisch gespeichert</div>
+              <div className="mt-0.5 text-xs text-slate-500">
+                {aktuelleZone.length} {aktuelleZone.length === 1 ? "Person ist" : "Personen sind"} aktuell in der Zone.
+              </div>
+            </div>
+            <a href={`/baustellen/${id}/journal`} className="bb-primary-button bb-button-link justify-center">
+              Weiter zum Journal →
+            </a>
+          </div>
+        </div>
+
       </div>
     </AppShell>
   );
+}
+
+function heuteKey() {
+  const heute = new Date();
+  const offset = heute.getTimezoneOffset();
+  return new Date(heute.getTime() - offset * 60_000).toISOString().slice(0, 10);
 }
