@@ -413,12 +413,25 @@ export default function Journal() {
               {meldung || "Du kannst jederzeit als Entwurf speichern."}
             </div>
             <div className="flex gap-3">
-              <button type="button" onClick={() => datenSpeichern(false)} className="bb-secondary-button">
-                Entwurf speichern
-              </button>
-              <button type="button" onClick={tagAbschliessen} className="bb-primary-button">
-                Tag abschliessen
-              </button>
+              {abgeschlossen ? (
+                <>
+                  <button type="button" onClick={() => datenSpeichern(true)} className="bb-secondary-button">
+                    Änderungen speichern
+                  </button>
+                  <a href={`/baustellen/${id}`} className="bb-primary-button bb-button-link justify-center">
+                    Zur Tagesübersicht →
+                  </a>
+                </>
+              ) : (
+                <>
+                  <button type="button" onClick={() => datenSpeichern(false)} className="bb-secondary-button">
+                    Entwurf speichern
+                  </button>
+                  <button type="button" onClick={tagAbschliessen} className="bb-primary-button">
+                    Tag abschliessen
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
