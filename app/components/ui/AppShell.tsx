@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import AuthUserMenu from "./AuthUserMenu";
 
 export type AppRole = "admin" | "vorarbeiter";
 
@@ -105,7 +106,7 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
           <div className="bb-topbar-actions">
             <div className="bb-role-switch" aria-label="Ansicht wechseln"><button type="button" className={role === "admin" ? "active" : ""} onClick={() => rolleWaehlen("admin")}>Admin</button><button type="button" className={role === "vorarbeiter" ? "active" : ""} onClick={() => rolleWaehlen("vorarbeiter")}>Vorarbeiter</button></div>
             <button className="bb-icon-button" type="button" aria-label="Benachrichtigungen"><span aria-hidden="true">⌁</span>{(suvaBadge + maengelBadge) > 0 && <span className="bb-notification-dot">{Math.min(9, suvaBadge + maengelBadge)}</span>}</button>
-            <div className="bb-user-avatar">LB</div>
+            <AuthUserMenu />
           </div>
         </header>
 
