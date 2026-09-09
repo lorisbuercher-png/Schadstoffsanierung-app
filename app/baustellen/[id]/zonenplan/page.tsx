@@ -1,9 +1,9 @@
 "use client";
 
-import AppShell from "../../../components/ui/AppShell";
-
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import AppShell from "../../../components/ui/AppShell";
 
 type Baustelle = {
   id: string;
@@ -11,1009 +11,254 @@ type Baustelle = {
   projektname: string;
 };
 
-type ElementTyp =
-  | "Zone"
-  | "Personenschleuse"
-  | "Materialschleuse"
-  | "UHG"
-  | "Zuluft";
-
-type PlanElement = {
-  id: string;
-  typ: ElementTyp;
-  name: string;
-  x: number;
-  y: number;
-  breite: number;
-  hoehe: number;
-  info: string;
-};
-
-type Luftzone = {
+type ZonenplanDatei = {
   id: string;
   name: string;
-  laenge: string;
-  breite: string;
-  hoehe: string;
-  luftwechsel: string;
-  personenschleuse: string;
-  materialschleuse: string;
-  klappenLeistung: string;
-  klappenAnzahl: string;
-  leckageFaktor: string;
-  uhg1000: string;
-  uhg2000: string;
-  uhg5000: string;
-  uhg10000: string;
+  type: "image/png" | "application/pdf";
+  size: number;
+  dataUrl: string;
+  hochgeladenAm: string;
 };
 
+type Dokument = {
+  id: string;
+  name: string;
+  ordnerId: string;
+  datum: string;
+  groesse?: string;
+  typ?: string;
+};
+
+const MAX_DATEIGROESSE = 4 * 1024 * 1024;
 
 export default function Zonenplan() {
-  const params = useParams();
-  const id = params.id as string;
+  const params = useParams<{ id: string }>();
+  const id = params.id;
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [baustelle, setBaustelle] = useState<Baustelle | null>(null);
-  const [luftzonen, setLuftzonen] = useState<Luftzone[]>([]);
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-
-  const [grundriss, setGrundriss] = useState("");
-  const [grundrissName, setGrundrissName] = useState("");
-  const [grundrissTyp, setGrundrissTyp] = useState("");
-
-  const [elemente, setElemente] = useState<PlanElement[]>([
-    {
-      id: crypto.randomUUID(),
-      typ: "Zone",
-      name: "Sanierungszone 1",
-      x: 120,
-      y: 80,
-      breite: 400,
-      hoehe: 280,
-      info: "",
-    },
-    {
-      id: crypto.randomUUID(),
-      typ: "Personenschleuse",
-      name: "Personenschleuse",
-      x: 20,
-      y: 220,
-      breite: 100,
-      hoehe: 80,
-      info: "4 Kammern",
-    },
-    {
-      id: crypto.randomUUID(),
-      typ: "UHG",
-      name: "UHG 1",
-      x: 520,
-      y: 120,
-      breite: 80,
-      hoehe: 60,
-      info: "Abluft ins Freie",
-    },
-    {
-      id: crypto.randomUUID(),
-      typ: "Zuluft",
-      name: "Zuluft 1",
-      x: 200,
-      y: 350,
-      breite: 70,
-      hoehe: 40,
-      info: "",
-    },
-  ]);
+  const [plan, setPlan] = useState<ZonenplanDatei | null>(null);
+  const [status, setStatus] = useState<"leer" | "speichert" | "gespeichert">("leer");
+  const [fehler, setFehler] = useState("");
 
   useEffect(() => {
-    const alle = JSON.parse(
-      localStorage.getItem("baustellen") || "[]"
-    );
+    const alle = JSON.parse(localStorage.getItem("baustellen") || "[]") as Baustelle[];
+    setBaustelle(alle.find((eintrag) => eintrag.id === id) || null);
 
-    const gefunden = alle.find(
-      (b: Baustelle) => b.id === id
-    );
+    try {
+      const gespeichert = JSON.parse(localStorage.getItem(`zonenplan-${id}`) || "null");
 
-    setBaustelle(gefunden || null);
-
-    const sanierungsplan = JSON.parse(
-      localStorage.getItem(`sanierungsplan-${id}`) || "{}"
-    );
-
-    if (sanierungsplan.luftzonen?.length) {
-      setLuftzonen(sanierungsplan.luftzonen);
-    }
-
-    const gespeichert = JSON.parse(
-      localStorage.getItem(`zonenplan-${id}`) || "{}"
-    );
-
-    if (gespeichert.elemente?.length) {
-      setElemente(gespeichert.elemente);
-    }
-
-    if (gespeichert.grundriss) {
-      setGrundriss(gespeichert.grundriss);
-    }
-
-    if (gespeichert.grundrissName) {
-      setGrundrissName(gespeichert.grundrissName);
-    }
-
-    if (gespeichert.grundrissTyp) {
-      setGrundrissTyp(gespeichert.grundrissTyp);
+      if (gespeichert?.datei) {
+        setPlan(gespeichert.datei);
+        setStatus("gespeichert");
+      }
+    } catch {
+      setFehler("Der gespeicherte Zonenplan konnte nicht geladen werden.");
     }
   }, [id]);
 
-  function hinzufuegen(typ: ElementTyp) {
-    const defaults: Record<
-      ElementTyp,
-      Pick<PlanElement, "breite" | "hoehe">
-    > = {
-      Zone: { breite: 300, hoehe: 200 },
-      Personenschleuse: { breite: 100, hoehe: 80 },
-      Materialschleuse: { breite: 110, hoehe: 80 },
-      UHG: { breite: 80, hoehe: 60 },
-      Zuluft: { breite: 70, hoehe: 40 },
+  function dokumentEintragen(datei: ZonenplanDatei) {
+    const key = `dokumente-${id}`;
+    let dokumente: Dokument[] = [];
+
+    try {
+      const gespeichert = JSON.parse(localStorage.getItem(key) || "[]");
+      dokumente = Array.isArray(gespeichert) ? gespeichert : [];
+    } catch {}
+
+    const ohneAltenPlan = dokumente.filter(
+      (dokument) => dokument.ordnerId !== "zonenplan"
+    );
+
+    const dokument: Dokument = {
+      id: datei.id,
+      name: datei.name,
+      ordnerId: "zonenplan",
+      datum: new Date(datei.hochgeladenAm).toLocaleDateString("de-CH"),
+      groesse: groesseFormatieren(datei.size),
+      typ: datei.type,
     };
 
-    setElemente((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        typ,
-        name: `${typ} ${prev.filter((e) => e.typ === typ).length + 1}`,
-        x: 50 + prev.length * 20,
-        y: 50 + prev.length * 20,
-        breite: defaults[typ].breite,
-        hoehe: defaults[typ].hoehe,
-        info: "",
-      },
-    ]);
+    localStorage.setItem(key, JSON.stringify([dokument, ...ohneAltenPlan]));
   }
 
-  function update(
-    elementId: string,
-    feld: keyof PlanElement,
-    value: string | number
-  ) {
-    setElemente((prev) =>
-      prev.map((element) =>
-        element.id === elementId
-          ? { ...element, [feld]: value }
-          : element
-      )
+  function dateiSpeichern(datei: ZonenplanDatei) {
+    setStatus("speichert");
+    localStorage.setItem(
+      `zonenplan-${id}`,
+      JSON.stringify({ datei, aktualisiertAm: new Date().toISOString() })
     );
+    dokumentEintragen(datei);
+    setPlan(datei);
+    setStatus("gespeichert");
   }
 
-  function entfernen(elementId: string) {
-    setElemente((prev) =>
-      prev.filter((element) => element.id !== elementId)
-    );
-  }
+  function dateiAuswaehlen(event: React.ChangeEvent<HTMLInputElement>) {
+    const datei = event.target.files?.[0];
+    event.target.value = "";
+    setFehler("");
 
-  function zahl(value: string) {
-    const n = Number(String(value).replace(",", "."));
-    return Number.isFinite(n) ? n : 0;
-  }
+    if (!datei) return;
 
-  function berechnung(zone: Luftzone) {
-    const volumen =
-      zahl(zone.laenge) *
-      zahl(zone.breite) *
-      zahl(zone.hoehe);
-
-    const soll =
-      volumen * zahl(zone.luftwechsel);
-
-    const uhgNenn =
-      zahl(zone.uhg1000) * 1000 +
-      zahl(zone.uhg2000) * 2000 +
-      zahl(zone.uhg5000) * 5000 +
-      zahl(zone.uhg10000) * 10000;
-
-    const uhgReal = uhgNenn * 0.75;
-
-    const zuluft =
-      zahl(zone.personenschleuse) +
-      zahl(zone.materialschleuse) +
-      zahl(zone.klappenLeistung) *
-        zahl(zone.klappenAnzahl);
-
-    return {
-      volumen,
-      soll,
-      uhgReal,
-      zuluft,
-    };
-  }
-
-  function ausLuftbilanzUebernehmen() {
-    if (!luftzonen.length) {
-      alert("Im Sanierungsplan sind noch keine Luftzonen erfasst.");
+    if (datei.type !== "image/png" && datei.type !== "application/pdf") {
+      setFehler("Bitte den fertigen Zonenplan als PNG oder PDF auswählen.");
       return;
     }
 
-    const neueElemente: PlanElement[] = [];
-
-    luftzonen.forEach((zone, index) => {
-      const b = berechnung(zone);
-
-      const x = 120 + (index % 2) * 380;
-      const y = 80 + Math.floor(index / 2) * 280;
-
-      neueElemente.push({
-        id: crypto.randomUUID(),
-        typ: "Zone",
-        name: zone.name || `Zone ${index + 1}`,
-        x,
-        y,
-        breite: 300,
-        hoehe: 200,
-        info:
-          `${b.volumen.toFixed(1)} m³ · Soll ${b.soll.toFixed(0)} m³/h`,
-      });
-
-      neueElemente.push({
-        id: crypto.randomUUID(),
-        typ: "Personenschleuse",
-        name: `Personenschleuse ${index + 1}`,
-        x: x - 100,
-        y: y + 90,
-        breite: 100,
-        hoehe: 70,
-        info: `${zone.personenschleuse || "0"} m³/h`,
-      });
-
-      neueElemente.push({
-        id: crypto.randomUUID(),
-        typ: "UHG",
-        name: `UHG ${index + 1}`,
-        x: x + 300,
-        y: y + 30,
-        breite: 80,
-        hoehe: 60,
-        info: `${b.uhgReal.toFixed(0)} m³/h real`,
-      });
-
-      neueElemente.push({
-        id: crypto.randomUUID(),
-        typ: "Zuluft",
-        name: `Zuluft ${index + 1}`,
-        x: x + 100,
-        y: y + 200,
-        breite: 80,
-        hoehe: 40,
-        info: `${b.zuluft.toFixed(0)} m³/h`,
-      });
-    });
-
-    setElemente(neueElemente);
-  }
-
-  function svgPosition(
-    event: React.PointerEvent<SVGSVGElement>
-  ) {
-    const svg = event.currentTarget;
-    const rect = svg.getBoundingClientRect();
-
-    return {
-      x: ((event.clientX - rect.left) / rect.width) * 900,
-      y: ((event.clientY - rect.top) / rect.height) * 650,
-    };
-  }
-
-  function dragStart(
-    event: React.PointerEvent<SVGGElement>,
-    element: PlanElement
-  ) {
-    event.stopPropagation();
-
-    const svg = event.currentTarget.ownerSVGElement;
-    if (!svg) return;
-
-    const rect = svg.getBoundingClientRect();
-
-    const x =
-      ((event.clientX - rect.left) / rect.width) * 900;
-
-    const y =
-      ((event.clientY - rect.top) / rect.height) * 650;
-
-    setDragId(element.id);
-
-    setDragOffset({
-      x: x - element.x,
-      y: y - element.y,
-    });
-
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }
-
-  function dragMove(
-    event: React.PointerEvent<SVGSVGElement>
-  ) {
-    if (!dragId) return;
-
-    const pos = svgPosition(event);
-
-    setElemente((prev) =>
-      prev.map((element) => {
-        if (element.id !== dragId) return element;
-
-        const newX = Math.max(
-          0,
-          Math.min(
-            900 - element.breite,
-            pos.x - dragOffset.x
-          )
-        );
-
-        const newY = Math.max(
-          0,
-          Math.min(
-            650 - element.hoehe,
-            pos.y - dragOffset.y
-          )
-        );
-
-        return {
-          ...element,
-          x: Math.round(newX),
-          y: Math.round(newY),
-        };
-      })
-    );
-  }
-
-  function dragEnd() {
-    setDragId(null);
-  }
-
-  function grundrissHochladen(
-    event: React.ChangeEvent<HTMLInputElement>
-  ) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const erlaubt =
-      file.type.startsWith("image/") ||
-      file.type === "application/pdf";
-
-    if (!erlaubt) {
-      alert("Bitte JPG, PNG, WEBP oder PDF verwenden.");
+    if (datei.size > MAX_DATEIGROESSE) {
+      setFehler("Die Datei ist grösser als 4 MB. Bitte den Plan zuerst verkleinern.");
       return;
     }
 
     const reader = new FileReader();
-
+    reader.onerror = () => setFehler("Die Datei konnte nicht gelesen werden.");
     reader.onload = () => {
-      setGrundriss(reader.result as string);
-      setGrundrissName(file.name);
-      setGrundrissTyp(file.type);
+      dateiSpeichern({
+        id: crypto.randomUUID(),
+        name: datei.name,
+        type: datei.type as ZonenplanDatei["type"],
+        size: datei.size,
+        dataUrl: reader.result as string,
+        hochgeladenAm: new Date().toISOString(),
+      });
     };
-
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(datei);
   }
 
-  function grundrissEntfernen() {
-    setGrundriss("");
-    setGrundrissName("");
-    setGrundrissTyp("");
-  }
+  function planEntfernen() {
+    if (!confirm("Soll der Zonenplan wirklich entfernt werden?")) return;
 
-  function speichern() {
-    localStorage.setItem(
-      `zonenplan-${id}`,
-      JSON.stringify({
-        elemente,
-        grundriss,
-        grundrissName,
-        grundrissTyp,
-      })
-    );
+    localStorage.removeItem(`zonenplan-${id}`);
 
-    alert("Zonenplan gespeichert.");
-  }
+    const dokumentKey = `dokumente-${id}`;
+    try {
+      const dokumente = JSON.parse(localStorage.getItem(dokumentKey) || "[]") as Dokument[];
+      localStorage.setItem(
+        dokumentKey,
+        JSON.stringify(dokumente.filter((dokument) => dokument.ordnerId !== "zonenplan"))
+      );
+    } catch {}
 
-  function farben(typ: ElementTyp) {
-    switch (typ) {
-      case "Zone":
-        return {
-          fill: "#fef3c7",
-          stroke: "#eab308",
-        };
-
-      case "Personenschleuse":
-        return {
-          fill: "#dbeafe",
-          stroke: "#2563eb",
-        };
-
-      case "Materialschleuse":
-        return {
-          fill: "#e0e7ff",
-          stroke: "#4f46e5",
-        };
-
-      case "UHG":
-        return {
-          fill: "#dcfce7",
-          stroke: "#16a34a",
-        };
-
-      case "Zuluft":
-        return {
-          fill: "#fce7f3",
-          stroke: "#db2777",
-        };
-    }
+    setPlan(null);
+    setStatus("leer");
   }
 
   if (!baustelle) {
     return (
-      <main className="min-h-screen bg-slate-50 p-10">
-        Baustelle wird geladen...
-      </main>
+      <AppShell title="Zonenplan" backHref={`/baustellen/${id}`} backLabel="Zur Baustelle">
+        <section className="bb-card p-8 text-sm font-semibold text-slate-600">
+          Baustelle wird geladen …
+        </section>
+      </AppShell>
     );
   }
 
   return (
     <AppShell
-      title="Zonenplan & Luftbilanz"
-      subtitle="Sanierungszone, Schleusen und Luftführung planen."
+      title="Zonenplan"
+      subtitle="Fertigen Plan als PDF oder PNG in der Baustelle ablegen."
       backHref={`/baustellen/${id}`}
       backLabel="Zur Baustelle"
     >
-
-      
-
-      <div className="bb-workspace max-w-[1600px]">
-
-        <div className="grid gap-6 xl:grid-cols-[520px_1fr]">
-
-          <div className="space-y-5">
-
-            <section className="rounded-2xl border bg-white p-5 shadow-sm">
-
-              <h2 className="font-bold">
-                Grundriss
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                JPG, PNG, WEBP oder PDF als Hintergrund verwenden
-              </p>
-
-              <div className="mt-4 flex flex-wrap gap-3">
-
-                <label className="cursor-pointer rounded-xl bg-[#e77818] px-4 py-2 text-sm font-bold text-white">
-                  + Grundriss wählen
-
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,application/pdf"
-                    onChange={grundrissHochladen}
-                    className="hidden"
-                  />
-                </label>
-
-                {grundriss && (
-                  <button
-                    type="button"
-                    onClick={grundrissEntfernen}
-                    className="rounded-xl border px-4 py-2 text-sm font-semibold text-red-600"
-                  >
-                    Entfernen
-                  </button>
-                )}
-
+      <div className="bb-workspace max-w-6xl space-y-5">
+        <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+          <div className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#d46c12]">
+                Baustellenordner · Zonenplan
               </div>
-
-              {grundrissName && (
-                <div className="mt-3 text-sm text-slate-500">
-                  {grundrissName}
-                </div>
-              )}
-
-            </section>
-
-            <section className="rounded-2xl border bg-white p-5 shadow-sm">
-
-              <h2 className="font-bold">
-                Elemente hinzufügen
+              <h2 className="mt-2 text-2xl font-black text-slate-900">
+                {baustelle.nummer} · {baustelle.projektname}
               </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Den Zonenplan weiterhin von Hand erstellen und hier nur die fertige Datei hochladen.
+                Die Ablage im Baustellenordner erfolgt automatisch.
+              </p>
+            </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
+            <div className={`rounded-2xl px-5 py-3 text-sm font-bold ${
+              plan ? "bg-green-50 text-green-700" : "bg-[#fff3e8] text-[#a95310]"
+            }`}>
+              {status === "speichert" ? "Wird gespeichert …" : plan ? "✓ Plan abgelegt" : "Plan fehlt"}
+            </div>
+          </div>
+        </section>
 
+        {!plan ? (
+          <section className="rounded-[24px] border-2 border-dashed border-[#edbf98] bg-[#fffaf5] p-8 text-center sm:p-12">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#ffe8d3] text-3xl text-[#d46c12]">
+              ⇧
+            </div>
+            <h2 className="mt-5 text-xl font-black text-slate-900">Zonenplan hochladen</h2>
+            <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
+              Akzeptiert werden PDF und PNG bis maximal 4 MB. Nach der Auswahl wird der Plan direkt gespeichert.
+            </p>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="bb-primary-button mt-6"
+            >
+              PDF oder PNG auswählen
+            </button>
+          </section>
+        ) : (
+          <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+            <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="font-black text-slate-900">{plan.name}</div>
+                <div className="mt-1 text-sm text-slate-500">
+                  {groesseFormatieren(plan.size)} · Hochgeladen am {new Date(plan.hochgeladenAm).toLocaleString("de-CH")}
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => inputRef.current?.click()} className="bb-secondary-button">
+                  Plan ersetzen
+                </button>
                 <button
                   type="button"
-                  onClick={ausLuftbilanzUebernehmen}
-                  className="rounded-xl bg-[#e77818] px-4 py-2 text-sm font-bold text-white"
+                  onClick={planEntfernen}
+                  className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50"
                 >
-                  Aus Luftbilanz übernehmen
+                  Entfernen
                 </button>
-
-                {[
-                  "Zone",
-                  "Personenschleuse",
-                  "Materialschleuse",
-                  "UHG",
-                  "Zuluft",
-                ].map((typ) => (
-
-                  <button
-                    key={typ}
-                    type="button"
-                    onClick={() =>
-                      hinzufuegen(typ as ElementTyp)
-                    }
-                    className="rounded-xl bg-[#e77818] px-4 py-2 text-sm font-bold text-white hover:bg-[#c96210]"
-                  >
-                    + {typ}
-                  </button>
-
-                ))}
-
               </div>
+            </div>
 
-            </section>
-
-            {luftzonen.length > 0 && (
-              <section className="rounded-2xl border bg-white p-5 shadow-sm">
-
-                <h2 className="font-bold">
-                  Luftbilanz aus Sanierungsplan
-                </h2>
-
-                <div className="mt-4 space-y-3">
-                  {luftzonen.map((zone) => {
-                    const b = berechnung(zone);
-
-                    return (
-                      <div
-                        key={zone.id}
-                        className="rounded-xl bg-slate-50 p-4"
-                      >
-                        <div className="font-bold">
-                          {zone.name}
-                        </div>
-
-                        <div className="mt-1 text-sm text-slate-600">
-                          Volumen: {b.volumen.toFixed(1)} m³
-                          {" · "}
-                          Soll: {b.soll.toFixed(0)} m³/h
-                          {" · "}
-                          UHG real: {b.uhgReal.toFixed(0)} m³/h
-                        </div>
-                      </div>
-                    );
-                  })}
+            <div className="bg-slate-100 p-4 sm:p-6">
+              {plan.type === "image/png" ? (
+                <div className="relative mx-auto min-h-[420px] max-w-5xl overflow-hidden rounded-xl bg-white">
+                  <Image src={plan.dataUrl} alt={`Zonenplan ${plan.name}`} fill unoptimized className="object-contain" />
                 </div>
-
-              </section>
-            )}
-
-            <section className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-
-              <div className="border-b p-5">
-
-                <h2 className="font-bold">
-                  Plan-Elemente
-                </h2>
-
-                <p className="text-sm text-slate-500">
-                  Position und Grösse anpassen
-                </p>
-
-              </div>
-
-              <div className="max-h-[750px] divide-y overflow-y-auto">
-
-                {elemente.map((element) => (
-
-                  <div
-                    key={element.id}
-                    className="p-5"
-                  >
-
-                    <div className="flex items-center justify-between">
-
-                      <span className="rounded-lg bg-[#e77818] px-3 py-1 text-xs font-bold text-white">
-                        {element.typ}
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          entfernen(element.id)
-                        }
-                        className="text-sm font-semibold text-red-600"
-                      >
-                        Entfernen
-                      </button>
-
-                    </div>
-
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-
-                      <Feld
-                        label="Bezeichnung"
-                        value={element.name}
-                        onChange={(v) =>
-                          update(element.id, "name", v)
-                        }
-                      />
-
-                      <Feld
-                        label="Info"
-                        value={element.info}
-                        onChange={(v) =>
-                          update(element.id, "info", v)
-                        }
-                      />
-
-                      <Nummer
-                        label="Position X"
-                        value={element.x}
-                        onChange={(v) =>
-                          update(element.id, "x", v)
-                        }
-                      />
-
-                      <Nummer
-                        label="Position Y"
-                        value={element.y}
-                        onChange={(v) =>
-                          update(element.id, "y", v)
-                        }
-                      />
-
-                      <Nummer
-                        label="Breite"
-                        value={element.breite}
-                        onChange={(v) =>
-                          update(
-                            element.id,
-                            "breite",
-                            v
-                          )
-                        }
-                      />
-
-                      <Nummer
-                        label="Höhe"
-                        value={element.hoehe}
-                        onChange={(v) =>
-                          update(
-                            element.id,
-                            "hoehe",
-                            v
-                          )
-                        }
-                      />
-
-                    </div>
-
-                  </div>
-
-                ))}
-
-              </div>
-
-            </section>
-
-          </div>
-
-          <section className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-
-            <div className="flex items-center justify-between border-b p-5">
-
-              <div>
-
-                <h2 className="font-bold">
-                  Zonenplan Vorschau
-                </h2>
-
-                <p className="text-sm text-slate-500">
-                  Elemente direkt mit Maus oder Finger verschieben
-                </p>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="print:hidden rounded-xl bg-[#e77818] px-5 py-3 font-bold text-white"
-              >
-                Als PDF
-              </button>
-
+              ) : (
+                <iframe
+                  src={plan.dataUrl}
+                  title={`Zonenplan ${plan.name}`}
+                  className="h-[70vh] min-h-[520px] w-full rounded-xl bg-white"
+                />
+              )}
             </div>
-
-            <div className="overflow-auto bg-slate-100 p-6">
-
-              {grundriss &&
-                grundrissTyp === "application/pdf" && (
-                  <div className="mb-5 overflow-hidden rounded-xl border bg-white">
-                    <iframe
-                      src={grundriss}
-                      title="PDF Grundriss"
-                      className="h-[650px] w-full"
-                    />
-                  </div>
-                )}
-
-              <div className="min-w-[900px]">
-
-                <svg
-                  viewBox="0 0 900 650"
-                  onPointerMove={dragMove}
-                  onPointerUp={dragEnd}
-                  onPointerLeave={dragEnd}
-                  className="w-full touch-none rounded-xl border bg-white"
-                >
-
-                  <defs>
-
-                    <pattern
-                      id="grid"
-                      width="25"
-                      height="25"
-                      patternUnits="userSpaceOnUse"
-                    >
-                      <path
-                        d="M 25 0 L 0 0 0 25"
-                        fill="none"
-                        stroke="#e5e7eb"
-                        strokeWidth="1"
-                      />
-                    </pattern>
-
-                  </defs>
-
-                  <rect
-                    width="900"
-                    height="650"
-                    fill="url(#grid)"
-                  />
-
-                  {grundriss &&
-                    grundrissTyp.startsWith("image/") && (
-                      <image
-                        href={grundriss}
-                        x="0"
-                        y="0"
-                        width="900"
-                        height="650"
-                        preserveAspectRatio="xMidYMid meet"
-                        opacity="0.72"
-                      />
-                    )}
-
-                  {elemente.map((element) => {
-
-                    const farbe = farben(element.typ);
-
-                    return (
-                      <g
-                        key={element.id}
-                        onPointerDown={(event) =>
-                          dragStart(event, element)
-                        }
-                        style={{
-                          cursor:
-                            dragId === element.id
-                              ? "grabbing"
-                              : "grab",
-                        }}
-                      >
-
-                        <rect
-                          x={element.x}
-                          y={element.y}
-                          width={element.breite}
-                          height={element.hoehe}
-                          rx="6"
-                          fill={farbe.fill}
-                          stroke={farbe.stroke}
-                          strokeWidth="3"
-                        />
-
-                        <text
-                          x={element.x + 10}
-                          y={element.y + 24}
-                          fontSize="15"
-                          fontWeight="700"
-                          fill="#0f172a"
-                        >
-                          {element.name}
-                        </text>
-
-                        {element.info && (
-                          <text
-                            x={element.x + 10}
-                            y={element.y + 45}
-                            fontSize="11"
-                            fill="#475569"
-                          >
-                            {element.info}
-                          </text>
-                        )}
-
-                        {element.typ === "UHG" && (
-                          <text
-                            x={
-                              element.x +
-                              element.breite +
-                              8
-                            }
-                            y={
-                              element.y +
-                              element.hoehe / 2
-                            }
-                            fontSize="24"
-                            fill="#16a34a"
-                          >
-                            →
-                          </text>
-                        )}
-
-                        {element.typ === "Zuluft" && (
-                          <text
-                            x={element.x - 24}
-                            y={
-                              element.y +
-                              element.hoehe / 2 +
-                              7
-                            }
-                            fontSize="24"
-                            fill="#db2777"
-                          >
-                            →
-                          </text>
-                        )}
-
-                      </g>
-                    );
-                  })}
-
-                </svg>
-
-              </div>
-
-            </div>
-
-            <div className="border-t p-5">
-
-              <h3 className="font-bold">
-                Legende
-              </h3>
-
-              <div className="mt-3 flex flex-wrap gap-5 text-sm">
-
-                <Legende
-                  text="Sanierungszone"
-                  klasse="bg-[#ffe7d1] border-[#e77818]"
-                />
-
-                <Legende
-                  text="Personenschleuse"
-                  klasse="bg-blue-100 border-blue-600"
-                />
-
-                <Legende
-                  text="Materialschleuse"
-                  klasse="bg-indigo-100 border-indigo-600"
-                />
-
-                <Legende
-                  text="UHG"
-                  klasse="bg-green-100 border-green-600"
-                />
-
-                <Legende
-                  text="Zuluft"
-                  klasse="bg-pink-100 border-pink-600"
-                />
-
-              </div>
-
-            </div>
-
           </section>
+        )}
 
-        </div>
+        {fehler && (
+          <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-bold text-red-700">
+            {fehler}
+          </div>
+        )}
 
-        <div className="sticky bottom-4 mt-6 flex justify-end rounded-2xl border bg-white p-4 shadow-lg">
-
-          <button
-            type="button"
-            onClick={speichern}
-            className="rounded-xl bg-[#e77818] px-6 py-3 font-bold text-white hover:bg-[#c96210]"
-          >
-            Zonenplan speichern
-          </button>
-
-        </div>
-
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/png,application/pdf,.png,.pdf"
+          onChange={dateiAuswaehlen}
+          className="hidden"
+        />
       </div>
-
     </AppShell>
   );
 }
 
-function Feld({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div>
-
-      <label className="mb-1 block text-xs font-semibold">
-        {label}
-      </label>
-
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border px-3 py-2"
-      />
-
-    </div>
-  );
-}
-
-function Nummer({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div>
-
-      <label className="mb-1 block text-xs font-semibold">
-        {label}
-      </label>
-
-      <input
-        type="number"
-        value={value}
-        onChange={(e) =>
-          onChange(Number(e.target.value))
-        }
-        className="w-full rounded-lg border px-3 py-2"
-      />
-
-    </div>
-  );
-}
-
-function Legende({
-  text,
-  klasse,
-}: {
-  text: string;
-  klasse: string;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-
-      <span
-        className={`h-5 w-8 rounded border-2 ${klasse}`}
-      />
-
-      <span>
-        {text}
-      </span>
-
-    </div>
-  );
+function groesseFormatieren(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
