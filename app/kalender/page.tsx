@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/ui/AppShell";
-import "./calendar.css";
+
 
 type Ansicht = "monat" | "woche" | "tag";
 

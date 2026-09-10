@@ -135,18 +135,18 @@ export default function BaustellenDetail() {
     >
       <div className="bb-workspace max-w-7xl space-y-5">
         <section className={`overflow-hidden rounded-[26px] border shadow-sm ${
-          kritisch ? "border-red-200 bg-red-50" : arbeitsbereit ? "border-green-200 bg-green-50" : "border-[#f1c59f] bg-[#fff8f1]"
+          kritisch ? "border-red-200 bg-red-50" : arbeitsbereit ? "border-green-200 bg-green-50" : "border-[var(--bb-accent-border)] bg-[var(--bb-accent-soft)]"
         }`}>
           <div className="grid gap-6 p-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div className="flex items-start gap-4">
-              <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-2xl font-black ${
-                kritisch ? "bg-red-100 text-red-700" : arbeitsbereit ? "bg-green-100 text-green-700" : "bg-[#ffe7d1] text-[#d46c12]"
+              <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-2xl font-semibold ${
+                kritisch ? "bg-red-100 text-red-700" : arbeitsbereit ? "bg-green-100 text-green-700" : "bg-[var(--bb-accent-soft)] text-[var(--bb-accent-ink)]"
               }`}>
                 {kritisch ? "!" : arbeitsbereit ? "✓" : "1"}
               </div>
               <div>
-                <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Heute auf der Baustelle</div>
-                <h2 className="mt-1 text-2xl font-black text-slate-900">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Heute auf der Baustelle</div>
+                <h2 className="mt-1 text-2xl font-semibold text-slate-900">
                   {kritisch ? "Arbeit noch nicht freigegeben" : arbeitsbereit ? "Baustelle ist arbeitsbereit" : "Tagescheck zuerst durchführen"}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -170,8 +170,8 @@ export default function BaustellenDetail() {
 
         <section className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-5">
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-[#d46c12]">Einfacher Tagesablauf</div>
-            <h2 className="mt-1 text-2xl font-black text-slate-900">Was ist als Nächstes zu tun?</h2>
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--bb-accent-ink)]">Einfacher Tagesablauf</div>
+            <h2 className="mt-1 text-2xl font-semibold text-slate-900">Was ist als Nächstes zu tun?</h2>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -214,8 +214,8 @@ export default function BaustellenDetail() {
           <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Schnellzugriff</div>
-                <h2 className="mt-1 text-xl font-black">Häufig gebraucht</h2>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Schnellzugriff</div>
+                <h2 className="mt-1 text-xl font-semibold">Häufig gebraucht</h2>
               </div>
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -227,7 +227,7 @@ export default function BaustellenDetail() {
           </section>
 
           <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Übersicht heute</div>
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Übersicht heute</div>
             <div className="mt-5 space-y-4">
               <Kennzahl label="Personen in der Zone" wert={String(personenInZone)} farbe={personenInZone ? "gruen" : "normal"} />
               <Kennzahl label="Offene Mängel" wert={String(maengel.offen)} farbe={maengel.kritisch ? "rot" : maengel.offen ? "orange" : "gruen"} />
@@ -240,11 +240,11 @@ export default function BaustellenDetail() {
         <details className="group overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-5 p-5 sm:p-6">
             <div>
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Administration</div>
-              <h2 className="mt-1 text-xl font-black text-slate-900">Unterlagen, SUVA und Gesamtprozess</h2>
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Administration</div>
+              <h2 className="mt-1 text-xl font-semibold text-slate-900">Unterlagen, SUVA und Gesamtprozess</h2>
               <p className="mt-1 text-sm text-slate-500">Nur öffnen, wenn Nachweise oder Projektunterlagen benötigt werden.</p>
             </div>
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl font-black transition group-open:rotate-45">+</span>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl font-semibold transition group-open:rotate-45">+</span>
           </summary>
 
           <div className="border-t border-slate-200 p-5 sm:p-6">
@@ -257,30 +257,30 @@ export default function BaustellenDetail() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h3 className="text-lg font-black">Gesamtprozess</h3>
+                <h3 className="text-lg font-semibold">Gesamtprozess</h3>
                 <p className="mt-1 text-sm text-slate-500">{abgeschlossen} von {checklisten.length} Prozessschritten abgeschlossen</p>
               </div>
-              <strong className="text-2xl text-[#d46c12]">{prozent}%</strong>
+              <strong className="text-2xl text-[var(--bb-accent-ink)]">{prozent}%</strong>
             </div>
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full rounded-full bg-[#e77818]" style={{ width: `${prozent}%` }} />
+              <div className="h-full rounded-full bg-[var(--bb-accent)]" style={{ width: `${prozent}%` }} />
             </div>
 
             <div className="mt-5 grid gap-3 lg:grid-cols-2">
               {checklisten.map((checkliste, index) => {
                 const fertig = checkliste.status === "Abgeschlossen";
                 return (
-                  <a key={checkliste.code} href={linkFuer(checkliste.code)} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4 transition hover:border-[#e77818]">
+                  <a key={checkliste.code} href={linkFuer(checkliste.code)} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 p-4 transition hover:border-[var(--bb-accent)]">
                     <div className="flex items-center gap-3">
-                      <span className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black ${fertig ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}>
+                      <span className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-semibold ${fertig ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}>
                         {fertig ? "✓" : index + 1}
                       </span>
                       <div>
-                        <div className="text-xs font-black text-slate-500">{checkliste.code}</div>
+                        <div className="text-xs font-semibold text-slate-500">{checkliste.code}</div>
                         <div className="text-sm font-bold text-slate-800">{checkliste.name}</div>
                       </div>
                     </div>
-                    <span className="text-[#d46c12]">→</span>
+                    <span className="text-[var(--bb-accent-ink)]">→</span>
                   </a>
                 );
               })}
@@ -300,7 +300,7 @@ function TagesSchritt({ nummer, titel, beschreibung, href, status, statusText }:
     aktiv: "border-blue-200 bg-blue-50",
   };
   const statusFarben: Record<Tagesstatus, string> = {
-    offen: "text-[#a95310]",
+    offen: "text-[var(--bb-accent-ink)]",
     erledigt: "text-green-700",
     kritisch: "text-red-700",
     aktiv: "text-blue-700",
@@ -309,22 +309,22 @@ function TagesSchritt({ nummer, titel, beschreibung, href, status, statusText }:
   return (
     <a href={href} className={`group rounded-2xl border p-5 transition hover:-translate-y-0.5 hover:shadow-md ${farben[status]}`}>
       <div className="flex items-center justify-between">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff0e2] font-black text-[#d46c12]">{status === "erledigt" ? "✓" : nummer}</span>
-        <span className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-[#d46c12]">→</span>
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--bb-accent-soft)] font-semibold text-[var(--bb-accent-ink)]">{status === "erledigt" ? "✓" : nummer}</span>
+        <span className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-[var(--bb-accent-ink)]">→</span>
       </div>
-      <h3 className="mt-5 font-black text-slate-900">{titel}</h3>
+      <h3 className="mt-5 font-semibold text-slate-900">{titel}</h3>
       <p className="mt-1 text-sm text-slate-500">{beschreibung}</p>
-      <div className={`mt-4 text-xs font-black ${statusFarben[status]}`}>{statusText}</div>
+      <div className={`mt-4 text-xs font-semibold ${statusFarben[status]}`}>{statusText}</div>
     </a>
   );
 }
 
 function SchnellLink({ href, icon, titel, text, warnung }: { href: string; icon: string; titel: string; text: string; warnung?: boolean }) {
   return (
-    <a href={href} className={`flex items-center gap-4 rounded-2xl border p-4 transition hover:border-[#e77818] ${warnung ? "border-[#f1c59f] bg-[#fff8f1]" : "border-slate-200"}`}>
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-lg font-black text-[#d46c12]">{icon}</span>
+    <a href={href} className={`flex items-center gap-4 rounded-2xl border p-4 transition hover:border-[var(--bb-accent)] ${warnung ? "border-[var(--bb-accent-border)] bg-[var(--bb-accent-soft)]" : "border-slate-200"}`}>
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-lg font-semibold text-[var(--bb-accent-ink)]">{icon}</span>
       <div>
-        <div className="font-black text-slate-900">{titel}</div>
+        <div className="font-semibold text-slate-900">{titel}</div>
         <div className="mt-0.5 text-xs text-slate-500">{text}</div>
       </div>
     </a>
@@ -332,7 +332,7 @@ function SchnellLink({ href, icon, titel, text, warnung }: { href: string; icon:
 }
 
 function Kennzahl({ label, wert, farbe }: { label: string; wert: string; farbe: "normal" | "gruen" | "orange" | "rot" }) {
-  const farben = { normal: "text-slate-900", gruen: "text-green-700", orange: "text-[#d46c12]", rot: "text-red-700" };
+  const farben = { normal: "text-slate-900", gruen: "text-green-700", orange: "text-[var(--bb-accent-ink)]", rot: "text-red-700" };
   return (
     <div className="flex items-center justify-between border-b border-slate-100 pb-4 last:border-0 last:pb-0">
       <span className="text-sm text-slate-500">{label}</span>
@@ -343,8 +343,8 @@ function Kennzahl({ label, wert, farbe }: { label: string; wert: string; farbe: 
 
 function VerwaltungsLink({ href, titel, text }: { href: string; titel: string; text: string }) {
   return (
-    <a href={href} className="rounded-2xl border border-slate-200 p-4 transition hover:border-[#e77818] hover:bg-[#fffaf5]">
-      <div className="font-black text-slate-900">{titel}</div>
+    <a href={href} className="rounded-2xl border border-slate-200 p-4 transition hover:border-[var(--bb-accent)] hover:bg-[var(--bb-accent-soft)]">
+      <div className="font-semibold text-slate-900">{titel}</div>
       <div className="mt-1 text-xs text-slate-500">{text}</div>
     </a>
   );

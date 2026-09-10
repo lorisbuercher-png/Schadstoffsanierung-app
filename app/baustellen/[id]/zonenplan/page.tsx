@@ -164,10 +164,10 @@ export default function Zonenplan() {
         <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
           <div className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center">
             <div>
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#d46c12]">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--bb-accent-ink)]">
                 Baustellenordner · Zonenplan
               </div>
-              <h2 className="mt-2 text-2xl font-black text-slate-900">
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">
                 {baustelle.nummer} · {baustelle.projektname}
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
@@ -177,7 +177,7 @@ export default function Zonenplan() {
             </div>
 
             <div className={`rounded-2xl px-5 py-3 text-sm font-bold ${
-              plan ? "bg-green-50 text-green-700" : "bg-[#fff3e8] text-[#a95310]"
+              plan ? "bg-green-50 text-green-700" : "bg-[var(--bb-accent-soft)] text-[var(--bb-accent-ink)]"
             }`}>
               {status === "speichert" ? "Wird gespeichert …" : plan ? "✓ Plan abgelegt" : "Plan fehlt"}
             </div>
@@ -185,11 +185,11 @@ export default function Zonenplan() {
         </section>
 
         {!plan ? (
-          <section className="rounded-[24px] border-2 border-dashed border-[#edbf98] bg-[#fffaf5] p-8 text-center sm:p-12">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#ffe8d3] text-3xl text-[#d46c12]">
+          <section className="rounded-[24px] border-2 border-dashed border-[var(--bb-accent-border)] bg-[var(--bb-accent-soft)] p-8 text-center sm:p-12">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--bb-accent-soft)] text-3xl text-[var(--bb-accent-ink)]">
               ⇧
             </div>
-            <h2 className="mt-5 text-xl font-black text-slate-900">Zonenplan hochladen</h2>
+            <h2 className="mt-5 text-xl font-semibold text-slate-900">Zonenplan hochladen</h2>
             <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
               Akzeptiert werden PDF und PNG bis maximal 4 MB. Nach der Auswahl wird der Plan direkt gespeichert.
             </p>
@@ -205,7 +205,7 @@ export default function Zonenplan() {
           <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
             <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="font-black text-slate-900">{plan.name}</div>
+                <div className="font-semibold text-slate-900">{plan.name}</div>
                 <div className="mt-1 text-sm text-slate-500">
                   {groesseFormatieren(plan.size)} · Hochgeladen am {new Date(plan.hochgeladenAm).toLocaleString("de-CH")}
                 </div>

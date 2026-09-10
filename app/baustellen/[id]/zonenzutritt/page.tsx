@@ -176,11 +176,11 @@ export default function ZonenzutrittPage() {
           <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
 
             <div>
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 MITARBEITER
               </div>
 
-              <label className="mt-2 block text-xl font-black">
+              <label className="mt-2 block text-xl font-semibold">
                 Person auswählen
               </label>
 
@@ -206,7 +206,7 @@ export default function ZonenzutrittPage() {
               <button
                 type="button"
                 onClick={() => buchen("eintritt")}
-                className="min-w-[150px] rounded-xl bg-[#e77818] px-6 py-4 font-black text-white hover:bg-[#c96210]"
+                className="min-w-[150px] rounded-xl bg-[var(--bb-accent)] px-6 py-4 font-semibold text-[var(--bb-on-accent)] hover:bg-[var(--bb-accent-hover)]"
               >
                 → Eintritt
               </button>
@@ -214,7 +214,7 @@ export default function ZonenzutrittPage() {
               <button
                 type="button"
                 onClick={() => buchen("austritt")}
-                className="min-w-[150px] rounded-xl bg-white px-6 py-4 font-black text-black hover:bg-slate-100"
+                className="min-w-[150px] rounded-xl bg-white px-6 py-4 font-semibold text-black hover:bg-slate-100"
               >
                 ← Austritt
               </button>
@@ -229,16 +229,16 @@ export default function ZonenzutrittPage() {
 
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   LIVE
                 </div>
 
-                <h2 className="mt-1 text-xl font-black">
+                <h2 className="mt-1 text-xl font-semibold">
                   Aktuell in der Zone
                 </h2>
               </div>
 
-              <div className="text-sm font-black text-green-600">
+              <div className="text-sm font-semibold text-green-600">
                 ● {aktuelleZone.length}
               </div>
             </div>
@@ -265,7 +265,7 @@ export default function ZonenzutrittPage() {
                   >
                     <div className="flex items-center gap-3">
 
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-green-600 text-xs font-black text-white">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-green-600 text-xs font-semibold text-white">
                         {person.name
                           .split(" ")
                           .map((n) => n[0])
@@ -285,7 +285,7 @@ export default function ZonenzutrittPage() {
 
                     </div>
 
-                    <span className="rounded-full bg-green-600 px-3 py-2 text-xs font-black text-white">
+                    <span className="rounded-full bg-green-600 px-3 py-2 text-xs font-semibold text-white">
                       IN ZONE
                     </span>
                   </div>
@@ -298,11 +298,11 @@ export default function ZonenzutrittPage() {
           <section className="rounded-[22px] border border-slate-200 bg-white p-6 shadow-sm">
 
             <div>
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 HEUTE
               </div>
 
-              <h2 className="mt-1 text-xl font-black">
+              <h2 className="mt-1 text-xl font-semibold">
                 Zutrittsprotokoll
               </h2>
             </div>
@@ -337,7 +337,7 @@ export default function ZonenzutrittPage() {
                   </div>
 
                   <span
-                    className={`rounded-full px-3 py-2 text-xs font-black ${
+                    className={`rounded-full px-3 py-2 text-xs font-semibold ${
                       eintrag.typ === "eintritt"
                         ? "bg-green-100 text-green-700"
                         : "bg-slate-100 text-slate-700"
@@ -358,11 +358,11 @@ export default function ZonenzutrittPage() {
         <section className="rounded-[22px] border border-slate-200 bg-white p-6 shadow-sm">
 
           <div>
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
               BACKUP
             </div>
 
-            <h2 className="mt-1 text-xl font-black">
+            <h2 className="mt-1 text-xl font-semibold">
               Zeit manuell nachtragen
             </h2>
 
@@ -376,7 +376,7 @@ export default function ZonenzutrittPage() {
             <select
               value={auswahl}
               onChange={(e) => setAuswahl(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#e77818]"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[var(--bb-accent)]"
             >
               <option value="">
                 Mitarbeiter auswählen...
@@ -396,7 +396,7 @@ export default function ZonenzutrittPage() {
                   e.target.value as "eintritt" | "austritt"
                 )
               }
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#e77818]"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[var(--bb-accent)]"
             >
               <option value="eintritt">Eintritt</option>
               <option value="austritt">Austritt</option>
@@ -406,13 +406,13 @@ export default function ZonenzutrittPage() {
               type="time"
               value={nachtragZeit}
               onChange={(e) => setNachtragZeit(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#e77818]"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[var(--bb-accent)]"
             />
 
             <button
               type="button"
               onClick={nachtragen}
-              className="rounded-xl bg-[#e77818] px-5 py-3 font-black text-white hover:bg-[#c96210] hover:text-white"
+              className="rounded-xl bg-[var(--bb-accent)] px-5 py-3 font-semibold text-[var(--bb-on-accent)] hover:bg-[var(--bb-accent-hover)] hover:text-[var(--bb-on-accent)]"
             >
               Nachtragen
             </button>
@@ -423,7 +423,7 @@ export default function ZonenzutrittPage() {
         <div className="sticky bottom-4 z-20 rounded-[20px] border border-slate-200 bg-white/95 p-4 shadow-xl backdrop-blur">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="text-sm font-black text-slate-900">Zutritte sind automatisch gespeichert</div>
+              <div className="text-sm font-semibold text-slate-900">Zutritte sind automatisch gespeichert</div>
               <div className="mt-0.5 text-xs text-slate-500">
                 {aktuelleZone.length} {aktuelleZone.length === 1 ? "Person ist" : "Personen sind"} aktuell in der Zone.
               </div>

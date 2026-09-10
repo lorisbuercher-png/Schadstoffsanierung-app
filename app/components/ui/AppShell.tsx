@@ -1,6 +1,5 @@
 "use client";
 
-import "./ui.css";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -64,7 +63,7 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
 
   const adminNavigation: NavItem[] = [
     { href: "/", icon: "home", label: "Übersicht" },
-    { href: "/#admin-suva", icon: "shield", label: "SUVA-Prüfungen", badge: suvaBadge, priority: suvaBadge > 0 },
+    { href: "/#admin-suva", icon: "shield", label: "SUVA-Checkliste", badge: suvaBadge, priority: suvaBadge > 0 },
     { href: "/#admin-maengel", icon: "alert", label: "Offene Mängel", badge: maengelBadge, priority: maengelBadge > 0 },
     { href: "/baustellen", icon: "site", label: "Baustellen" },
     { href: "/kalender", icon: "clock", label: "Planung" },
@@ -88,21 +87,22 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
 
   return (
     <div className={`bb-shell bb-role-${role}`}>
+      <a className="bb-skip-link" href="#bb-main-content">Zum Inhalt</a>
       <aside className={`bb-sidebar ${menuOffen ? "mobile-open" : ""}`}>
         <button type="button" className="bb-sidebar-close" onClick={() => setMenuOffen(false)} aria-label="Menü schliessen">×</button>
         <Link href="/" className="bb-brand bb-brand-logo" aria-label="B&B Schadstoffsanierung – Übersicht"><Image src="/bb-logo.png" alt="B&B Schadstoffsanierung" width={546} height={300} priority /></Link>
         <div className="bb-sidebar-role"><span>{role === "admin" ? "Geschäftsleitung" : "Baustellenmodus"}</span><strong>{role === "admin" ? "Admin-Cockpit" : "Vorarbeiter"}</strong></div>
-        <nav className="bb-nav" aria-label="Hauptnavigation">
-          {navigation.map((eintrag) => <Link key={eintrag.label} href={eintrag.href} onClick={() => setMenuOffen(false)} className={`${istAktiv(eintrag.href) ? "active" : ""} ${eintrag.priority ? "priority" : ""}`}><Icon name={eintrag.icon} /><span className="bb-nav-label">{eintrag.label}</span>{!!eintrag.badge && <b className="bb-nav-badge">{eintrag.badge}</b>}</Link>)}
+        <nav id="bb-navigation" className="bb-nav" aria-label="Hauptnavigation">
+          {navigation.map((eintrag) => <Link key={eintrag.label} aria-current={istAktiv(eintrag.href) ? "page" : undefined} title={eintrag.label} href={eintrag.href} onClick={() => setMenuOffen(false)} className={`${istAktiv(eintrag.href) ? "active" : ""} ${eintrag.priority ? "priority" : ""}`}><Icon name={eintrag.icon} /><span className="bb-nav-label">{eintrag.label}</span>{!!eintrag.badge && <b className="bb-nav-badge">{eintrag.badge}</b>}</Link>)}
         </nav>
         <div className="bb-sidebar-footer"><Icon name="shield" /><span>Sicherheit hat Priorität</span></div>
       </aside>
 
       {menuOffen && <button type="button" className="bb-sidebar-overlay" onClick={() => setMenuOffen(false)} aria-label="Menü schliessen" />}
 
-      <main className="bb-main">
+      <main id="bb-main-content" className="bb-main" tabIndex={-1}>
         <header className="bb-topbar">
-          <div className="bb-topbar-left"><button type="button" className="bb-mobile-menu" onClick={() => setMenuOffen(true)} aria-label="Navigation öffnen">☰</button><div className="bb-topbar-context"><span className="bb-live-dot" />B&amp;B Arbeitsportal</div></div>
+          <div className="bb-topbar-left"><button type="button" className="bb-mobile-menu" onClick={() => setMenuOffen(true)} aria-label="Navigation öffnen" aria-expanded={menuOffen} aria-controls="bb-navigation">☰</button><div className="bb-topbar-context"><span className="bb-live-dot" />B&amp;B Arbeitsportal</div></div>
           <div className="bb-topbar-actions">
             <div className="bb-role-switch" aria-label="Ansicht wechseln"><button type="button" className={role === "admin" ? "active" : ""} onClick={() => rolleWaehlen("admin")}>Admin</button><button type="button" className={role === "vorarbeiter" ? "active" : ""} onClick={() => rolleWaehlen("vorarbeiter")}>Vorarbeiter</button></div>
             <button className="bb-icon-button" type="button" aria-label="Benachrichtigungen"><span aria-hidden="true">⌁</span>{(suvaBadge + maengelBadge) > 0 && <span className="bb-notification-dot">{Math.min(9, suvaBadge + maengelBadge)}</span>}</button>

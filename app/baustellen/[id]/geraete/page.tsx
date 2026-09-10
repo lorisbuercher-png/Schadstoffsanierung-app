@@ -196,11 +196,11 @@ export default function GeraetePage() {
             </strong>
           </div>
 
-          <div className="rounded-[22px] border border-[#efc39f] bg-[#fff8f1] p-5">
-            <span className="text-xs text-[#8e6100]">
+          <div className="rounded-[22px] border border-[var(--bb-accent-border)] bg-[var(--bb-accent-soft)] p-5">
+            <span className="text-xs text-[var(--bb-accent-ink)]">
               Bald fällig
             </span>
-            <strong className="mt-2 block text-3xl text-[#a95310]">
+            <strong className="mt-2 block text-3xl text-[var(--bb-accent-ink)]">
               {baldFaellig}
             </strong>
           </div>
@@ -234,14 +234,14 @@ export default function GeraetePage() {
         )}
 
         {formularOffen && (
-          <section className="rounded-[22px] border border-[#e77818] bg-white p-6 shadow-sm">
+          <section className="rounded-[22px] border border-[var(--bb-accent)] bg-white p-6 shadow-sm">
 
             <div className="mb-5">
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#9d6810]">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--bb-accent-ink)]">
                 NEUES GERÄT
               </div>
 
-              <h2 className="mt-1 text-xl font-black">
+              <h2 className="mt-1 text-xl font-semibold">
                 Gerät erfassen
               </h2>
             </div>
@@ -256,7 +256,7 @@ export default function GeraetePage() {
                   value={nummer}
                   onChange={(e) => setNummer(e.target.value)}
                   placeholder="z.B. UHG-04"
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[#e77818]"
+                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-[var(--bb-accent)]"
                 />
               </div>
 
@@ -379,7 +379,7 @@ export default function GeraetePage() {
               <button
                 type="button"
                 onClick={geraetErstellen}
-                className="rounded-xl bg-[#e77818] px-5 py-3 text-sm font-black text-white"
+                className="rounded-xl bg-[var(--bb-accent)] px-5 py-3 text-sm font-semibold text-[var(--bb-on-accent)]"
               >
                 Gerät speichern
               </button>
@@ -392,7 +392,7 @@ export default function GeraetePage() {
         <section className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm">
 
           <div className="border-b border-slate-200 p-5">
-            <h2 className="text-xl font-black">
+            <h2 className="text-xl font-semibold">
               Geräte auf Baustelle
             </h2>
           </div>
@@ -400,7 +400,7 @@ export default function GeraetePage() {
           {geraete.length === 0 && (
             <div className="p-10 text-center">
               <div className="text-4xl">◫</div>
-              <h3 className="mt-3 font-black">
+              <h3 className="mt-3 font-semibold">
                 Noch keine Geräte
               </h3>
               <p className="mt-1 text-sm text-slate-500">
@@ -421,7 +421,7 @@ export default function GeraetePage() {
                     status.farbe === "rot"
                       ? "bg-red-50"
                       : status.farbe === "gelb"
-                      ? "bg-[#fff9e8]"
+                      ? "bg-[var(--bb-accent-soft)]"
                       : ""
                   }`}
                 >
@@ -431,11 +431,11 @@ export default function GeraetePage() {
                     <div className="flex gap-4">
 
                       <div
-                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-black ${
+                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-semibold ${
                           status.farbe === "rot"
                             ? "bg-red-600 text-white"
                             : status.farbe === "gelb"
-                            ? "bg-[#e77818] text-white"
+                            ? "bg-[var(--bb-accent)] text-[var(--bb-on-accent)]"
                             : "bg-green-600 text-white"
                         }`}
                       >
@@ -449,7 +449,7 @@ export default function GeraetePage() {
                             {geraet.nummer} · {geraet.bezeichnung}
                           </strong>
 
-                          <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-black">
+                          <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold">
                             {geraet.typ}
                           </span>
 
@@ -498,11 +498,11 @@ export default function GeraetePage() {
                     <div className="flex items-center gap-3">
 
                       <span
-                        className={`rounded-full px-3 py-2 text-xs font-black ${
+                        className={`rounded-full px-3 py-2 text-xs font-semibold ${
                           status.farbe === "rot"
                             ? "bg-red-100 text-red-700"
                             : status.farbe === "gelb"
-                            ? "bg-[#fff3e8] text-[#a95310]"
+                            ? "bg-[var(--bb-accent-soft)] text-[var(--bb-accent-ink)]"
                             : "bg-green-100 text-green-700"
                         }`}
                       >

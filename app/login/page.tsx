@@ -39,21 +39,21 @@ export default function LoginPage() {
       <div className="grid w-full max-w-5xl overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-xl lg:grid-cols-[0.9fr_1.1fr]">
         <section className="bg-[#18212b] p-8 text-white sm:p-12">
           <Image src="/bb-logo.png" alt="B&B Schadstoffsanierung" width={220} height={121} priority className="h-auto w-44 brightness-0 invert" />
-          <div className="mt-12 text-xs font-black uppercase tracking-[0.22em] text-[#f0a45e]">Digitales Arbeitsportal</div>
-          <h1 className="mt-4 text-3xl font-black leading-tight sm:text-4xl">Sicher arbeiten.<br />Einfach dokumentieren.</h1>
+          <div className="mt-12 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--bb-accent-ink)]">Digitales Arbeitsportal</div>
+          <h1 className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">Sicher arbeiten.<br />Einfach dokumentieren.</h1>
           <p className="mt-5 max-w-md text-sm leading-7 text-slate-300">
             Baustellen, Tageschecks, Zonenzutritte und Dokumente zentral an einem Ort.
           </p>
           <div className="mt-10 space-y-3 text-sm text-slate-200">
-            <div className="flex items-center gap-3"><span className="text-[#f0a45e]">✓</span> Sicherer Microsoft-365-Login</div>
-            <div className="flex items-center gap-3"><span className="text-[#f0a45e]">✓</span> Zugriff nur für B&B-Mitarbeitende</div>
-            <div className="flex items-center gap-3"><span className="text-[#f0a45e]">✓</span> Für iPad, Smartphone und Büro</div>
+            <div className="flex items-center gap-3"><span className="text-[var(--bb-accent-ink)]">✓</span> Sicherer Microsoft-365-Login</div>
+            <div className="flex items-center gap-3"><span className="text-[var(--bb-accent-ink)]">✓</span> Zugriff nur für B&B-Mitarbeitende</div>
+            <div className="flex items-center gap-3"><span className="text-[var(--bb-accent-ink)]">✓</span> Für iPad, Smartphone und Büro</div>
           </div>
         </section>
 
         <section className="flex flex-col justify-center p-8 sm:p-12 lg:p-16">
-          <div className="text-xs font-black uppercase tracking-[0.2em] text-[#d46c12]">Willkommen zurück</div>
-          <h2 className="mt-3 text-3xl font-black text-slate-900">Beim Arbeitsportal anmelden</h2>
+          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--bb-accent-ink)]">Willkommen zurück</div>
+          <h2 className="mt-3 text-3xl font-semibold text-slate-900">Beim Arbeitsportal anmelden</h2>
           <p className="mt-3 text-sm leading-6 text-slate-500">
             Verwende dein geschäftliches Microsoft-365-Konto von B&B.
           </p>
@@ -62,7 +62,7 @@ export default function LoginPage() {
             type="button"
             onClick={mitMicrosoftAnmelden}
             disabled={!konfiguriert || laedt}
-            className="mt-8 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#e77818] px-5 py-4 font-black text-white transition hover:bg-[#c96210] disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-8 flex w-full items-center justify-center gap-3 rounded-2xl bg-[var(--bb-accent)] px-5 py-4 font-semibold text-[var(--bb-on-accent)] transition hover:bg-[var(--bb-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <MicrosoftIcon />
             {laedt ? "Microsoft wird geöffnet …" : "Mit Microsoft 365 anmelden"}
@@ -73,7 +73,7 @@ export default function LoginPage() {
           </div>
 
           {!konfiguriert && (
-            <div className="mt-5 rounded-2xl border border-[#f1c59f] bg-[#fff8f1] p-4 text-sm font-semibold text-[#8b4a13]">
+            <div className="mt-5 rounded-2xl border border-[var(--bb-accent-border)] bg-[var(--bb-accent-soft)] p-4 text-sm font-semibold text-[var(--bb-accent-ink)]">
               Die Verbindung wird vorbereitet. Supabase-Projekt-URL und Publishable Key fehlen noch.
             </div>
           )}

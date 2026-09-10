@@ -264,16 +264,16 @@ export default function Journal() {
         <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#d46c12]">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--bb-accent-ink)]">
                 {baustelle.nummer} · {baustelle.ort}
               </div>
-              <h2 className="mt-2 text-2xl font-black text-slate-900">{baustelle.projektname}</h2>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">{baustelle.projektname}</h2>
               <p className="mt-1 text-sm text-slate-500">
                 Das ausgefüllte Journal und alle Anhänge landen automatisch im Baustellenordner.
               </p>
             </div>
             <div className={`rounded-2xl px-5 py-3 text-sm font-bold ${
-              abgeschlossen ? "bg-green-50 text-green-700" : "bg-[#fff3e8] text-[#a95310]"
+              abgeschlossen ? "bg-green-50 text-green-700" : "bg-[var(--bb-accent-soft)] text-[var(--bb-accent-ink)]"
             }`}>
               {abgeschlossen ? "✓ Tag abgeschlossen" : "Journal offen"}
             </div>
@@ -289,7 +289,7 @@ export default function Journal() {
               <select
                 value={vorarbeiter}
                 onChange={(event) => setVorarbeiter(event.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-[#e77818]"
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-[var(--bb-accent)]"
               >
                 <option value="">Auswählen</option>
                 {team.map((m) => (
@@ -360,9 +360,9 @@ export default function Journal() {
                   <MiniFeld label="Beginn" type="time" value={eintrag.arbeitsbeginn} onChange={(wert) => updateArbeitszeit(eintrag.id, "arbeitsbeginn", wert)} />
                   <MiniFeld label="Ende" type="time" value={eintrag.arbeitsende} onChange={(wert) => updateArbeitszeit(eintrag.id, "arbeitsende", wert)} />
                   <MiniFeld label="Pause (Min.)" type="number" value={eintrag.pause} onChange={(wert) => updateArbeitszeit(eintrag.id, "pause", wert)} />
-                  <div className="rounded-xl bg-[#fff3e8] px-3 py-2.5 text-center">
-                    <div className="text-xs font-bold text-[#a95310]">Stunden</div>
-                    <div className="font-black text-[#d46c12]">{stundenBerechnen(eintrag).toFixed(1)}</div>
+                  <div className="rounded-xl bg-[var(--bb-accent-soft)] px-3 py-2.5 text-center">
+                    <div className="text-xs font-bold text-[var(--bb-accent-ink)]">Stunden</div>
+                    <div className="font-semibold text-[var(--bb-accent-ink)]">{stundenBerechnen(eintrag).toFixed(1)}</div>
                   </div>
                   <button
                     type="button"
@@ -388,14 +388,14 @@ export default function Journal() {
               <label
                 key={punkt}
                 className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${
-                  kontrolle[index] ? "border-green-200 bg-green-50" : "border-slate-200 hover:border-[#e77818]"
+                  kontrolle[index] ? "border-green-200 bg-green-50" : "border-slate-200 hover:border-[var(--bb-accent)]"
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={Boolean(kontrolle[index])}
                   onChange={(event) => setKontrolle((aktuell) => ({ ...aktuell, [index]: event.target.checked }))}
-                  className="mt-0.5 h-5 w-5 accent-[#e77818]"
+                  className="mt-0.5 h-5 w-5 accent-[var(--bb-accent)]"
                 />
                 <span className="text-sm font-semibold leading-5 text-slate-700">{punkt}</span>
               </label>
@@ -457,9 +457,9 @@ function Schritt({
     <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
       <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#fff0e2] font-black text-[#d46c12]">{nummer}</span>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--bb-accent-soft)] font-semibold text-[var(--bb-accent-ink)]">{nummer}</span>
           <div>
-            <h2 className="font-black text-slate-900">{titel}</h2>
+            <h2 className="font-semibold text-slate-900">{titel}</h2>
             <p className="mt-0.5 text-sm text-slate-500">{untertitel}</p>
           </div>
         </div>
@@ -491,7 +491,7 @@ function Feld({
         value={value}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#e77818]"
+        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[var(--bb-accent)]"
       />
     </div>
   );
@@ -506,7 +506,7 @@ function Textfeld({ label, value, onChange, placeholder }: { label: string; valu
         value={value}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-[#e77818]"
+        className="w-full rounded-xl border border-slate-300 p-4 outline-none focus:border-[var(--bb-accent)]"
       />
     </div>
   );

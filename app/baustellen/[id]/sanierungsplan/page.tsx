@@ -184,7 +184,7 @@ export default function Sanierungsplan() {
 
             <div>
 
-              <div className="text-sm font-bold text-[#e77818]">
+              <div className="text-sm font-bold text-[var(--bb-accent-ink)]">
                 1
               </div>
 
@@ -194,7 +194,7 @@ export default function Sanierungsplan() {
 
             </div>
 
-            <span className="rounded-full bg-[#fff1e4] px-4 py-2 text-sm font-bold text-[#e77818]">
+            <span className="rounded-full bg-[var(--bb-accent-soft)] px-4 py-2 text-sm font-bold text-[var(--bb-accent-ink)]">
               Version {version}
             </span>
 
@@ -255,7 +255,7 @@ export default function Sanierungsplan() {
 
           <div className="border-b p-6">
 
-            <div className="text-sm font-bold text-[#e77818]">
+            <div className="text-sm font-bold text-[var(--bb-accent-ink)]">
               2
             </div>
 
@@ -384,7 +384,7 @@ export default function Sanierungsplan() {
           <button
             type="button"
             onClick={speichern}
-            className="rounded-xl bg-[#e77818] px-6 py-3 font-bold text-white hover:bg-[#c96210]"
+            className="rounded-xl bg-[var(--bb-accent)] px-6 py-3 font-bold text-[var(--bb-on-accent)] hover:bg-[var(--bb-accent-hover)]"
           >
             Sanierungsplan speichern
           </button>
@@ -422,7 +422,7 @@ function Feld({
         value={value}
         disabled={disabled}
         onChange={(e) => onChange?.(e.target.value)}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#e77818] disabled:bg-slate-100"
+        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[var(--bb-accent)] disabled:bg-slate-100"
       />
 
     </div>

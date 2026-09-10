@@ -112,7 +112,7 @@ export default function BaustellenMitarbeiter() {
 
               <a
                 href="/mitarbeiter"
-                className="mt-4 inline-block rounded-xl bg-[#e77818] px-5 py-3 font-bold text-white"
+                className="mt-4 inline-block rounded-xl bg-[var(--bb-accent)] px-5 py-3 font-bold text-[var(--bb-on-accent)]"
               >
                 Mitarbeiter erfassen
               </a>
@@ -155,7 +155,7 @@ export default function BaustellenMitarbeiter() {
                     </div>
 
                     {aktiv && (
-                      <span className="rounded-full bg-[#e77818] px-3 py-1 text-xs font-bold text-white">
+                      <span className="rounded-full bg-[var(--bb-accent)] px-3 py-1 text-xs font-bold text-[var(--bb-on-accent)]">
                         Zugewiesen
                       </span>
                     )}
@@ -173,7 +173,7 @@ export default function BaustellenMitarbeiter() {
             <button
               type="button"
               onClick={speichern}
-              className="rounded-xl bg-[#e77818] px-6 py-3 font-bold text-white hover:bg-[#c96210]"
+              className="rounded-xl bg-[var(--bb-accent)] px-6 py-3 font-bold text-[var(--bb-on-accent)] hover:bg-[var(--bb-accent-hover)]"
             >
               Team speichern
             </button>

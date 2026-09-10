@@ -378,7 +378,7 @@ export default function TagescheckPage() {
             {gespeichert && !arbeitsbereit && (
               <a
                 href={`/baustellen/${id}/maengel`}
-                className="mt-3 block text-center text-sm font-black text-red-700"
+                className="mt-3 block text-center text-sm font-semibold text-red-700"
               >
                 Abweichung als Mangel erfassen →
               </a>
