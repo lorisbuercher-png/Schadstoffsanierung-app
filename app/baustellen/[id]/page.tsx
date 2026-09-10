@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import AppShell from "../../components/ui/AppShell";
+import { gespeicherteFreigabe, personenInZone as anwesendePersonen, hatZonenplan, type Freigabe, type ZonenBuchung } from "../../lib/workflow";
 
 type Checkliste = {
   code: string;
@@ -26,6 +27,7 @@ export default function BaustellenDetail() {
   const params = useParams<{ id: string }>();
   const id = params.id;
 
+  const [freigabe, setFreigabe] = useState<Freigabe>({ bereit: false, kritisch: false, gruende: [] });
   const [baustelle, setBaustelle] = useState<Baustelle | null>(null);
   const [tagescheckStatus, setTagescheckStatus] = useState("offen");
   const [personenInZone, setPersonenInZone] = useState(0);
@@ -40,19 +42,18 @@ export default function BaustellenDetail() {
 
   useEffect(() => {
     const heute = heuteIso();
+    setFreigabe(gespeicherteFreigabe(localStorage, id, heute));
     const baustellen = lesen<Baustelle[]>("baustellen", []);
     setBaustelle(baustellen.find((eintrag) => eintrag.id === id) || null);
 
     const tagescheck = lesen<Record<string, string> | null>(`tagescheck-${id}-${heute}`, null);
     setTagescheckStatus(tagescheck?.status || "offen");
 
-    const zutritte = lesen<Array<{ mitarbeiterId: string; typ: "eintritt" | "austritt" }>>(
+    const zutritte = lesen<ZonenBuchung[]>(
       `zonenzutritt-${id}-${heute}`,
       []
     );
-    const letzteMeldung: Record<string, "eintritt" | "austritt"> = {};
-    for (const zutritt of zutritte) letzteMeldung[zutritt.mitarbeiterId] = zutritt.typ;
-    setPersonenInZone(Object.values(letzteMeldung).filter((typ) => typ === "eintritt").length);
+    setPersonenInZone(anwesendePersonen(zutritte).length);
 
     const journal = lesen<Record<string, unknown> | null>(`journal-${id}-${heute}`, null);
     setJournalHeute(Boolean(journal));
@@ -60,7 +61,7 @@ export default function BaustellenDetail() {
 
     const dokumente = lesen<Array<{ ordnerId: string }>>(`dokumente-${id}`, []);
     setAnzahlDokumente(dokumente.length);
-    setAnzahlZonenplaene(dokumente.filter((dokument) => dokument.ordnerId === "zonenplan").length);
+    setAnzahlZonenplaene(hatZonenplan(lesen(`zonenplan-${id}`, null)) ? 1 : 0);
 
     setAnzahlMitarbeiter(lesen<string[]>(`baustellen-mitarbeiter-${id}`, []).length);
 
@@ -123,8 +124,8 @@ export default function BaustellenDetail() {
   const prozent = checklisten.length ? Math.round((abgeschlossen / checklisten.length) * 100) : 0;
   const tagescheckKritisch = tagescheckStatus === "nicht-arbeitsbereit";
   const tagescheckErledigt = tagescheckStatus === "arbeitsbereit";
-  const kritisch = tagescheckKritisch || suva.prio1Kritisch > 0 || maengel.kritisch > 0 || geraete.abgelaufen > 0;
-  const arbeitsbereit = !kritisch && tagescheckErledigt;
+  const kritisch = freigabe.kritisch;
+  const arbeitsbereit = freigabe.bereit;
 
   return (
     <AppShell
@@ -147,23 +148,23 @@ export default function BaustellenDetail() {
               <div>
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Heute auf der Baustelle</div>
                 <h2 className="mt-1 text-2xl font-semibold text-slate-900">
-                  {kritisch ? "Arbeit noch nicht freigegeben" : arbeitsbereit ? "Baustelle ist arbeitsbereit" : "Tagescheck zuerst durchführen"}
+                  {kritisch ? "Arbeit noch nicht freigegeben" : arbeitsbereit ? "Baustelle ist arbeitsbereit" : "Freigabe noch offen"}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
                   {kritisch
-                    ? "Mindestens ein kritischer Punkt muss vor den Arbeiten geklärt werden."
+                    ? freigabe.gruende.map((grund) => grund.text).join(" · ")
                     : arbeitsbereit
                     ? `${personenInZone} ${personenInZone === 1 ? "Person ist" : "Personen sind"} aktuell in der Zone.`
-                    : "Der Vorarbeiter bestätigt kurz die wichtigsten Sicherheits- und Betriebsprüfungen."}
+                    : freigabe.gruende.map((grund) => grund.text).join(" · ")}
                 </p>
               </div>
             </div>
 
             <a
-              href={tagescheckErledigt ? `/baustellen/${id}/zonenzutritt` : `/baustellen/${id}/tagescheck`}
+              href={`/baustellen/${id}/${arbeitsbereit ? "zonenzutritt" : freigabe.gruende[0]?.pfad || "tagescheck"}`}
               className="bb-primary-button bb-button-link justify-center px-6 py-3.5"
             >
-              {tagescheckErledigt ? "Zonenzutritt öffnen" : "Tagescheck starten"} →
+              {arbeitsbereit ? "Zonenzutritt öffnen" : "Offenen Punkt prüfen"} →
             </a>
           </div>
         </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import AppShell from "../../../components/ui/AppShell";
+import { gespeicherteFreigabe, personenInZone } from "../../../lib/workflow";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
@@ -96,6 +97,19 @@ export default function ZonenzutrittPage() {
       return;
     }
 
+    if (typ === "eintritt") {
+      const freigabe = gespeicherteFreigabe(localStorage, id, heuteKey());
+      if (!freigabe.bereit) {
+        alert(freigabe.gruende.map((grund) => grund.text).join("\n"));
+        return;
+      }
+    }
+    const anwesend = personenInZone(eintraege).includes(person.id);
+    if (typ === "eintritt" && anwesend) {
+      alert(anwesend ? "Diese Person ist bereits eingecheckt." : "Diese Person ist nicht eingecheckt.");
+      return;
+    }
+
     const jetzt = new Date();
 
     const neuerEintrag: Zutritt = {
@@ -126,6 +140,14 @@ export default function ZonenzutrittPage() {
       return;
     }
 
+    if (nachtragTyp === "eintritt") {
+      const freigabe = gespeicherteFreigabe(localStorage, id, heuteKey());
+      if (!freigabe.bereit) {
+        alert(freigabe.gruende.map((grund) => grund.text).join("\n"));
+        return;
+      }
+    }
+
     const datum = new Date();
     const [stunden, minuten] = nachtragZeit.split(":");
 
@@ -146,17 +168,8 @@ export default function ZonenzutrittPage() {
   }
 
   const aktuelleZone = useMemo(() => {
-    return mitarbeiter.filter((person) => {
-      const personEintraege = eintraege
-        .filter((e) => e.mitarbeiterId === person.id)
-        .sort(
-          (a, b) =>
-            new Date(b.timestamp).getTime() -
-            new Date(a.timestamp).getTime()
-        );
-
-      return personEintraege[0]?.typ === "eintritt";
-    });
+    const ids = personenInZone(eintraege);
+    return mitarbeiter.filter((person) => ids.includes(person.id));
   }, [eintraege, mitarbeiter]);
 
   return (

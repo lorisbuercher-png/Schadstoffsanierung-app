@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { gespeicherteFreigabe, hatZonenplan, personenInZone, type Freigabe, type ZonenBuchung } from "../../lib/workflow";
 import AppShell, { type AppRole } from "../ui/AppShell";
 
 type Baustelle = {
@@ -23,6 +24,7 @@ type Mangel = {
 };
 
 type SiteStatus = {
+  freigabe: Freigabe;
   baustelle: Baustelle;
   suvaOffen: number;
   suvaKritisch: number;
@@ -89,22 +91,19 @@ export default function Dashboard() {
       const maengel = lesen<Mangel[]>(`maengel-${baustelle.id}`, []);
       const offen = Array.isArray(maengel) ? maengel.filter((m) => m.status !== "behoben") : [];
       const tagescheck = lesen<{ status?: string } | null>(`tagescheck-${baustelle.id}-${heute}`, null);
-      const zonenplan = lesen<{ grundriss?: string; elemente?: unknown[] }>(`zonenplan-${baustelle.id}`, {});
-      const zutritte = lesen<Array<{ mitarbeiterId?: string; typ?: string }>>(`zonenzutritt-${baustelle.id}-${heute}`, []);
-      const letzterStatus = new Map<string, string>();
-      if (Array.isArray(zutritte)) zutritte.forEach((eintrag) => {
-        if (eintrag.mitarbeiterId && !letzterStatus.has(eintrag.mitarbeiterId)) letzterStatus.set(eintrag.mitarbeiterId, eintrag.typ || "");
-      });
+      const zonenplan = lesen<{ datei?: { dataUrl?: string }; grundriss?: string }>(`zonenplan-${baustelle.id}`, {});
+      const zutritte = lesen<ZonenBuchung[]>(`zonenzutritt-${baustelle.id}-${heute}`, []);
 
       return {
         baustelle,
+        freigabe: gespeicherteFreigabe(localStorage, baustelle.id, heute),
         suvaOffen,
         suvaKritisch,
         maengelOffen: offen.length,
         maengelKritisch: offen.filter((m) => m.prioritaet === "kritisch").length,
         tagescheckOffen: tagescheck?.status !== "arbeitsbereit",
-        zonenplanFehlt: !zonenplan.grundriss && !(zonenplan.elemente?.length),
-        personenInZone: [...letzterStatus.values()].filter((wert) => wert === "eintritt").length,
+        zonenplanFehlt: !hatZonenplan(zonenplan),
+        personenInZone: personenInZone(zutritte).length,
       };
     });
     setStatus(auswertung);
@@ -162,7 +161,7 @@ function AdminDashboard({ sites, mitarbeiter, zahlen }: { sites: SiteStatus[]; m
 
     <div className="admin-lower-grid">
       <section className="dash-panel" id="baustellenstatus"><div className="panel-heading"><div><span className="dash-eyebrow">Betrieb</span><h2>Baustellenstatus</h2></div><Link className="text-link" href="/baustellen">Alle anzeigen →</Link></div>
-        <div className="site-table"><div className="site-table-head"><span>Baustelle</span><span>Freigabe heute</span><span>Team</span><span>Status</span></div>{sites.length ? sites.slice(0, 5).map((site) => <Link href={`/baustellen/${site.baustelle.id}`} className="site-table-row" key={site.baustelle.id}><span><strong>{site.baustelle.projektname}</strong><small>{site.baustelle.nummer || "–"} · {site.baustelle.ort || "–"}</small></span><span className={site.tagescheckOffen ? "status-open" : "status-ok"}>{site.tagescheckOffen ? "Offen" : "Erteilt"}</span><span>{site.personenInZone} in Zone</span><span><i className={site.suvaKritisch || site.maengelKritisch ? "red" : site.suvaOffen ? "amber" : "green"} />{site.suvaKritisch || site.maengelKritisch ? "Gesperrt" : site.suvaOffen ? "Zu prüfen" : "Bereit"}</span></Link>) : <div className="empty-row">Noch keine Baustelle erfasst.</div>}</div>
+        <div className="site-table"><div className="site-table-head"><span>Baustelle</span><span>Freigabe heute</span><span>Team</span><span>Status</span></div>{sites.length ? sites.slice(0, 5).map((site) => <Link href={`/baustellen/${site.baustelle.id}`} className="site-table-row" key={site.baustelle.id}><span><strong>{site.baustelle.projektname}</strong><small>{site.baustelle.nummer || "–"} · {site.baustelle.ort || "–"}</small></span><span className={!site.freigabe.bereit ? "status-open" : "status-ok"}>{!site.freigabe.bereit ? "Offen" : "Erteilt"}</span><span>{site.personenInZone} in Zone</span><span><i className={site.freigabe.kritisch ? "red" : !site.freigabe.bereit ? "amber" : "green"} />{site.freigabe.kritisch ? "Gesperrt" : !site.freigabe.bereit ? "Zu prüfen" : "Bereit"}</span></Link>) : <div className="empty-row">Noch keine Baustelle erfasst.</div>}</div>
       </section>
       <aside className="dash-panel team-panel"><div className="panel-heading"><div><span className="dash-eyebrow">Heute draussen</span><h2>Team-Einsatz</h2></div></div><div className="team-big-number">{zahlen.personen}</div><p>Personen aktuell in einer Sanierungszone</p><div className="team-stat"><span>Aktive Mitarbeitende</span><strong>{mitarbeiter}</strong></div><div className="team-stat"><span>Offene Tageschecks</span><strong>{zahlen.tageschecks}</strong></div><Link className="dash-secondary-button" href="/mitarbeiter">Mitarbeiter öffnen</Link></aside>
     </div>
@@ -176,24 +175,18 @@ function Kpi({ iconName, label, value, note, tone = "normal", href }: { iconName
 function VorarbeiterDashboard({ site }: { site?: SiteStatus }) {
   if (!site) return <div className="dash foreman-dashboard"><header className="dash-hero"><div><span className="dash-eyebrow">Baustellenmodus</span><h1>Guten Morgen, Loris.</h1><p>Heute ist noch keine aktive Baustelle zugewiesen.</p></div></header><section className="dash-panel empty-project"><span>{icon("site")}</span><h2>Baustelle auswählen</h2><p>Erfasse eine Baustelle oder öffne die Baustellenübersicht.</p><Link className="dash-primary-button" href="/baustellen">Zu den Baustellen</Link></section></div>;
 
-  const blocker = site.suvaKritisch + site.maengelKritisch + (site.tagescheckOffen ? 1 : 0) + (site.zonenplanFehlt ? 1 : 0);
-  const bereit = blocker === 0;
+  const bereit = site.freigabe.bereit;
   return <div className="dash foreman-dashboard">
     <header className="dash-hero foreman-hero"><div><span className="dash-eyebrow">Baustellenmodus · Heute</span><h1>Guten Morgen, Loris.</h1><p>Du siehst nur das, was du für den heutigen Arbeitstag brauchst.</p></div><Link className="site-selector" href="/baustellen"><span>{icon("site")}</span><div><small>Aktuelle Baustelle</small><strong>{site.baustelle.projektname}</strong><em>{site.baustelle.ort || site.baustelle.nummer || ""}</em></div>{icon("arrow")}</Link></header>
 
     <section className={`release-card ${bereit ? "ready" : "blocked"}`}>
       <div className="release-status"><span className="release-icon">{icon(bereit ? "check" : "alert")}</span><div><span className="dash-eyebrow">Arbeitsfreigabe</span><h2>{bereit ? "Baustelle ist arbeitsbereit" : "Freigabe ausstehend"}</h2><p>{bereit ? "Alle sicherheitsrelevanten Schritte sind erledigt." : "Vor Arbeitsbeginn müssen die folgenden Punkte bestätigt werden."}</p></div></div>
-      {!bereit && <div className="blocker-list">
-        {(site.suvaKritisch > 0 || site.suvaOffen > 0) && <Link href={`/baustellen/${site.baustelle.id}/suva-audit`}><span>{icon("shield")}</span><div><strong>Sicherheitsprüfung</strong><small>{site.suvaKritisch ? `${site.suvaKritisch} Prio-1-Punkte nicht erfüllt` : `${site.suvaOffen} Prio-1-Punkte zu bestätigen`}</small></div><b>Jetzt prüfen</b>{icon("arrow")}</Link>}
-        {site.maengelKritisch > 0 && <Link href={`/baustellen/${site.baustelle.id}/maengel`}><span>{icon("alert")}</span><div><strong>Mangel Prio 1</strong><small>{site.maengelKritisch} kritische {site.maengelKritisch === 1 ? "Meldung" : "Meldungen"} offen</small></div><b>Öffnen</b>{icon("arrow")}</Link>}
-        {site.zonenplanFehlt && <Link href={`/baustellen/${site.baustelle.id}/zonenplan`}><span>{icon("site")}</span><div><strong>Zonenplan hinterlegen</strong><small>Foto oder PDF wird für die Freigabe benötigt</small></div><b>Erfassen</b>{icon("arrow")}</Link>}
-        {site.tagescheckOffen && <Link href={`/baustellen/${site.baustelle.id}/tagescheck`}><span>{icon("check")}</span><div><strong>Tagescheck abschliessen</strong><small>Zone, Unterdruck, PSA und Fluchtwege prüfen</small></div><b>Starten</b>{icon("arrow")}</Link>}
-      </div>}
-      <div className="release-footer"><span>{bereit ? "Zonenzutritt freigegeben" : "Zonenzutritt bleibt bis zur Freigabe gesperrt"}</span><Link className={bereit ? "dash-primary-button" : "dash-primary-button danger"} href={bereit ? `/baustellen/${site.baustelle.id}/zonenzutritt` : `/baustellen/${site.baustelle.id}/tagescheck`}>{bereit ? "Team einchecken" : "Freigabe starten"}</Link></div>
+      {!bereit && <div className="blocker-list">{site.freigabe.gruende.map((grund) => <Link key={grund.pfad} href={`/baustellen/${site.baustelle.id}/${grund.pfad}`}><span>{icon("shield")}</span><div><strong>{grund.text}</strong></div><b>Prüfen</b>{icon("arrow")}</Link>)}</div>}
+      <div className="release-footer"><span>{bereit ? "Zonenzutritt freigegeben" : "Zonenzutritt bleibt bis zur Freigabe gesperrt"}</span><Link className={bereit ? "dash-primary-button" : "dash-primary-button danger"} href={`/baustellen/${site.baustelle.id}/${bereit ? "zonenzutritt" : site.freigabe.gruende[0]?.pfad || "tagescheck"}`}>{bereit ? "Team einchecken" : "Freigabe starten"}</Link></div>
     </section>
 
     <section className="today-section"><div className="panel-heading"><div><span className="dash-eyebrow">Geführter Ablauf</span><h2>Dein Arbeitstag</h2></div><span className="today-date">Heute</span></div><div className="workflow-grid">
-      <WorkflowStep number="1" title="Team einchecken" note={`${site.personenInZone} Personen in Zone`} done={site.personenInZone > 0} href={`/baustellen/${site.baustelle.id}/mitarbeiter`} iconName="team" />
+      <WorkflowStep number="1" title="Team zuweisen" note="Mitarbeitende der Baustelle" href={`/baustellen/${site.baustelle.id}/mitarbeiter`} iconName="team" />
       <WorkflowStep number="2" title="Sicherheit freigeben" note={bereit ? "Freigabe erteilt" : "Noch nicht erledigt"} done={bereit} href={`/baustellen/${site.baustelle.id}/tagescheck`} iconName="shield" />
       <WorkflowStep number="3" title="Zonenzutritt führen" note={bereit ? "Ein- und Austritte erfassen" : "Nach Freigabe verfügbar"} locked={!bereit} href={`/baustellen/${site.baustelle.id}/zonenzutritt`} iconName="clock" />
       <WorkflowStep number="4" title="Arbeit dokumentieren" note="Fotos, Fortschritt, Rapport" href={`/baustellen/${site.baustelle.id}/journal`} iconName="journal" />
