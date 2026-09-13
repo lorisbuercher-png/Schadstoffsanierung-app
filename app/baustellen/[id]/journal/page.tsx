@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import FileUpload, { DateiEintrag } from "../../../components/FileUpload";
+import { entwurfLesen, entwurfSichern } from "../../../lib/journalRecovery";
 import { gueltigesDatum } from "../../../lib/documents";
 import { stundenBerechnen, zeitFehler, journalAblegen } from "../../../lib/journal";
 import { personenInZone } from "../../../lib/workflow";
@@ -88,6 +89,11 @@ export default function Journal() {
   const [anhaenge, setAnhaenge] = useState<DateiEintrag[]>([]);
   const [abgeschlossen, setAbgeschlossen] = useState(false);
   const [meldung, setMeldung] = useState("");
+  const [geaendert, setGeaendert] = useState(false);
+  const [geladenKey, setGeladenKey] = useState("");
+  const [basis, setBasis] = useState<string | null>(null);
+  const [ladeFehler, setLadeFehler] = useState(false);
+  const [entwurfStatus, setEntwurfStatus] = useState("");
 
   useEffect(() => {
     if (gueltigesDatum(gewaehltesDatum)) setDatum(gewaehltesDatum);
@@ -110,16 +116,33 @@ export default function Journal() {
     if (!datum) return;
 
     setMeldung("");
+    setEntwurfStatus("");
+    setLadeFehler(false);
+    setGeaendert(false);
     const key = `journal-${id}-${datum}`;
 
     try {
-      const gespeichert = JSON.parse(localStorage.getItem(key) || "null");
+      const raw = localStorage.getItem(key);
+      setBasis(raw);
+      setGeladenKey(key);
+      const gespeichert = JSON.parse(raw || "null");
+      const entwurf = entwurfLesen(localStorage, key);
       const alt = datum === heuteIso()
         ? JSON.parse(localStorage.getItem(`journal-${id}`) || "null")
         : null;
-      const daten = gespeichert || (alt?.datum === datum ? alt : null);
+      const daten = entwurf || gespeichert || (alt?.datum === datum ? alt : null);
+      if (entwurf) {
+        setGeaendert(true);
+        setMeldung("Deine letzten Eingaben wurden wiederhergestellt. Bitte prüfen und speichern oder den Tag abschliessen.");
+      }
 
       if (daten) {
+        if (typeof daten !== "object" || Array.isArray(daten) ||
+            (daten.arbeitszeiten !== undefined && !Array.isArray(daten.arbeitszeiten)) ||
+            (daten.eintraege !== undefined && !Array.isArray(daten.eintraege)) ||
+            (daten.anhaenge !== undefined && !Array.isArray(daten.anhaenge))) {
+          throw new Error("Ungültiges Journal");
+        }
         setZone(daten.zone || "");
         setVorarbeiter(daten.vorarbeiter || "");
         setArbeit(daten.arbeit || "");
@@ -130,7 +153,11 @@ export default function Journal() {
         setAbgeschlossen(Boolean(daten.abgeschlossen));
         return;
       }
-    } catch {}
+    } catch {
+      setLadeFehler(true);
+      setMeldung("Bitte die Seite erneut öffnen: Das Journal konnte nicht gelesen werden. Speichern ist zum Schutz der bestehenden Daten gesperrt.");
+      return;
+    }
 
     setZone("");
     setVorarbeiter("");
@@ -142,6 +169,50 @@ export default function Journal() {
     setAbgeschlossen(false);
   }, [datum, id, team]);
 
+  useEffect(() => {
+    if (!geaendert || ladeFehler || geladenKey !== `journal-${id}-${datum}`) return;
+    try {
+      entwurfSichern(localStorage, geladenKey, basis, {
+        datum, zone, vorarbeiter, arbeit, besonderheiten, arbeitszeiten,
+        kontrolle, anhaenge, abgeschlossen,
+      });
+      setEntwurfStatus("Eingaben auf diesem Gerät zwischengespeichert · Tagesabschluss noch nicht bestätigt.");
+    } catch {
+      setEntwurfStatus("Zwischenspeichern fehlgeschlagen. Bitte die Seite geöffnet lassen und manuell speichern; gegebenenfalls Anhänge verkleinern.");
+    }
+  }, [geaendert, ladeFehler, geladenKey, id, datum, basis, zone, vorarbeiter, arbeit, besonderheiten, arbeitszeiten, kontrolle, anhaenge, abgeschlossen]);
+
+  useEffect(() => {
+    if (!geaendert) return;
+    function vorVerlassen(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+    function linkVerlassen(event: MouseEvent) {
+      if (!entwurfStatus.startsWith("Zwischenspeichern fehlgeschlagen")) return;
+      const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      if (!link) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setMeldung("Bitte vor dem Verlassen speichern. Deine Eingaben konnten nicht zwischengespeichert werden.");
+    }
+    window.addEventListener("beforeunload", vorVerlassen);
+    document.addEventListener("click", linkVerlassen, true);
+    return () => {
+      window.removeEventListener("beforeunload", vorVerlassen);
+      document.removeEventListener("click", linkVerlassen, true);
+    };
+  }, [geaendert, entwurfStatus]);
+
+  function datumWechseln(wert: string) {
+    if (!gueltigesDatum(wert)) return;
+    if (geaendert && entwurfStatus.startsWith("Zwischenspeichern fehlgeschlagen")) {
+      setMeldung("Bitte vor dem Datumswechsel speichern. Deine Eingaben konnten nicht zwischengespeichert werden.");
+      return;
+    }
+    setDatum(wert);
+  }
+
   const kontrollenErledigt = kontrollpunkte.filter((_, index) => kontrolle[index]).length;
   const totalStunden = useMemo(
     () => arbeitszeiten.reduce((summe, eintrag) => summe + stundenBerechnen(eintrag), 0),
@@ -149,6 +220,7 @@ export default function Journal() {
   );
 
   function mitarbeiterHinzufuegen() {
+    setGeaendert(true);
     setArbeitszeiten((aktuell) => [...aktuell, leereArbeitszeit()]);
   }
 
@@ -172,6 +244,7 @@ export default function Journal() {
   }
 
   function datenSpeichern(istAbgeschlossen: boolean) {
+    if (ladeFehler || geladenKey !== `journal-${id}-${datum}`) return;
     if (!datum) {
       setMeldung("Bitte ein Datum auswählen.");
       return;
@@ -195,6 +268,10 @@ export default function Journal() {
       setMeldung("Bitte erneut speichern: Journal und Ablage konnten nicht vollständig gespeichert werden. Deine Eingaben bleiben hier erhalten. Bei vollem Speicher Anhänge verkleinern.");
       return;
     }
+    setGeaendert(false);
+    setEntwurfStatus("");
+    setBasis(JSON.stringify(daten));
+    try { localStorage.removeItem(`entwurf-journal-${id}-${datum}`); } catch { /* Obsolete drafts are ignored when their base differs. */ }
     setAbgeschlossen(istAbgeschlossen);
     setMeldung(istAbgeschlossen ? "Arbeitstag abgeschlossen und abgelegt." : "Entwurf gespeichert.");
   }
@@ -286,7 +363,9 @@ export default function Journal() {
       backHref={`/baustellen/${id}`}
       backLabel="Zur Baustelle"
     >
-      <div className="bb-workspace max-w-6xl space-y-5 pb-28">
+      <div className="bb-workspace max-w-6xl space-y-5 pb-28" onChangeCapture={(event) => {
+        if (!(event.target instanceof HTMLInputElement && event.target.type === "date")) setGeaendert(true);
+      }}>
         <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
@@ -301,14 +380,14 @@ export default function Journal() {
             <div className={`rounded-2xl px-5 py-3 text-sm font-bold ${
               abgeschlossen ? "bg-green-50 text-green-700" : "bg-[var(--bb-accent-soft)] text-[var(--bb-accent-ink)]"
             }`}>
-              {abgeschlossen ? "✓ Tag abgeschlossen" : "Journal offen"}
+              {geaendert ? "Änderungen noch offen" : abgeschlossen ? "✓ Tag abgeschlossen" : "Journal offen"}
             </div>
           </div>
         </section>
 
         <Schritt nummer="1" titel="Tag und Arbeiten" untertitel="Was wurde heute auf der Baustelle erledigt?">
           <div className="grid gap-4 md:grid-cols-3">
-            <Feld label="Datum" type="date" value={datum} onChange={setDatum} />
+            <Feld label="Datum" type="date" value={datum} onChange={datumWechseln} />
             <Feld label="Zone / Etappe" value={zone} onChange={setZone} placeholder="z. B. Zone 1" />
             <div>
               <label className="mb-2 block text-sm font-bold text-slate-700">Vorarbeiter *</label>
@@ -392,7 +471,7 @@ export default function Journal() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setArbeitszeiten((aktuell) => aktuell.filter((item) => item.id !== eintrag.id))}
+                    onClick={() => { setGeaendert(true); setArbeitszeiten((aktuell) => aktuell.filter((item) => item.id !== eintrag.id)); }}
                     className="rounded-xl px-3 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50"
                     aria-label={`${eintrag.name || "Mitarbeiter"} entfernen`}
                   >
@@ -430,9 +509,11 @@ export default function Journal() {
         </Schritt>
 
         <Schritt nummer="4" titel="Fotos und Anhänge" untertitel="Optional – direkt beim Tagesjournal ablegen">
-          <FileUpload value={anhaenge} onChange={setAnhaenge} />
+          <FileUpload value={anhaenge} onChange={(dateien) => { setGeaendert(true); setAnhaenge(dateien); }} />
         </Schritt>
 
+        {entwurfStatus && <p role="status" className="text-sm font-semibold text-slate-600">{entwurfStatus}</p>}
+        {geaendert && <p className="text-sm font-bold text-[var(--bb-accent-ink)]">Ungespeicherte Änderungen – bitte vor dem Tagesabschluss prüfen.</p>}
         <div className="sticky bottom-4 z-20 rounded-[20px] border border-slate-200 bg-white/95 p-4 shadow-xl backdrop-blur">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div role="status" aria-live="polite" className={`text-sm font-bold ${meldung.startsWith("Bitte") ? "text-red-600" : "text-green-700"}`}>
@@ -441,7 +522,7 @@ export default function Journal() {
             <div className="flex gap-3">
               {abgeschlossen ? (
                 <>
-                  <button type="button" onClick={tagAbschliessen} className="bb-secondary-button">
+                  <button type="button" onClick={tagAbschliessen} disabled={ladeFehler} className="bb-secondary-button">
                     Änderungen speichern
                   </button>
                   <a href={`/baustellen/${id}`} className="bb-primary-button bb-button-link justify-center">
@@ -450,10 +531,10 @@ export default function Journal() {
                 </>
               ) : (
                 <>
-                  <button type="button" onClick={() => datenSpeichern(false)} className="bb-secondary-button">
+                  <button type="button" onClick={() => datenSpeichern(false)} disabled={ladeFehler} className="bb-secondary-button">
                     Entwurf speichern
                   </button>
-                  <button type="button" onClick={tagAbschliessen} className="bb-primary-button">
+                  <button type="button" onClick={tagAbschliessen} disabled={ladeFehler} className="bb-primary-button">
                     Tag abschliessen
                   </button>
                 </>
