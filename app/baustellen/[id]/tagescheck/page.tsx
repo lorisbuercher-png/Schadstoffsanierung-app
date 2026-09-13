@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { gueltigesDatum } from "../../../lib/documents";
 import AppShell from "../../../components/ui/AppShell";
 
 type CheckKey =
@@ -113,6 +114,7 @@ export default function TagescheckPage() {
   const [bemerkung, setBemerkung] = useState("");
   const [gespeichert, setGespeichert] = useState(false);
   const [meldung, setMeldung] = useState("");
+  const [ladeFehler, setLadeFehler] = useState(false);
 
   const storageKey = `tagescheck-${id}-${datum}`;
 
@@ -135,6 +137,7 @@ export default function TagescheckPage() {
   }, [id]);
 
   useEffect(() => {
+    setLadeFehler(false);
     setPruefungen(LEER);
     setBemerkung("");
     setGespeichert(false);
@@ -146,12 +149,16 @@ export default function TagescheckPage() {
       if (!raw) return;
 
       const daten: TagescheckDaten = JSON.parse(raw);
+      if (!daten || typeof daten !== "object" || !daten.pruefungen || typeof daten.pruefungen !== "object" ||
+          PRUEFUNGEN.some(p => typeof daten.pruefungen[p.key] !== "boolean")) throw new Error("Ungültiger Tagescheck");
 
       setPruefungen({ ...LEER, ...daten.pruefungen });
       setKontrolliertVon(daten.kontrolliertVon || "");
       setBemerkung(daten.bemerkung || "");
       setGespeichert(true);
     } catch {
+      setLadeFehler(true);
+      setMeldung("Tagescheck konnte nicht gelesen werden. Bitte die Seite erneut öffnen; Speichern ist zum Schutz der bisherigen Daten gesperrt.");
       setGespeichert(false);
     }
   }, [storageKey]);
@@ -185,6 +192,12 @@ export default function TagescheckPage() {
   }
 
   function speichern() {
+    if (ladeFehler) return;
+    setGespeichert(false);
+    if (!gueltigesDatum(datum)) {
+      setMeldung("Bitte ein gültiges Datum auswählen.");
+      return;
+    }
     if (!kontrolliertVon.trim()) {
       setMeldung("Bitte die kontrollierende Person eintragen.");
       return;
@@ -201,12 +214,17 @@ export default function TagescheckPage() {
       gespeichertAm: new Date().toISOString(),
     };
 
-    localStorage.setItem(storageKey, JSON.stringify(daten));
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(daten));
+    } catch {
+      setMeldung("Tagescheck nicht gespeichert. Bitte die Seite geöffnet lassen und erneut versuchen; der Gerätespeicher ist möglicherweise voll.");
+      return;
+    }
     setGespeichert(true);
 
     setMeldung(
       arbeitsbereit
-        ? "Tagescheck gespeichert – die Baustelle ist arbeitsbereit."
+        ? "Tagescheck gespeichert – alle Tagesprüfungen bestätigt. Weitere Freigaben werden beim Zonenzutritt geprüft."
         : "Tagescheck gespeichert – die Baustelle ist noch nicht arbeitsbereit."
     );
   }
@@ -224,11 +242,11 @@ export default function TagescheckPage() {
       action={
         <div
           className={`bb-daily-status ${
-            arbeitsbereit ? "ready" : "open"
+            gespeichert && arbeitsbereit ? "ready" : "open"
           }`}
         >
           <i />
-          {arbeitsbereit ? "Arbeitsbereit" : "Kontrolle offen"}
+          {gespeichert && arbeitsbereit ? "Tagescheck bestätigt" : "Kontrolle offen"}
         </div>
       }
     >
@@ -360,6 +378,7 @@ export default function TagescheckPage() {
               type="button"
               className="bb-primary-button bb-daily-save"
               onClick={speichern}
+              disabled={ladeFehler}
             >
               {gespeichert
                 ? "✓ Tagescheck gespeichert"
