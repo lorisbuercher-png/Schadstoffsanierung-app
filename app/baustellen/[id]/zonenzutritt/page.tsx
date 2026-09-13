@@ -1,23 +1,13 @@
 "use client";
 
 import { buchungAblegen, buchungenLesen } from "../../../lib/bookings";
+import Link from "next/link";
+import { baustellenTeam, zonenPersonen, TeamPerson } from "../../../lib/siteTeam";
 import AppShell from "../../../components/ui/AppShell";
 import { gespeicherteFreigabe, personenInZone } from "../../../lib/workflow";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-
-type Mitarbeiter = {
-  id: string;
-  name: string;
-};
-
-type GespeicherterMitarbeiter = {
-  id?: string | number;
-  name?: string;
-  vorname?: string;
-  nachname?: string;
-};
 
 type Zutritt = {
   id: string;
@@ -29,19 +19,12 @@ type Zutritt = {
   manuell?: boolean;
 };
 
-const demoMitarbeiter: Mitarbeiter[] = [
-  { id: "m1", name: "Rolf Bächler" },
-  { id: "m2", name: "Marco Steiner" },
-  { id: "m3", name: "Lukas Baumann" },
-  { id: "m4", name: "Arben Krasniqi" },
-];
-
 export default function ZonenzutrittPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
 
   const [mitarbeiter, setMitarbeiter] =
-    useState<Mitarbeiter[]>(demoMitarbeiter);
+    useState<TeamPerson[]>([]);
 
   const [auswahl, setAuswahl] = useState("");
   const [eintraege, setEintraege] = useState<Zutritt[]>([]);
@@ -56,37 +39,29 @@ export default function ZonenzutrittPage() {
   const storageKey = `zonenzutritt-${id}-${heute}`;
 
   useEffect(() => {
-    try {
-      setEintraege(buchungenLesen<Zutritt>(localStorage, storageKey));
-      setMeldung("");
-    } catch {
-      setMeldung("Buchungen konnten nicht geladen werden. Bitte die Seite neu laden; bestehende Daten werden nicht überschrieben.");
-    }
-
-    const gespeicherteMitarbeiter = localStorage.getItem("mitarbeiter");
-
-    if (gespeicherteMitarbeiter) {
+    function laden() {
       try {
-        const daten = JSON.parse(gespeicherteMitarbeiter);
-
-        if (Array.isArray(daten) && daten.length > 0) {
-          const normalisiert = daten.map(
-            (m: GespeicherterMitarbeiter, index: number) => {
-              const vollerName =
-                m.name || `${m.vorname ?? ""} ${m.nachname ?? ""}`.trim();
-
-              return {
-                id: String(m.id ?? index),
-                name: vollerName || `Mitarbeiter ${index + 1}`,
-              };
-            }
-          );
-
-          setMitarbeiter(normalisiert);
-        }
-      } catch {}
+        setEintraege(buchungenLesen<Zutritt>(localStorage, storageKey));
+      } catch {
+        setMeldung("Buchungen konnten nicht geladen werden. Bitte die Seite neu laden; bestehende Daten werden nicht überschrieben.");
+      }
+      try {
+        setMitarbeiter(baustellenTeam(localStorage, id));
+      } catch {
+        setMitarbeiter([]);
+        setMeldung("Das Baustellenteam konnte nicht gelesen werden. Bereits anwesende Personen können weiterhin ausgecheckt werden.");
+      }
     }
-  }, [storageKey]);
+    laden();
+    function aktualisieren(event: StorageEvent) {
+      if (event.key === null || [storageKey, "mitarbeiter", `baustellen-mitarbeiter-${id}`].includes(event.key)) laden();
+    }
+    window.addEventListener("storage", aktualisieren);
+    return () => window.removeEventListener("storage", aktualisieren);
+  }, [storageKey, id]);
+
+  const auswahlPersonen = useMemo(() => zonenPersonen(mitarbeiter, personenInZone(eintraege), eintraege), [mitarbeiter, eintraege]);
+  const gewaehltePerson = auswahlPersonen.find(person => person.id === auswahl);
 
   function speichern(eintrag: Zutritt) {
     try {
@@ -94,6 +69,7 @@ export default function ZonenzutrittPage() {
       if (heuteAktuell !== heute) throw new Error("Der Tag hat gewechselt. Bitte die Seite neu laden.");
       const neu = buchungAblegen(localStorage, `zonenzutritt-${id}-${heuteAktuell}`, eintrag, (aktuell) => {
         if (eintrag.typ === "eintritt") {
+          if (!baustellenTeam(localStorage, id).some(person => person.id === eintrag.mitarbeiterId)) throw new Error("Diese Person ist der Baustelle nicht mehr aktiv zugeteilt.");
           const freigabe = gespeicherteFreigabe(localStorage, id, heuteAktuell);
           if (!freigabe.bereit) throw new Error(freigabe.gruende.map(g => g.text).join(" · "));
           if (!eintrag.manuell && personenInZone(aktuell).includes(eintrag.mitarbeiterId)) throw new Error("Diese Person ist bereits eingecheckt.");
@@ -109,7 +85,7 @@ export default function ZonenzutrittPage() {
   }
 
   function buchen(typ: "eintritt" | "austritt") {
-    const person = mitarbeiter.find((m) => m.id === auswahl);
+    const person = auswahlPersonen.find((m) => m.id === auswahl);
 
     if (!person) {
       alert("Bitte zuerst einen Mitarbeiter auswählen.");
@@ -134,7 +110,7 @@ export default function ZonenzutrittPage() {
   }
 
   function nachtragen() {
-    const person = mitarbeiter.find((m) => m.id === auswahl);
+    const person = auswahlPersonen.find((m) => m.id === auswahl);
 
     if (!person) {
       alert("Bitte zuerst einen Mitarbeiter auswählen.");
@@ -171,8 +147,8 @@ export default function ZonenzutrittPage() {
 
   const aktuelleZone = useMemo(() => {
     const ids = personenInZone(eintraege);
-    return mitarbeiter.filter((person) => ids.includes(person.id));
-  }, [eintraege, mitarbeiter]);
+    return auswahlPersonen.filter((person) => ids.includes(person.id));
+  }, [eintraege, auswahlPersonen]);
 
   return (
     <AppShell
@@ -187,6 +163,10 @@ export default function ZonenzutrittPage() {
       <div className="bb-workspace max-w-6xl space-y-5">
         {meldung && <p role="status" className="bb-card p-4 text-sm font-semibold">{meldung}</p>}
 
+        <div className="bb-card p-4 text-sm">
+          {mitarbeiter.length ? `${mitarbeiter.length} Mitarbeitende der Baustelle zugeteilt.` : "Noch kein aktives Baustellenteam zugeteilt."}
+          {" "}<Link href={`/baustellen/${id}/mitarbeiter`} className="font-bold underline">Team zuweisen →</Link>
+        </div>
         <section className="rounded-[18px] border border-slate-200 bg-white p-6 text-slate-900">
 
           <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
@@ -209,9 +189,9 @@ export default function ZonenzutrittPage() {
                   Mitarbeiter auswählen...
                 </option>
 
-                {mitarbeiter.map((person) => (
+                {auswahlPersonen.map((person) => (
                   <option key={person.id} value={person.id}>
-                    {person.name}
+                    {person.name}{person.nurAustritt ? " · nur Austritt" : ""}
                   </option>
                 ))}
               </select>
@@ -222,6 +202,7 @@ export default function ZonenzutrittPage() {
               <button
                 type="button"
                 onClick={() => buchen("eintritt")}
+                disabled={!gewaehltePerson || gewaehltePerson.nurAustritt}
                 className="min-w-[150px] rounded-xl bg-[var(--bb-accent)] px-6 py-4 font-semibold text-[var(--bb-on-accent)] hover:bg-[var(--bb-accent-hover)]"
               >
                 → Eintritt
@@ -230,6 +211,7 @@ export default function ZonenzutrittPage() {
               <button
                 type="button"
                 onClick={() => buchen("austritt")}
+                disabled={!gewaehltePerson}
                 className="min-w-[150px] rounded-xl bg-white px-6 py-4 font-semibold text-black hover:bg-slate-100"
               >
                 ← Austritt
@@ -398,7 +380,7 @@ export default function ZonenzutrittPage() {
                 Mitarbeiter auswählen...
               </option>
 
-              {mitarbeiter.map((person) => (
+              {auswahlPersonen.map((person) => (
                 <option key={person.id} value={person.id}>
                   {person.name}
                 </option>
