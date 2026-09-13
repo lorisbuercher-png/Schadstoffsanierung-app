@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import { dateiLesen } from "../../../lib/documents";
+import { zonenplanAblegen, ZonenplanDatei } from "../../../lib/zonenplan";
 import AppShell from "../../../components/ui/AppShell";
 
 type Baustelle = {
@@ -11,35 +13,19 @@ type Baustelle = {
   projektname: string;
 };
 
-type ZonenplanDatei = {
-  id: string;
-  name: string;
-  type: "image/png" | "application/pdf";
-  size: number;
-  dataUrl: string;
-  hochgeladenAm: string;
-};
-
-type Dokument = {
-  id: string;
-  name: string;
-  ordnerId: string;
-  datum: string;
-  groesse?: string;
-  typ?: string;
-};
-
 const MAX_DATEIGROESSE = 4 * 1024 * 1024;
 
 export default function Zonenplan() {
   const params = useParams<{ id: string }>();
   const id = params.id;
   const inputRef = useRef<HTMLInputElement>(null);
+  const busyRef = useRef(false);
 
   const [baustelle, setBaustelle] = useState<Baustelle | null>(null);
   const [plan, setPlan] = useState<ZonenplanDatei | null>(null);
   const [status, setStatus] = useState<"leer" | "speichert" | "gespeichert">("leer");
   const [fehler, setFehler] = useState("");
+  const [ladeFehler, setLadeFehler] = useState(false);
 
   useEffect(() => {
     const alle = JSON.parse(localStorage.getItem("baustellen") || "[]") as Baustelle[];
@@ -53,52 +39,23 @@ export default function Zonenplan() {
         setStatus("gespeichert");
       }
     } catch {
+      setLadeFehler(true);
       setFehler("Der gespeicherte Zonenplan konnte nicht geladen werden.");
     }
   }, [id]);
 
-  function dokumentEintragen(datei: ZonenplanDatei) {
-    const key = `dokumente-${id}`;
-    let dokumente: Dokument[] = [];
-
-    try {
-      const gespeichert = JSON.parse(localStorage.getItem(key) || "[]");
-      dokumente = Array.isArray(gespeichert) ? gespeichert : [];
-    } catch {}
-
-    const ohneAltenPlan = dokumente.filter(
-      (dokument) => dokument.ordnerId !== "zonenplan"
-    );
-
-    const dokument: Dokument = {
-      id: datei.id,
-      name: datei.name,
-      ordnerId: "zonenplan",
-      datum: new Date(datei.hochgeladenAm).toLocaleDateString("de-CH"),
-      groesse: groesseFormatieren(datei.size),
-      typ: datei.type,
-    };
-
-    localStorage.setItem(key, JSON.stringify([dokument, ...ohneAltenPlan]));
-  }
-
   function dateiSpeichern(datei: ZonenplanDatei) {
-    setStatus("speichert");
-    localStorage.setItem(
-      `zonenplan-${id}`,
-      JSON.stringify({ datei, aktualisiertAm: new Date().toISOString() })
-    );
-    dokumentEintragen(datei);
+    zonenplanAblegen(localStorage, id, datei, plan?.id ?? null);
     setPlan(datei);
     setStatus("gespeichert");
   }
 
-  function dateiAuswaehlen(event: React.ChangeEvent<HTMLInputElement>) {
+  async function dateiAuswaehlen(event: React.ChangeEvent<HTMLInputElement>) {
     const datei = event.target.files?.[0];
     event.target.value = "";
     setFehler("");
 
-    if (!datei) return;
+    if (!datei || busyRef.current || ladeFehler) return;
 
     if (datei.type !== "image/png" && datei.type !== "application/pdf") {
       setFehler("Bitte den fertigen Zonenplan als PNG oder PDF auswählen.");
@@ -110,37 +67,33 @@ export default function Zonenplan() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onerror = () => setFehler("Die Datei konnte nicht gelesen werden.");
-    reader.onload = () => {
+    busyRef.current = true;
+    setStatus("speichert");
+    try {
       dateiSpeichern({
-        id: crypto.randomUUID(),
-        name: datei.name,
-        type: datei.type as ZonenplanDatei["type"],
-        size: datei.size,
-        dataUrl: reader.result as string,
-        hochgeladenAm: new Date().toISOString(),
+        id: crypto.randomUUID(), name: datei.name,
+        type: datei.type as ZonenplanDatei["type"], size: datei.size,
+        dataUrl: await dateiLesen(datei), hochgeladenAm: new Date().toISOString(),
       });
-    };
-    reader.readAsDataURL(datei);
+    } catch {
+      setFehler("Der Plan konnte nicht vollständig gespeichert werden. Bitte eine kleinere Datei verwenden oder die Seite neu laden und erneut versuchen.");
+      setStatus(plan ? "gespeichert" : "leer");
+    } finally {
+      busyRef.current = false;
+    }
   }
 
   function planEntfernen() {
-    if (!confirm("Soll der Zonenplan wirklich entfernt werden?")) return;
-
-    localStorage.removeItem(`zonenplan-${id}`);
-
-    const dokumentKey = `dokumente-${id}`;
+    if (busyRef.current || ladeFehler) return;
+    if (!confirm("Soll der aktive Zonenplan entfernt werden? Weitere Dateien im Ordner bleiben erhalten.")) return;
+    setFehler("");
     try {
-      const dokumente = JSON.parse(localStorage.getItem(dokumentKey) || "[]") as Dokument[];
-      localStorage.setItem(
-        dokumentKey,
-        JSON.stringify(dokumente.filter((dokument) => dokument.ordnerId !== "zonenplan"))
-      );
-    } catch {}
-
-    setPlan(null);
-    setStatus("leer");
+      zonenplanAblegen(localStorage, id, null, plan?.id ?? null);
+      setPlan(null);
+      setStatus("leer");
+    } catch {
+      setFehler("Der Plan konnte nicht vollständig entfernt werden. Bitte die Seite neu laden und erneut versuchen.");
+    }
   }
 
   if (!baustelle) {
@@ -196,6 +149,7 @@ export default function Zonenplan() {
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
+              disabled={status === "speichert" || ladeFehler}
               className="bb-primary-button mt-6"
             >
               PDF oder PNG auswählen
@@ -211,12 +165,15 @@ export default function Zonenplan() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={() => inputRef.current?.click()} className="bb-secondary-button">
+                <a href={plan.dataUrl} download={plan.name} className="bb-secondary-button">Herunterladen</a>
+                <button type="button" onClick={() => inputRef.current?.click()}
+              disabled={status === "speichert" || ladeFehler} className="bb-secondary-button">
                   Plan ersetzen
                 </button>
                 <button
                   type="button"
                   onClick={planEntfernen}
+                  disabled={status === "speichert" || ladeFehler}
                   className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50"
                 >
                   Entfernen
@@ -251,6 +208,7 @@ export default function Zonenplan() {
           type="file"
           accept="image/png,application/pdf,.png,.pdf"
           onChange={dateiAuswaehlen}
+          disabled={status === "speichert" || ladeFehler}
           className="hidden"
         />
       </div>
