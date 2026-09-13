@@ -5,14 +5,8 @@ import AppShell from "../../../components/ui/AppShell";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 
-type Dokument = {
-  id: string;
-  name: string;
-  ordnerId: string;
-  datum: string;
-  groesse?: string;
-  typ?: string;
-};
+import Link from "next/link";
+import { AblageDokument as Dokument, dateiInhalt, dateiLesen, dokumentZiel } from "../../../lib/documents";
 
 type Ordner = {
   id: string;
@@ -110,49 +104,84 @@ export default function DokumentePage() {
   const [aktiverOrdner, setAktiverOrdner] = useState<string | null>(null);
   const [suche, setSuche] = useState("");
 
+  const [meldung, setMeldung] = useState("");
+  const [busy, setBusy] = useState(false);
+
   const storageKey = `dokumente-${id}`;
 
   useEffect(() => {
-    const gespeichert = localStorage.getItem(storageKey);
-
-    if (gespeichert) {
-      try {
-        const daten = JSON.parse(gespeichert);
-
-        if (Array.isArray(daten)) {
-          setDokumente(daten);
-        }
-      } catch {}
+    try {
+      const daten = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      if (!Array.isArray(daten)) throw new Error("Ungültige Ablage");
+      setDokumente(daten);
+    } catch {
+      setMeldung("Die Dokumentablage konnte nicht gelesen werden. Bitte die Seite erneut öffnen.");
     }
   }, [storageKey]);
 
-  function speichern(neu: Dokument[]) {
-    setDokumente(neu);
-    localStorage.setItem(storageKey, JSON.stringify(neu));
+  function speichern(aendern: (aktuell: Dokument[]) => Dokument[]) {
+    try {
+      const aktuell = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      if (!Array.isArray(aktuell)) throw new Error("Ungültige Ablage");
+      const neu = aendern(aktuell);
+      localStorage.setItem(storageKey, JSON.stringify(neu));
+      setDokumente(neu);
+      return true;
+    } catch {
+      setMeldung("Speichern fehlgeschlagen. Die bisherige Ablage bleibt erhalten. Bitte kleinere Dateien verwenden oder den Speicher prüfen.");
+      return false;
+    }
   }
 
-  function dateiHinzufuegen(
-    event: React.ChangeEvent<HTMLInputElement>,
-    ordnerId: string
-  ) {
-    const dateien = event.target.files;
-
-    if (!dateien || dateien.length === 0) {
+  async function dateiHinzufuegen(event: React.ChangeEvent<HTMLInputElement>, ordnerId: string) {
+    const input = event.target;
+    const dateien = Array.from(input.files || []);
+    if (!dateien.length) return;
+    setMeldung("");
+    if (dateien.some((datei) => datei.size > 4 * 1024 * 1024)) {
+      setMeldung("Bitte Dateien bis maximal 4 MB pro Datei auswählen.");
+      input.value = "";
       return;
     }
+    setBusy(true);
+    try {
+      const neueDokumente: Dokument[] = [];
+      for (const datei of dateien) {
+        neueDokumente.push({
+          id: crypto.randomUUID(), name: datei.name, ordnerId,
+          datum: new Date().toLocaleDateString("de-CH"),
+          groesse: `${(datei.size / 1024 / 1024).toFixed(1)} MB`,
+          typ: datei.type || "Datei", dataUrl: await dateiLesen(datei),
+        });
+      }
+      if (speichern((aktuell) => [...neueDokumente, ...aktuell])) setMeldung(`${neueDokumente.length} Datei(en) gespeichert.`);
+    } catch {
+      setMeldung("Die Dateien konnten nicht gelesen werden. Bitte erneut auswählen.");
+    } finally {
+      input.value = "";
+      setBusy(false);
+    }
+  }
 
-    const neueDokumente: Dokument[] = Array.from(dateien).map((datei) => ({
-      id: crypto.randomUUID(),
-      name: datei.name,
-      ordnerId,
-      datum: new Date().toLocaleDateString("de-CH"),
-      groesse: `${(datei.size / 1024 / 1024).toFixed(1)} MB`,
-      typ: datei.type || "Datei",
-    }));
-
-    speichern([...neueDokumente, ...dokumente]);
-
-    event.target.value = "";
+  async function herunterladen(dokument: Dokument) {
+    const inhalt = dateiInhalt(localStorage, id, dokument);
+    if (!inhalt) {
+      setMeldung("Für diese ältere Ablage fehlt der Dateiinhalt. Bitte die Originaldatei erneut hochladen.");
+      return;
+    }
+    try {
+      const blob = await (await fetch(inhalt)).blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = dokument.name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+    } catch {
+      setMeldung("Die Datei konnte nicht heruntergeladen werden. Bitte erneut versuchen.");
+    }
   }
 
   function loeschen(dokumentId: string) {
@@ -162,9 +191,7 @@ export default function DokumentePage() {
 
     if (!bestaetigt) return;
 
-    speichern(
-      dokumente.filter((dokument) => dokument.id !== dokumentId)
-    );
+    if (speichern((aktuell) => aktuell.filter((dokument) => dokument.id !== dokumentId))) setMeldung("Eintrag aus der Ablage entfernt.");
   }
 
   const gefilterteDokumente = useMemo(() => {
@@ -195,6 +222,7 @@ export default function DokumentePage() {
       
 
       <div className="bb-workspace max-w-[1500px] space-y-5">
+        {meldung && <p role="status" className="bb-card p-4 text-sm">{meldung}</p>}
 
         <section className="rounded-[18px] border border-slate-200 bg-white p-6 text-slate-900">
 
@@ -338,7 +366,7 @@ export default function DokumentePage() {
                   value={suche}
                   onChange={(e) => setSuche(e.target.value)}
                   placeholder="Dokument suchen..."
-                  className="min-w-[260px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[var(--bb-accent)]"
+                  className="w-full md:w-auto md:min-w-[260px] rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-[var(--bb-accent)]"
                 />
 
               </div>
@@ -364,11 +392,12 @@ export default function DokumentePage() {
                   </div>
 
                   <label className="cursor-pointer rounded-xl bg-[var(--bb-accent)] px-5 py-3 text-sm font-semibold text-[var(--bb-on-accent)] hover:bg-[var(--bb-accent-hover)]">
-                    + Datei hinzufügen
+                    {busy ? "Dateien werden gespeichert …" : "+ Datei hinzufügen"}
 
                     <input
                       type="file"
                       multiple
+                      disabled={busy}
                       onChange={(event) =>
                         dateiHinzufuegen(event, aktuellerOrdner.id)
                       }
@@ -390,7 +419,7 @@ export default function DokumentePage() {
 
             <section className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm">
 
-              <div className="grid grid-cols-[1fr_160px_120px_70px] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+              <div className="hidden md:grid md:grid-cols-[minmax(0,1fr)_160px_120px_50px] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
                 <span>Dokument</span>
                 <span>Ordner</span>
                 <span>Datum</span>
@@ -423,7 +452,7 @@ export default function DokumentePage() {
                 return (
                   <div
                     key={dokument.id}
-                    className="grid grid-cols-[1fr_160px_120px_70px] items-center gap-4 border-b border-slate-100 px-5 py-4 last:border-b-0"
+                    className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_160px_120px_50px] items-center gap-4 border-b border-slate-100 px-5 py-4 last:border-b-0"
                   >
 
                     <div className="flex min-w-0 items-center gap-3">
@@ -437,6 +466,10 @@ export default function DokumentePage() {
                         <strong className="block truncate text-sm">
                           {dokument.name}
                         </strong>
+                        <div className="mt-2 flex flex-wrap gap-3 text-xs font-bold">
+                          {dokumentZiel(id, dokument) && <Link className="underline" href={dokumentZiel(id, dokument)!}>Journal öffnen →</Link>}
+                          {dokument.typ !== "Baustellenjournal" && <button type="button" onClick={() => herunterladen(dokument)} className="underline">Herunterladen</button>}
+                        </div>
 
                         <span className="text-xs text-slate-500">
                           {dokument.groesse}
@@ -457,6 +490,7 @@ export default function DokumentePage() {
                     <button
                       type="button"
                       onClick={() => loeschen(dokument.id)}
+                      aria-label={`${dokument.name} aus der Ablage entfernen`}
                       className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-red-50 hover:text-red-600"
                     >
                       ×

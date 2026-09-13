@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import FileUpload, { DateiEintrag } from "../../../components/FileUpload";
+import { gueltigesDatum } from "../../../lib/documents";
 import { stundenBerechnen, zeitFehler, journalAblegen } from "../../../lib/journal";
 import { personenInZone } from "../../../lib/workflow";
 import AppShell from "../../../components/ui/AppShell";
@@ -72,10 +73,12 @@ function leereArbeitszeit(mitarbeiter?: Mitarbeiter): Arbeitszeit {
 export default function Journal() {
   const params = useParams<{ id: string }>();
   const id = params.id;
+  const searchParams = useSearchParams();
+  const gewaehltesDatum = searchParams.get("datum");
 
   const [baustelle, setBaustelle] = useState<Baustelle | null>(null);
   const [team, setTeam] = useState<Mitarbeiter[]>([]);
-  const [datum, setDatum] = useState(heuteIso);
+  const [datum, setDatum] = useState(() => gueltigesDatum(gewaehltesDatum) ? gewaehltesDatum : heuteIso());
   const [zone, setZone] = useState("");
   const [vorarbeiter, setVorarbeiter] = useState("");
   const [arbeit, setArbeit] = useState("");
@@ -85,6 +88,10 @@ export default function Journal() {
   const [anhaenge, setAnhaenge] = useState<DateiEintrag[]>([]);
   const [abgeschlossen, setAbgeschlossen] = useState(false);
   const [meldung, setMeldung] = useState("");
+
+  useEffect(() => {
+    if (gueltigesDatum(gewaehltesDatum)) setDatum(gewaehltesDatum);
+  }, [gewaehltesDatum]);
 
   useEffect(() => {
     const alle = JSON.parse(localStorage.getItem("baustellen") || "[]") as Baustelle[];
