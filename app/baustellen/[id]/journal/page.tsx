@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import FileUpload, { DateiEintrag } from "../../../components/FileUpload";
+import { stundenBerechnen, zeitFehler, journalAblegen } from "../../../lib/journal";
+import { personenInZone } from "../../../lib/workflow";
 import AppShell from "../../../components/ui/AppShell";
 
 type Arbeitszeit = {
@@ -108,7 +110,7 @@ export default function Journal() {
       const alt = datum === heuteIso()
         ? JSON.parse(localStorage.getItem(`journal-${id}`) || "null")
         : null;
-      const daten = gespeichert || alt;
+      const daten = gespeichert || (alt?.datum === datum ? alt : null);
 
       if (daten) {
         setZone(daten.zone || "");
@@ -163,6 +165,10 @@ export default function Journal() {
   }
 
   function datenSpeichern(istAbgeschlossen: boolean) {
+    if (!datum) {
+      setMeldung("Bitte ein Datum auswählen.");
+      return;
+    }
     const daten = {
       datum,
       zone,
@@ -176,9 +182,12 @@ export default function Journal() {
       aktualisiertAm: new Date().toISOString(),
     };
 
-    localStorage.setItem(`journal-${id}-${datum}`, JSON.stringify(daten));
-    localStorage.removeItem(`journal-${id}`);
-    dokumenteAktualisieren(istAbgeschlossen);
+    try {
+      journalAblegen(localStorage, `journal-${id}-${datum}`, daten, () => dokumenteAktualisieren(istAbgeschlossen));
+    } catch {
+      setMeldung("Bitte erneut speichern: Journal und Ablage konnten nicht vollständig gespeichert werden. Deine Eingaben bleiben hier erhalten. Bei vollem Speicher Anhänge verkleinern.");
+      return;
+    }
     setAbgeschlossen(istAbgeschlossen);
     setMeldung(istAbgeschlossen ? "Arbeitstag abgeschlossen und abgelegt." : "Entwurf gespeichert.");
   }
@@ -189,8 +198,9 @@ export default function Journal() {
 
     try {
       const gespeichert = JSON.parse(localStorage.getItem(key) || "[]");
-      dokumente = Array.isArray(gespeichert) ? gespeichert : [];
-    } catch {}
+      if (!Array.isArray(gespeichert)) throw new Error("Ungültige Dokumentablage");
+      dokumente = gespeichert;
+    } catch { throw new Error("Dokumentablage konnte nicht gelesen werden"); }
 
     const journalId = `journal-${id}-${datum}`;
     const neueDokumente: Dokument[] = [
@@ -221,17 +231,15 @@ export default function Journal() {
   }
 
   function tagAbschliessen() {
-    const zeitenKomplett = arbeitszeiten.every(
-      (eintrag) => eintrag.name && eintrag.arbeitsbeginn && eintrag.arbeitsende
-    );
+    const fehlerhafterEintrag = arbeitszeiten.find((eintrag) => zeitFehler(eintrag));
 
-    if (!datum || !vorarbeiter || !arbeit.trim()) {
+    if (!datum || !vorarbeiter.trim() || !arbeit.trim()) {
       setMeldung("Bitte Datum, Vorarbeiter und ausgeführte Arbeiten ausfüllen.");
       return;
     }
 
-    if (!arbeitszeiten.length || !zeitenKomplett) {
-      setMeldung("Bitte die Arbeitszeiten aller Mitarbeitenden vollständig erfassen.");
+    if (!arbeitszeiten.length || fehlerhafterEintrag) {
+      setMeldung(fehlerhafterEintrag ? `${zeitFehler(fehlerhafterEintrag)} (${fehlerhafterEintrag.name || "Mitarbeiter ohne Name"})` : "Bitte die Arbeitszeiten aller Mitarbeitenden vollständig erfassen.");
       return;
     }
 
@@ -240,6 +248,17 @@ export default function Journal() {
       return;
     }
 
+    try {
+      const buchungen = JSON.parse(localStorage.getItem(`zonenzutritt-${id}-${datum}`) || "[]");
+      if (!Array.isArray(buchungen)) throw new Error("Ungültige Buchungen");
+      if (personenInZone(buchungen).length) {
+        setMeldung("Bitte zuerst alle Mitarbeitenden aus der Zone auschecken. Danach kannst du den Tag abschliessen.");
+        return;
+      }
+    } catch {
+      setMeldung("Bitte die Zonenbuchungen prüfen: Der Anwesenheitsstatus konnte nicht gelesen werden.");
+      return;
+    }
     datenSpeichern(true);
   }
 
@@ -409,13 +428,13 @@ export default function Journal() {
 
         <div className="sticky bottom-4 z-20 rounded-[20px] border border-slate-200 bg-white/95 p-4 shadow-xl backdrop-blur">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className={`text-sm font-bold ${meldung.startsWith("Bitte") ? "text-red-600" : "text-green-700"}`}>
+            <div role="status" aria-live="polite" className={`text-sm font-bold ${meldung.startsWith("Bitte") ? "text-red-600" : "text-green-700"}`}>
               {meldung || "Du kannst jederzeit als Entwurf speichern."}
             </div>
             <div className="flex gap-3">
               {abgeschlossen ? (
                 <>
-                  <button type="button" onClick={() => datenSpeichern(true)} className="bb-secondary-button">
+                  <button type="button" onClick={tagAbschliessen} className="bb-secondary-button">
                     Änderungen speichern
                   </button>
                   <a href={`/baustellen/${id}`} className="bb-primary-button bb-button-link justify-center">
@@ -519,15 +538,6 @@ function MiniFeld({ label, type, value, onChange }: { label: string; type: strin
       <input type={type} value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-xl border border-slate-300 px-3 py-2.5" />
     </div>
   );
-}
-
-function stundenBerechnen(eintrag: Arbeitszeit) {
-  if (!eintrag.arbeitsbeginn || !eintrag.arbeitsende) return 0;
-
-  const [startStunde, startMinute] = eintrag.arbeitsbeginn.split(":").map(Number);
-  const [endeStunde, endeMinute] = eintrag.arbeitsende.split(":").map(Number);
-  const minuten = endeStunde * 60 + endeMinute - (startStunde * 60 + startMinute) - Number(eintrag.pause || 0);
-  return Math.max(0, minuten / 60);
 }
 
 function groesseFormatieren(bytes: number) {

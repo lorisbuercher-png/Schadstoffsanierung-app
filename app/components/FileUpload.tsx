@@ -21,6 +21,7 @@ export default function FileUpload({
   onChange,
 }: Props) {
   const [busy, setBusy] = useState(false);
+  const [fehler, setFehler] = useState("");
 
   async function dateienVerarbeiten(
     event: React.ChangeEvent<HTMLInputElement>
@@ -28,31 +29,26 @@ export default function FileUpload({
     const dateien = Array.from(event.target.files || []);
     if (!dateien.length) return;
 
-    setBusy(true);
-
-    const neu: DateiEintrag[] = [];
-
-    for (const datei of dateien) {
-      const eintrag: DateiEintrag = {
-        id: crypto.randomUUID(),
-        name: datei.name,
-        type: datei.type,
-        size: datei.size,
-      };
-
-      if (
-        datei.type.startsWith("image/") &&
-        datei.size <= 4 * 1024 * 1024
-      ) {
-        eintrag.dataUrl = await zuDataUrl(datei);
-      }
-
-      neu.push(eintrag);
+    setFehler("");
+    if (dateien.some((datei) => !(datei.type.startsWith("image/") || datei.type === "application/pdf") || datei.size > 4 * 1024 * 1024)) {
+      setFehler("Bitte nur Bilder oder PDF-Dateien bis 4 MB pro Datei auswählen.");
+      event.target.value = "";
+      return;
     }
-
-    onChange([...value, ...neu]);
-    event.target.value = "";
-    setBusy(false);
+    const input = event.target;
+    setBusy(true);
+    try {
+      const neu: DateiEintrag[] = [];
+      for (const datei of dateien) {
+        neu.push({ id: crypto.randomUUID(), name: datei.name, type: datei.type, size: datei.size, dataUrl: await zuDataUrl(datei) });
+      }
+      onChange([...value, ...neu]);
+    } catch {
+      setFehler("Die Dateien konnten nicht gelesen werden. Bitte erneut auswählen.");
+    } finally {
+      input.value = "";
+      setBusy(false);
+    }
   }
 
   function entfernen(id: string) {
@@ -67,7 +63,7 @@ export default function FileUpload({
           {busy ? "Dateien werden vorbereitet …" : "Dateien hochladen"}
         </strong>
         <p>
-          Fotos, PDF-Dateien und Nachweise auswählen oder hier ablegen
+          Fotos und PDF-Dateien auswählen (max. 4 MB pro Datei). Danach das Formular speichern.
         </p>
         <span className="bb-upload-button">Dateien auswählen</span>
 
@@ -80,12 +76,14 @@ export default function FileUpload({
         />
       </label>
 
+      {fehler && <p role="alert" className="text-sm text-red-600">{fehler}</p>}
+
       {value.length > 0 && (
         <div className="bb-upload-list">
           {value.map((datei) => (
             <article key={datei.id} className="bb-upload-file">
               <div className="bb-upload-preview">
-                {datei.dataUrl ? (
+                {datei.dataUrl && datei.type.startsWith("image/") ? (
                   <Image
                     src={datei.dataUrl}
                     alt={datei.name}
@@ -101,6 +99,11 @@ export default function FileUpload({
               <div className="bb-upload-info">
                 <strong title={datei.name}>{datei.name}</strong>
                 <span>{groesseFormatieren(datei.size)}</span>
+                {datei.dataUrl ? (
+                  <a href={datei.dataUrl} download={datei.name} className="text-sm underline">Herunterladen</a>
+                ) : (
+                  <span className="text-red-600">Dateiinhalt fehlt – bitte erneut hochladen.</span>
+                )}
               </div>
 
               <button
