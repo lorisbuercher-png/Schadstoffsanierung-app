@@ -1,5 +1,6 @@
 "use client";
 
+import { buchungAblegen, buchungenLesen } from "../../../lib/bookings";
 import AppShell from "../../../components/ui/AppShell";
 import { gespeicherteFreigabe, personenInZone } from "../../../lib/workflow";
 
@@ -48,15 +49,18 @@ export default function ZonenzutrittPage() {
   const [nachtragTyp, setNachtragTyp] =
     useState<"eintritt" | "austritt">("eintritt");
 
+  const [meldung, setMeldung] = useState("");
+
   const heute = heuteKey();
 
   const storageKey = `zonenzutritt-${id}-${heute}`;
 
   useEffect(() => {
-    const gespeichert = localStorage.getItem(storageKey);
-
-    if (gespeichert) {
-      setEintraege(JSON.parse(gespeichert));
+    try {
+      setEintraege(buchungenLesen<Zutritt>(localStorage, storageKey));
+      setMeldung("");
+    } catch {
+      setMeldung("Buchungen konnten nicht geladen werden. Bitte die Seite neu laden; bestehende Daten werden nicht überschrieben.");
     }
 
     const gespeicherteMitarbeiter = localStorage.getItem("mitarbeiter");
@@ -84,9 +88,24 @@ export default function ZonenzutrittPage() {
     }
   }, [storageKey]);
 
-  function speichern(neu: Zutritt[]) {
-    setEintraege(neu);
-    localStorage.setItem(storageKey, JSON.stringify(neu));
+  function speichern(eintrag: Zutritt) {
+    try {
+      const heuteAktuell = heuteKey();
+      if (heuteAktuell !== heute) throw new Error("Der Tag hat gewechselt. Bitte die Seite neu laden.");
+      const neu = buchungAblegen(localStorage, `zonenzutritt-${id}-${heuteAktuell}`, eintrag, (aktuell) => {
+        if (eintrag.typ === "eintritt") {
+          const freigabe = gespeicherteFreigabe(localStorage, id, heuteAktuell);
+          if (!freigabe.bereit) throw new Error(freigabe.gruende.map(g => g.text).join(" · "));
+          if (!eintrag.manuell && personenInZone(aktuell).includes(eintrag.mitarbeiterId)) throw new Error("Diese Person ist bereits eingecheckt.");
+        }
+      });
+      setEintraege(neu);
+      setMeldung(`${eintrag.name}: ${eintrag.typ === "eintritt" ? "Eintritt" : "Austritt"} gespeichert.`);
+      return true;
+    } catch (fehler) {
+      setMeldung(`Buchung nicht gespeichert. ${fehler instanceof Error ? fehler.message : "Bitte erneut versuchen."}`);
+      return false;
+    }
   }
 
   function buchen(typ: "eintritt" | "austritt") {
@@ -94,19 +113,6 @@ export default function ZonenzutrittPage() {
 
     if (!person) {
       alert("Bitte zuerst einen Mitarbeiter auswählen.");
-      return;
-    }
-
-    if (typ === "eintritt") {
-      const freigabe = gespeicherteFreigabe(localStorage, id, heuteKey());
-      if (!freigabe.bereit) {
-        alert(freigabe.gruende.map((grund) => grund.text).join("\n"));
-        return;
-      }
-    }
-    const anwesend = personenInZone(eintraege).includes(person.id);
-    if (typ === "eintritt" && anwesend) {
-      alert(anwesend ? "Diese Person ist bereits eingecheckt." : "Diese Person ist nicht eingecheckt.");
       return;
     }
 
@@ -124,7 +130,7 @@ export default function ZonenzutrittPage() {
       timestamp: jetzt.toISOString(),
     };
 
-    speichern([neuerEintrag, ...eintraege]);
+    speichern(neuerEintrag);
   }
 
   function nachtragen() {
@@ -135,23 +141,20 @@ export default function ZonenzutrittPage() {
       return;
     }
 
-    if (!nachtragZeit) {
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(nachtragZeit)) {
       alert("Bitte eine Uhrzeit eingeben.");
       return;
-    }
-
-    if (nachtragTyp === "eintritt") {
-      const freigabe = gespeicherteFreigabe(localStorage, id, heuteKey());
-      if (!freigabe.bereit) {
-        alert(freigabe.gruende.map((grund) => grund.text).join("\n"));
-        return;
-      }
     }
 
     const datum = new Date();
     const [stunden, minuten] = nachtragZeit.split(":");
 
     datum.setHours(Number(stunden), Number(minuten), 0, 0);
+
+    if (datum.getTime() > Date.now()) {
+      setMeldung("Ein Nachtrag darf nicht in der Zukunft liegen.");
+      return;
+    }
 
     const neuerEintrag: Zutritt = {
       id: crypto.randomUUID(),
@@ -163,8 +166,7 @@ export default function ZonenzutrittPage() {
       manuell: true,
     };
 
-    speichern([neuerEintrag, ...eintraege]);
-    setNachtragZeit("");
+    if (speichern(neuerEintrag)) setNachtragZeit("");
   }
 
   const aktuelleZone = useMemo(() => {
@@ -183,6 +185,7 @@ export default function ZonenzutrittPage() {
       
 
       <div className="bb-workspace max-w-6xl space-y-5">
+        {meldung && <p role="status" className="bb-card p-4 text-sm font-semibold">{meldung}</p>}
 
         <section className="rounded-[18px] border border-slate-200 bg-white p-6 text-slate-900">
 
