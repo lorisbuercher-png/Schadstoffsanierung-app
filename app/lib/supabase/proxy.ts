@@ -1,11 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { zugelassenesProfil } from "../auth-policy";
 import { istSupabaseKonfiguriert, supabaseKonfiguration } from "./config";
 
 const OEFFENTLICHE_PFADE = ["/login", "/auth/callback", "/auth/auth-code-error"];
 
 export async function sessionAktualisieren(request: NextRequest) {
-  if (!istSupabaseKonfiguriert()) return NextResponse.next();
+  if (!istSupabaseKonfiguriert()) {
+    if (process.env.NODE_ENV !== "production" || process.env.BB_PREVIEW_MODE === "true" || OEFFENTLICHE_PFADE.includes(request.nextUrl.pathname)) return NextResponse.next();
+    const login = request.nextUrl.clone(); login.pathname = "/login"; login.search = "";
+    return NextResponse.redirect(login);
+  }
 
   const { url, key } = supabaseKonfiguration();
   let response = NextResponse.next({ request });
@@ -26,7 +31,13 @@ export async function sessionAktualisieren(request: NextRequest) {
   });
 
   const { data } = await supabase.auth.getClaims();
-  const angemeldet = Boolean(data?.claims);
+  let angemeldet = false;
+  let rolle = "";
+  if (data?.claims?.sub) {
+    const {data: profile} = await supabase.from("profile").select("aktiv,rolle").eq("id",data.claims.sub).single();
+    angemeldet = zugelassenesProfil(profile);
+    rolle = profile?.rolle || "";
+  }
   const pfad = request.nextUrl.pathname;
   const oeffentlich = OEFFENTLICHE_PFADE.some(
     (eintrag) => pfad === eintrag || pfad.startsWith(`${eintrag}/`)
@@ -37,6 +48,11 @@ export async function sessionAktualisieren(request: NextRequest) {
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", `${pfad}${request.nextUrl.search}`);
     return antwortMitCookies(NextResponse.redirect(loginUrl), response);
+  }
+
+  if (angemeldet && rolle !== "admin" && pfad === "/baustellen/neu") {
+    const ziel = request.nextUrl.clone(); ziel.pathname = "/baustellen"; ziel.search = "";
+    return antwortMitCookies(NextResponse.redirect(ziel), response);
   }
 
   if (angemeldet && pfad === "/login") {

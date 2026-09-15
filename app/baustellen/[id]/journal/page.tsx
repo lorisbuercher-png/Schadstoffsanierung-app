@@ -1,4 +1,5 @@
 "use client";
+import { appStorage, speichernBestaetigt } from "../../../lib/cloud-store";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
@@ -100,14 +101,14 @@ export default function Journal() {
   }, [gewaehltesDatum]);
 
   useEffect(() => {
-    const alle = JSON.parse(localStorage.getItem("baustellen") || "[]") as Baustelle[];
+    const alle = JSON.parse(appStorage.getItem("baustellen") || "[]") as Baustelle[];
     setBaustelle(alle.find((eintrag) => eintrag.id === id) || null);
 
     const alleMitarbeiter = JSON.parse(
-      localStorage.getItem("mitarbeiter") || "[]"
+      appStorage.getItem("mitarbeiter") || "[]"
     ) as Mitarbeiter[];
     const teamIds = JSON.parse(
-      localStorage.getItem(`baustellen-mitarbeiter-${id}`) || "[]"
+      appStorage.getItem(`baustellen-mitarbeiter-${id}`) || "[]"
     ) as string[];
     setTeam(alleMitarbeiter.filter((m) => teamIds.includes(m.id)));
   }, [id]);
@@ -122,13 +123,13 @@ export default function Journal() {
     const key = `journal-${id}-${datum}`;
 
     try {
-      const raw = localStorage.getItem(key);
+      const raw = appStorage.getItem(key);
       setBasis(raw);
       setGeladenKey(key);
       const gespeichert = JSON.parse(raw || "null");
-      const entwurf = entwurfLesen(localStorage, key);
+      const entwurf = entwurfLesen(appStorage, key);
       const alt = datum === heuteIso()
-        ? JSON.parse(localStorage.getItem(`journal-${id}`) || "null")
+        ? JSON.parse(appStorage.getItem(`journal-${id}`) || "null")
         : null;
       const daten = entwurf || gespeichert || (alt?.datum === datum ? alt : null);
       if (entwurf) {
@@ -172,7 +173,7 @@ export default function Journal() {
   useEffect(() => {
     if (!geaendert || ladeFehler || geladenKey !== `journal-${id}-${datum}`) return;
     try {
-      entwurfSichern(localStorage, geladenKey, basis, {
+      entwurfSichern(appStorage, geladenKey, basis, {
         datum, zone, vorarbeiter, arbeit, besonderheiten, arbeitszeiten,
         kontrolle, anhaenge, abgeschlossen,
       });
@@ -243,7 +244,7 @@ export default function Journal() {
     );
   }
 
-  function datenSpeichern(istAbgeschlossen: boolean) {
+  async function datenSpeichern(istAbgeschlossen: boolean) {
     if (ladeFehler || geladenKey !== `journal-${id}-${datum}`) return;
     if (!datum) {
       setMeldung("Bitte ein Datum auswählen.");
@@ -263,15 +264,16 @@ export default function Journal() {
     };
 
     try {
-      journalAblegen(localStorage, `journal-${id}-${datum}`, daten, () => dokumenteAktualisieren(istAbgeschlossen));
+      journalAblegen(appStorage, `journal-${id}-${datum}`, daten, () => dokumenteAktualisieren(istAbgeschlossen));
     } catch {
       setMeldung("Bitte erneut speichern: Journal und Ablage konnten nicht vollständig gespeichert werden. Deine Eingaben bleiben hier erhalten. Bei vollem Speicher Anhänge verkleinern.");
       return;
     }
+    if (!(await speichernBestaetigt())) return;
     setGeaendert(false);
     setEntwurfStatus("");
     setBasis(JSON.stringify(daten));
-    try { localStorage.removeItem(`entwurf-journal-${id}-${datum}`); } catch { /* Obsolete drafts are ignored when their base differs. */ }
+    try { appStorage.removeItem(`entwurf-journal-${id}-${datum}`); } catch { /* Obsolete drafts are ignored when their base differs. */ }
     setAbgeschlossen(istAbgeschlossen);
     setMeldung(istAbgeschlossen ? "Arbeitstag abgeschlossen und abgelegt." : "Entwurf gespeichert.");
   }
@@ -281,7 +283,7 @@ export default function Journal() {
     let dokumente: Dokument[] = [];
 
     try {
-      const gespeichert = JSON.parse(localStorage.getItem(key) || "[]");
+      const gespeichert = JSON.parse(appStorage.getItem(key) || "[]");
       if (!Array.isArray(gespeichert)) throw new Error("Ungültige Dokumentablage");
       dokumente = gespeichert;
     } catch { throw new Error("Dokumentablage konnte nicht gelesen werden"); }
@@ -305,7 +307,7 @@ export default function Journal() {
       })),
     ];
 
-    localStorage.setItem(
+    appStorage.setItem(
       key,
       JSON.stringify([
         ...neueDokumente,
@@ -333,7 +335,7 @@ export default function Journal() {
     }
 
     try {
-      const buchungen = JSON.parse(localStorage.getItem(`zonenzutritt-${id}-${datum}`) || "[]");
+      const buchungen = JSON.parse(appStorage.getItem(`zonenzutritt-${id}-${datum}`) || "[]");
       if (!Array.isArray(buchungen)) throw new Error("Ungültige Buchungen");
       if (personenInZone(buchungen).length) {
         setMeldung("Bitte zuerst alle Mitarbeitenden aus der Zone auschecken. Danach kannst du den Tag abschliessen.");

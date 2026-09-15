@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# B&B Arbeitsportal
 
-## Getting Started
+Next.js-App für Geschäftsleitung und Vorarbeiter. Gemeinsame Baustellenakte,
+Tagescheck, Journal, Zonenzutritt, Zonenplan, Team, Geräte und Dokumente.
 
-First, run the development server:
+## Entwicklung und Prüfung
 
-```bash
+```sh
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm test
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ohne Supabase-Konfiguration arbeitet `next dev` lokal mit vorhandenen Browserdaten.
+Produktionsstarts ohne Supabase leiten auf die gesperrte Anmeldeseite um.
+Nur für eine ausdrücklich isolierte Vorschau: `BB_PREVIEW_MODE=true`.
+Dieser Wert darf beim produktiven Deployment nicht gesetzt sein.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Produktiver Aufbau
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Microsoft Entra (Single Tenant) → Supabase Auth → aktives B&B-Profil.
+`admin` verwaltet Stammdaten und Teams, `vorarbeiter` bearbeitet Arbeitsunterlagen.
+Beide Rollen sehen Baustellen ihrer Organisation. Die Rolle `mitarbeiter` hat in
+diesem Release keinen Portalzugang. Eine Baustellenzuweisung ist eine Teamzuordnung,
+keine zusätzliche Sichtbarkeitsgrenze.
 
-## Learn More
+Alle Arbeitsdaten laufen bei konfiguriertem Supabase über `app_records` und die
+transaktionale Funktion `save_app_records`. Die Tabellen aus Migration 001 sind
+für eine spätere Normalisierung reserviert und kein paralleler Schreibpfad.
+Dateiinhalte werden derzeit im jeweiligen JSON-Datensatz gespeichert (4 MB pro
+Datei, 20 MB pro Datensatz). Für grosse Dokumentbestände ist eine spätere Auslagerung
+in den privaten Storage-Bucket nötig. SharePoint ist noch keine aktive Synchronisierung.
 
-To learn more about Next.js, take a look at the following resources:
+Schreibzugriffe prüfen Organisation, Profil, Rolle und Datensatzversion in PostgreSQL.
+Ein Schreibvorgang aktualisiert Journal und Ablage gemeinsam. Wiederholte Anfragen
+mit derselben ID erzeugen keine zweite Version. Bei Konflikten wird nicht automatisch
+überschrieben; der Benutzer kann seine Eingaben sichern und den aktuellen Stand laden.
+Zwischenstände des Journals bleiben im Produktivmodus pro Nutzer im aktuellen Browsertab.
+Arbeitsdaten fallen bei Cloud-Fehlern nicht auf einen lokalen Parallelbestand zurück.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Inbetriebnahme
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Siehe [Launch-Protokoll](docs/LAUNCH.md) und
+[Microsoft-Anmeldung](docs/MICROSOFT_LOGIN_EINRICHTEN.md).

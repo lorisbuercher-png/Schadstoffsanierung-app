@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage } from "../lib/cloud-store";
+
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "../components/ui/AppShell";
 
@@ -64,7 +66,7 @@ export default function GeraeteUebersicht() {
   useEffect(() => {
     try {
       const baustellen = JSON.parse(
-        localStorage.getItem("baustellen") || "[]"
+        appStorage.getItem("baustellen") || "[]"
       );
 
       if (!Array.isArray(baustellen)) return;
@@ -74,7 +76,7 @@ export default function GeraeteUebersicht() {
       for (const baustelle of baustellen as Baustelle[]) {
         try {
           const liste = JSON.parse(
-            localStorage.getItem(
+            appStorage.getItem(
               `geraete-${baustelle.id}`
             ) || "[]"
           );

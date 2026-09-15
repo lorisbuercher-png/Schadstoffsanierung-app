@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage } from "../../../lib/cloud-store";
+
 import AppShell from "../../../components/ui/AppShell";
 
 import { useEffect, useMemo, useState } from "react";
@@ -40,7 +42,7 @@ export default function MaengelPage() {
   const storageKey = `maengel-${id}`;
 
   useEffect(() => {
-    const raw = localStorage.getItem(storageKey);
+    const raw = appStorage.getItem(storageKey);
 
     if (raw) {
       try {
@@ -52,7 +54,7 @@ export default function MaengelPage() {
 
   function speichern(neu: Mangel[]) {
     setMaengel(neu);
-    localStorage.setItem(storageKey, JSON.stringify(neu));
+    appStorage.setItem(storageKey, JSON.stringify(neu));
   }
 
   function mangelErstellen() {
@@ -110,7 +112,7 @@ export default function MaengelPage() {
       mangel?.suvaPunkt
     ) {
       const auditKey = `suva-audit-${id}`;
-      const raw = localStorage.getItem(auditKey);
+      const raw = appStorage.getItem(auditKey);
 
       if (raw) {
         try {
@@ -125,7 +127,7 @@ export default function MaengelPage() {
                 "\nMassnahme behoben – Nachkontrolle erforderlich.",
             };
 
-            localStorage.setItem(
+            appStorage.setItem(
               auditKey,
               JSON.stringify(audit)
             );

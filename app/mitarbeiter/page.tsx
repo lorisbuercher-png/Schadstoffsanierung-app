@@ -1,5 +1,7 @@
 "use client";
 
+import { cloudState, appStorage } from "../lib/cloud-store";
+
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "../components/ui/AppShell";
 
@@ -24,7 +26,7 @@ export default function MitarbeiterSeite() {
   useEffect(() => {
     try {
       const daten = JSON.parse(
-        localStorage.getItem("mitarbeiter") || "[]"
+        appStorage.getItem("mitarbeiter") || "[]"
       );
       setMitarbeiter(Array.isArray(daten) ? daten : []);
     } catch {
@@ -34,7 +36,7 @@ export default function MitarbeiterSeite() {
 
   function speichernListe(liste: Mitarbeiter[]) {
     setMitarbeiter(liste);
-    localStorage.setItem("mitarbeiter", JSON.stringify(liste));
+    appStorage.setItem("mitarbeiter", JSON.stringify(liste));
   }
 
   function hinzufuegen() {
@@ -106,6 +108,7 @@ export default function MitarbeiterSeite() {
       action={
         <button
           type="button"
+                  disabled={cloudState().profile !== null && cloudState().profile?.rolle !== "admin"}
           className="bb-primary-button bb-button-link"
           onClick={() => setFormularOffen(!formularOffen)}
         >
@@ -206,6 +209,7 @@ export default function MitarbeiterSeite() {
           <div className="bb-employee-form-actions">
             <button
               type="button"
+                  disabled={cloudState().profile !== null && cloudState().profile?.rolle !== "admin"}
               className="bb-secondary-button"
               onClick={() => setFormularOffen(false)}
             >
@@ -213,6 +217,7 @@ export default function MitarbeiterSeite() {
             </button>
             <button
               type="button"
+                  disabled={cloudState().profile !== null && cloudState().profile?.rolle !== "admin"}
               className="bb-primary-button"
               onClick={hinzufuegen}
             >
@@ -276,6 +281,7 @@ export default function MitarbeiterSeite() {
 
                 <button
                   type="button"
+                  disabled={cloudState().profile !== null && cloudState().profile?.rolle !== "admin"}
                   className={`bb-employee-status ${
                     person.aktiv ? "active" : "inactive"
                   }`}
@@ -287,6 +293,7 @@ export default function MitarbeiterSeite() {
 
                 <button
                   type="button"
+                  disabled={cloudState().profile !== null && cloudState().profile?.rolle !== "admin"}
                   className="bb-employee-delete"
                   onClick={() => entfernen(person.id)}
                   aria-label={`${person.vorname} löschen`}

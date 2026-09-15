@@ -1,4 +1,5 @@
 "use client";
+import { appStorage } from "../../../lib/cloud-store";
 
 import { buchungAblegen, buchungenLesen } from "../../../lib/bookings";
 import Link from "next/link";
@@ -41,12 +42,12 @@ export default function ZonenzutrittPage() {
   useEffect(() => {
     function laden() {
       try {
-        setEintraege(buchungenLesen<Zutritt>(localStorage, storageKey));
+        setEintraege(buchungenLesen<Zutritt>(appStorage, storageKey));
       } catch {
         setMeldung("Buchungen konnten nicht geladen werden. Bitte die Seite neu laden; bestehende Daten werden nicht überschrieben.");
       }
       try {
-        setMitarbeiter(baustellenTeam(localStorage, id));
+        setMitarbeiter(baustellenTeam(appStorage, id));
       } catch {
         setMitarbeiter([]);
         setMeldung("Das Baustellenteam konnte nicht gelesen werden. Bereits anwesende Personen können weiterhin ausgecheckt werden.");
@@ -67,10 +68,10 @@ export default function ZonenzutrittPage() {
     try {
       const heuteAktuell = heuteKey();
       if (heuteAktuell !== heute) throw new Error("Der Tag hat gewechselt. Bitte die Seite neu laden.");
-      const neu = buchungAblegen(localStorage, `zonenzutritt-${id}-${heuteAktuell}`, eintrag, (aktuell) => {
+      const neu = buchungAblegen(appStorage, `zonenzutritt-${id}-${heuteAktuell}`, eintrag, (aktuell) => {
         if (eintrag.typ === "eintritt") {
-          if (!baustellenTeam(localStorage, id).some(person => person.id === eintrag.mitarbeiterId)) throw new Error("Diese Person ist der Baustelle nicht mehr aktiv zugeteilt.");
-          const freigabe = gespeicherteFreigabe(localStorage, id, heuteAktuell);
+          if (!baustellenTeam(appStorage, id).some(person => person.id === eintrag.mitarbeiterId)) throw new Error("Diese Person ist der Baustelle nicht mehr aktiv zugeteilt.");
+          const freigabe = gespeicherteFreigabe(appStorage, id, heuteAktuell);
           if (!freigabe.bereit) throw new Error(freigabe.gruende.map(g => g.text).join(" · "));
           if (!eintrag.manuell && personenInZone(aktuell).includes(eintrag.mitarbeiterId)) throw new Error("Diese Person ist bereits eingecheckt.");
         }
