@@ -1,3 +1,4 @@
+import { sicheresWeiterleitungsziel, zugelassenesProfil } from "../../lib/auth-policy";
 import { NextResponse } from "next/server";
 import { erlaubteEmailDomain } from "../../lib/supabase/config";
 import { createClient } from "../../lib/supabase/server";
@@ -6,7 +7,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const nextParameter = searchParams.get("next");
-  const next = nextParameter?.startsWith("/") ? nextParameter : "/";
+  const next = sicheresWeiterleitungsziel(nextParameter);
 
   if (!code) return NextResponse.redirect(`${origin}/auth/auth-code-error`);
 
@@ -23,11 +24,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/auth/auth-code-error`);
   }
 
-  const forwardedHost = request.headers.get("x-forwarded-host");
-  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
-  const basis = process.env.NODE_ENV === "development" || !forwardedHost
-    ? origin
-    : `${forwardedProto}://${forwardedHost}`;
-
-  return NextResponse.redirect(`${basis}${next}`);
+  const {data: profile} = await supabase.from("profile").select("aktiv,rolle").eq("id",data.user!.id).single();
+  if (!zugelassenesProfil(profile)) {
+    await supabase.auth.signOut();
+    return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+  }
+  return NextResponse.redirect(new URL(next, origin));
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { sicheresWeiterleitungsziel } from "../lib/auth-policy";
 import Image from "next/image";
 import { useState } from "react";
 import { createClient } from "../lib/supabase/client";
@@ -17,7 +18,7 @@ export default function LoginPage() {
     setFehler("");
 
     const nextParameter = new URLSearchParams(window.location.search).get("next");
-    const next = nextParameter?.startsWith("/") ? nextParameter : "/";
+    const next = sicheresWeiterleitungsziel(nextParameter);
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "azure",
@@ -74,7 +75,7 @@ export default function LoginPage() {
 
           {!konfiguriert && (
             <div className="mt-5 rounded-2xl border border-[var(--bb-accent-border)] bg-[var(--bb-accent-soft)] p-4 text-sm font-semibold text-[var(--bb-accent-ink)]">
-              Die Verbindung wird vorbereitet. Supabase-Projekt-URL und Publishable Key fehlen noch.
+              Das Arbeitsportal wird eingerichtet. Bitte wende dich an die Geschäftsleitung.
             </div>
           )}
 

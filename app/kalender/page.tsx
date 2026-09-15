@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage } from "../lib/cloud-store";
+
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import AppShell from "../components/ui/AppShell";
 
@@ -121,10 +123,10 @@ export default function KalenderPage() {
   useEffect(() => {
     try {
       const gespeicherteEvents = JSON.parse(
-        localStorage.getItem("kalender-events") || "[]"
+        appStorage.getItem("kalender-events") || "[]"
       );
       const gespeicherteBaustellen = JSON.parse(
-        localStorage.getItem("baustellen") || "[]"
+        appStorage.getItem("baustellen") || "[]"
       );
 
       setEvents(
@@ -262,7 +264,7 @@ export default function KalenderPage() {
 
     const neu = [...events, neuerTermin];
     setEvents(neu);
-    localStorage.setItem("kalender-events", JSON.stringify(neu));
+    appStorage.setItem("kalender-events", JSON.stringify(neu));
     setAuswahl(datum);
     setFormularOffen(false);
   }
@@ -270,7 +272,7 @@ export default function KalenderPage() {
   function loeschen(id: string) {
     const neu = events.filter((event) => event.id !== id);
     setEvents(neu);
-    localStorage.setItem("kalender-events", JSON.stringify(neu));
+    appStorage.setItem("kalender-events", JSON.stringify(neu));
   }
 
   const monatsname = ansichtDatum.toLocaleDateString("de-CH", {

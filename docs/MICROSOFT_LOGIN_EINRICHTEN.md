@@ -7,7 +7,7 @@ als Administratoren angelegt; weitere B&B-Konten erhalten zunächst die Rolle `v
 ## 1. Supabase-Projekt erstellen
 
 1. In Supabase ein neues Projekt für `B&B Arbeitsportal` erstellen.
-2. Im SQL Editor den Inhalt von `supabase/migrations/001_bb_basis.sql` ausführen.
+2. Im SQL Editor die noch nicht angewendeten Migrationen 001, 002 und 003 aus `supabase/migrations/` in Reihenfolge ausführen.
 3. Unter **Project Settings > API** die Project URL und den Publishable Key kopieren.
 
 ## 2. Microsoft-App registrieren
@@ -46,8 +46,8 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_DEIN_KEY
 NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN=bb-schadstoffsanierung.ch
 ```
 
-Danach die App neu bereitstellen. Ohne diese Werte bleibt der bisherige Vorschaumodus aktiv,
-damit die Entwicklung nicht blockiert wird.
+Danach die App neu bereitstellen. Ohne diese Werte ist der Arbeitsbereich in Produktion gesperrt.
+Die lokale Entwicklung bleibt möglich; eine isolierte Vorschau benötigt ausdrücklich `BB_PREVIEW_MODE=true`.
 
 ## Sicherheit
 

@@ -1,4 +1,5 @@
 "use client";
+import { appStorage } from "../../lib/cloud-store";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -42,7 +43,7 @@ export default function BaustellenDetail() {
 
   useEffect(() => {
     const heute = heuteIso();
-    setFreigabe(gespeicherteFreigabe(localStorage, id, heute));
+    setFreigabe(gespeicherteFreigabe(appStorage, id, heute));
     const baustellen = lesen<Baustelle[]>("baustellen", []);
     setBaustelle(baustellen.find((eintrag) => eintrag.id === id) || null);
 
@@ -353,7 +354,7 @@ function VerwaltungsLink({ href, titel, text }: { href: string; titel: string; t
 
 function lesen<T>(key: string, fallback: T): T {
   try {
-    const wert = localStorage.getItem(key);
+    const wert = appStorage.getItem(key);
     return wert ? (JSON.parse(wert) as T) : fallback;
   } catch {
     return fallback;

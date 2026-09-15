@@ -1,4 +1,5 @@
 "use client";
+import { appStorage } from "../../../lib/cloud-store";
 
 import AppShell from "../../../components/ui/AppShell";
 
@@ -111,7 +112,7 @@ export default function DokumentePage() {
 
   useEffect(() => {
     try {
-      const daten = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      const daten = JSON.parse(appStorage.getItem(storageKey) || "[]");
       if (!Array.isArray(daten)) throw new Error("Ungültige Ablage");
       setDokumente(daten);
     } catch {
@@ -121,10 +122,10 @@ export default function DokumentePage() {
 
   function speichern(aendern: (aktuell: Dokument[]) => Dokument[]) {
     try {
-      const aktuell = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      const aktuell = JSON.parse(appStorage.getItem(storageKey) || "[]");
       if (!Array.isArray(aktuell)) throw new Error("Ungültige Ablage");
       const neu = aendern(aktuell);
-      localStorage.setItem(storageKey, JSON.stringify(neu));
+      appStorage.setItem(storageKey, JSON.stringify(neu));
       setDokumente(neu);
       return true;
     } catch {
@@ -164,7 +165,7 @@ export default function DokumentePage() {
   }
 
   async function herunterladen(dokument: Dokument) {
-    const inhalt = dateiInhalt(localStorage, id, dokument);
+    const inhalt = dateiInhalt(appStorage, id, dokument);
     if (!inhalt) {
       setMeldung("Für diese ältere Ablage fehlt der Dateiinhalt. Bitte die Originaldatei erneut hochladen.");
       return;

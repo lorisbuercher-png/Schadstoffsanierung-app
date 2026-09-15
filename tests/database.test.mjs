@@ -1,0 +1,41 @@
+import {PGlite} from '@electric-sql/pglite';
+import {readFileSync} from 'node:fs';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+const admin='00000000-0000-0000-0000-000000000001', foreman='00000000-0000-0000-0000-000000000002', outsider='00000000-0000-0000-0000-000000000003';
+const org='10000000-0000-0000-0000-000000000001';
+test('Database enforces atomic writes, conflict checks, role boundaries and organisation isolation',async()=>{
+ const db=new PGlite();
+ try {
+ await db.exec(`create role anon; create role authenticated; create schema auth;
+ create table auth.users(id uuid primary key); create function auth.uid() returns uuid language sql as $$select nullif(current_setting('app.uid',true),'')::uuid$$;
+ create table public.organisationen(id uuid primary key);
+ create table public.profile(id uuid primary key,organisation_id uuid,rolle text,aktiv boolean);
+ create function public.meine_organisation_id() returns uuid language sql as $$select organisation_id from public.profile where id=auth.uid() and aktiv$$;
+ insert into auth.users values('${admin}'),('${foreman}'),('${outsider}');
+ insert into organisationen values('${org}'),('10000000-0000-0000-0000-000000000002');
+ insert into profile values('${admin}','${org}','admin',true),('${foreman}','${org}','vorarbeiter',true),('${outsider}','10000000-0000-0000-0000-000000000002','vorarbeiter',true);
+ grant usage on schema auth to authenticated; grant select on public.profile to authenticated;`);
+ await db.exec(readFileSync(new URL('../supabase/migrations/002_shared_app_records.sql',import.meta.url),'utf8'));
+ await db.exec(`set role authenticated; set app.uid='${admin}';`);
+ const save=async(changes,id=crypto.randomUUID())=> (await db.query('select save_app_records($1,$2::jsonb) as result',[id,JSON.stringify(changes)])).rows[0].result;
+ const batch=[{key:'journal-b',value:'{}',version:0},{key:'dokumente-b',value:'[]',version:0}];
+ const request=crypto.randomUUID();await save(batch,request); await save(batch,request);
+ assert.equal((await db.query("select version from app_records where key='journal-b'")).rows[0].version,1);
+ await assert.rejects(()=>save([{key:'journal-b',value:'{"changed":true}',version:1},{key:'dokumente-b',value:'[]',version:0}]),/CONFLICT/);
+ assert.equal((await db.query("select value from app_records where key='journal-b'")).rows[0].value,'{}');
+ await assert.rejects(()=>db.exec("update app_records set value='null'"),/permission denied/);
+ await db.exec(`set app.uid='${foreman}';`);
+ await assert.rejects(()=>save([{key:'mitarbeiter',value:'[]',version:0}]),/FORBIDDEN/);
+ await save([{key:'journal-b',value:'{"foreman":true}',version:1}]);
+ await db.exec(`set app.uid='${admin}';`);
+ await save([{key:'baustellen',value:'[{"id":"b","projektname":"Bau","checklisten":[],"fortschritt":0}]',version:0}]);
+ await db.exec(`set app.uid='${foreman}';`);
+ await save([{key:'baustellen',value:'[{"id":"b","projektname":"Bau","checklisten":[1],"fortschritt":10}]',version:1}]);
+ await assert.rejects(()=>save([{key:'baustellen',value:'[]',version:2}]),/FORBIDDEN/);
+ await db.exec(`set app.uid='${outsider}';`);
+ assert.equal((await db.query('select * from app_records')).rows.length,0);
+ await db.exec(`reset role; update profile set aktiv=false where id='${foreman}'; set role authenticated; set app.uid='${foreman}';`);
+ await assert.rejects(()=>save([{key:'journal-b',value:'{}',version:2}]),/FORBIDDEN/);
+ } finally {await db.close();}
+});

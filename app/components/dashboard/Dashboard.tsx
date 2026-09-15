@@ -1,4 +1,5 @@
 "use client";
+import { appStorage, cloudState } from "../../lib/cloud-store";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -39,7 +40,7 @@ const prio1Nummern = new Set([6, 10, 12, 13, 19, 20, 23, 26, 29, 31, 33, 38, 42,
 
 function lesen<T>(key: string, fallback: T): T {
   try {
-    const raw = localStorage.getItem(key);
+    const raw = appStorage.getItem(key);
     return raw ? JSON.parse(raw) as T : fallback;
   } catch {
     return fallback;
@@ -67,13 +68,13 @@ function icon(name: "shield" | "alert" | "site" | "clock" | "team" | "check" | "
 }
 
 export default function Dashboard() {
-  const [role, setRole] = useState<AppRole>("admin");
+  const [role, setRole] = useState<AppRole>(() => cloudState().profile?.rolle === "vorarbeiter" ? "vorarbeiter" : "admin");
   const [status, setStatus] = useState<SiteStatus[]>([]);
   const [mitarbeiter, setMitarbeiter] = useState(0);
   const [heute] = useState(datumKey);
 
   useEffect(() => {
-    const gespeichert = localStorage.getItem("bb-role");
+    const gespeichert = appStorage.getItem("bb-role");
     if (gespeichert === "admin" || gespeichert === "vorarbeiter") setRole(gespeichert);
 
     const alle = lesen<Baustelle[]>("baustellen", []);
@@ -96,7 +97,7 @@ export default function Dashboard() {
 
       return {
         baustelle,
-        freigabe: gespeicherteFreigabe(localStorage, baustelle.id, heute),
+        freigabe: gespeicherteFreigabe(appStorage, baustelle.id, heute),
         suvaOffen,
         suvaKritisch,
         maengelOffen: offen.length,
