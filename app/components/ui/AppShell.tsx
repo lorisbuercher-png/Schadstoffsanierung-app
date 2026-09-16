@@ -1,8 +1,11 @@
 "use client";
 
+import { istSupabaseKonfiguriert } from "../../lib/supabase/config";
+import { cloudState, appStorage } from "../../lib/cloud-store";
+
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import BrandLogo from "./BrandLogo";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import AuthUserMenu from "./AuthUserMenu";
@@ -45,17 +48,18 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
   const pathname = usePathname();
   const [menuOffen, setMenuOffen] = useState(false);
   const [localRole, setLocalRole] = useState<AppRole>("admin");
-  const role = controlledRole ?? localRole;
+  const canSwitch = !istSupabaseKonfiguriert() || cloudState().profile?.rolle === "admin";
+  const role = canSwitch ? controlledRole ?? localRole : "vorarbeiter";
 
   useEffect(() => {
     if (controlledRole) return;
-    const saved = localStorage.getItem("bb-role");
+    const saved = appStorage.getItem("bb-role");
     if (saved === "admin" || saved === "vorarbeiter") setLocalRole(saved);
   }, [controlledRole]);
 
   function rolleWaehlen(nextRole: AppRole) {
     if (!controlledRole) setLocalRole(nextRole);
-    localStorage.setItem("bb-role", nextRole);
+    appStorage.setItem("bb-role", nextRole);
     window.dispatchEvent(new CustomEvent("bb-role-change", { detail: nextRole }));
     onRoleChange?.(nextRole);
     setMenuOffen(false);
@@ -90,7 +94,7 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
       <a className="bb-skip-link" href="#bb-main-content">Zum Inhalt</a>
       <aside className={`bb-sidebar ${menuOffen ? "mobile-open" : ""}`}>
         <button type="button" className="bb-sidebar-close" onClick={() => setMenuOffen(false)} aria-label="Menü schliessen">×</button>
-        <Link href="/" className="bb-brand bb-brand-logo" aria-label="B&B Schadstoffsanierung – Übersicht"><Image src="/bb-logo.png" alt="B&B Schadstoffsanierung" width={546} height={300} priority /></Link>
+        <Link href="/" className="bb-brand bb-brand-logo" aria-label="B&B Schadstoffsanierung – Übersicht"><BrandLogo /></Link>
         <div className="bb-sidebar-role"><span>{role === "admin" ? "Geschäftsleitung" : "Baustellenmodus"}</span><strong>{role === "admin" ? "Admin-Cockpit" : "Vorarbeiter"}</strong></div>
         <nav id="bb-navigation" className="bb-nav" aria-label="Hauptnavigation">
           {navigation.map((eintrag) => <Link key={eintrag.label} aria-current={istAktiv(eintrag.href) ? "page" : undefined} title={eintrag.label} href={eintrag.href} onClick={() => setMenuOffen(false)} className={`${istAktiv(eintrag.href) ? "active" : ""} ${eintrag.priority ? "priority" : ""}`}><Icon name={eintrag.icon} /><span className="bb-nav-label">{eintrag.label}</span>{!!eintrag.badge && <b className="bb-nav-badge">{eintrag.badge}</b>}</Link>)}
@@ -104,8 +108,8 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
         <header className="bb-topbar">
           <div className="bb-topbar-left"><button type="button" className="bb-mobile-menu" onClick={() => setMenuOffen(true)} aria-label="Navigation öffnen" aria-expanded={menuOffen} aria-controls="bb-navigation">☰</button><div className="bb-topbar-context"><span className="bb-live-dot" />B&amp;B Arbeitsportal</div></div>
           <div className="bb-topbar-actions">
-            <div className="bb-role-switch" aria-label="Ansicht wechseln"><button type="button" className={role === "admin" ? "active" : ""} onClick={() => rolleWaehlen("admin")}>Admin</button><button type="button" className={role === "vorarbeiter" ? "active" : ""} onClick={() => rolleWaehlen("vorarbeiter")}>Vorarbeiter</button></div>
-            <button className="bb-icon-button" type="button" aria-label="Benachrichtigungen"><span aria-hidden="true">⌁</span>{(suvaBadge + maengelBadge) > 0 && <span className="bb-notification-dot">{Math.min(9, suvaBadge + maengelBadge)}</span>}</button>
+            {canSwitch && <div className="bb-role-switch" aria-label="Ansicht wechseln"><button type="button" className={role === "admin" ? "active" : ""} onClick={() => rolleWaehlen("admin")}>Admin</button><button type="button" className={role === "vorarbeiter" ? "active" : ""} onClick={() => rolleWaehlen("vorarbeiter")}>Vorarbeiter</button></div>}
+            <Link href="/#admin-maengel" className="bb-icon-button" aria-label="Offene Mängel ansehen"><span aria-hidden="true">⌁</span>{(suvaBadge + maengelBadge) > 0 && <span className="bb-notification-dot">{Math.min(9, suvaBadge + maengelBadge)}</span>}</Link>
             <AuthUserMenu />
           </div>
         </header>

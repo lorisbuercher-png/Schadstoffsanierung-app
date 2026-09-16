@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage } from "../lib/cloud-store";
+
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "../components/ui/AppShell";
 
@@ -21,7 +23,7 @@ export default function DokumentePage() {
   useEffect(() => {
     try {
       const baustellen = JSON.parse(
-        localStorage.getItem("baustellen") || "[]"
+        appStorage.getItem("baustellen") || "[]"
       );
 
       if (!Array.isArray(baustellen)) return;
@@ -32,7 +34,7 @@ export default function DokumentePage() {
 
           try {
             const dokumente = JSON.parse(
-              localStorage.getItem(
+              appStorage.getItem(
                 `dokumente-${baustelle.id}`
               ) || "[]"
             );

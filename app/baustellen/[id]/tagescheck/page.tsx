@@ -1,4 +1,5 @@
 "use client";
+import { appStorage } from "../../../lib/cloud-store";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
@@ -121,7 +122,7 @@ export default function TagescheckPage() {
   useEffect(() => {
     try {
       const alle = JSON.parse(
-        localStorage.getItem("baustellen") || "[]"
+        appStorage.getItem("baustellen") || "[]"
       );
 
       if (Array.isArray(alle)) {
@@ -144,7 +145,7 @@ export default function TagescheckPage() {
     setMeldung("");
 
     try {
-      const raw = localStorage.getItem(storageKey);
+      const raw = appStorage.getItem(storageKey);
 
       if (!raw) return;
 
@@ -215,7 +216,7 @@ export default function TagescheckPage() {
     };
 
     try {
-      localStorage.setItem(storageKey, JSON.stringify(daten));
+      appStorage.setItem(storageKey, JSON.stringify(daten));
     } catch {
       setMeldung("Tagescheck nicht gespeichert. Bitte die Seite geöffnet lassen und erneut versuchen; der Gerätespeicher ist möglicherweise voll.");
       return;

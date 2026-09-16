@@ -1,5 +1,7 @@
 "use client";
 
+import { cloudState, appStorage, speichernBestaetigt } from "../../../lib/cloud-store";
+
 import AppShell from "../../../components/ui/AppShell";
 
 import { useEffect, useState } from "react";
@@ -29,7 +31,7 @@ export default function BaustellenMitarbeiter() {
 
   useEffect(() => {
     const alleBaustellen = JSON.parse(
-      localStorage.getItem("baustellen") || "[]"
+      appStorage.getItem("baustellen") || "[]"
     );
 
     setBaustelle(
@@ -37,7 +39,7 @@ export default function BaustellenMitarbeiter() {
     );
 
     const alleMitarbeiter = JSON.parse(
-      localStorage.getItem("mitarbeiter") || "[]"
+      appStorage.getItem("mitarbeiter") || "[]"
     );
 
     setMitarbeiter(
@@ -46,7 +48,7 @@ export default function BaustellenMitarbeiter() {
 
     setZugewiesen(
       JSON.parse(
-        localStorage.getItem(`baustellen-mitarbeiter-${id}`) || "[]"
+        appStorage.getItem(`baustellen-mitarbeiter-${id}`) || "[]"
       )
     );
   }, [id]);
@@ -59,13 +61,13 @@ export default function BaustellenMitarbeiter() {
     );
   }
 
-  function speichern() {
-    localStorage.setItem(
+  async function speichern() {
+    appStorage.setItem(
       `baustellen-mitarbeiter-${id}`,
       JSON.stringify(zugewiesen)
     );
 
-    alert("Baustellen-Team gespeichert.");
+    if (await speichernBestaetigt()) alert("Baustellen-Team gespeichert.");
   }
 
   if (!baustelle) {
@@ -137,6 +139,7 @@ export default function BaustellenMitarbeiter() {
 
                     <input
                       type="checkbox"
+                  disabled={cloudState().profile !== null && cloudState().profile?.rolle !== "admin"}
                       checked={aktiv}
                       onChange={() => toggle(m.id)}
                       className="h-5 w-5"
@@ -172,6 +175,7 @@ export default function BaustellenMitarbeiter() {
 
             <button
               type="button"
+                  disabled={cloudState().profile !== null && cloudState().profile?.rolle !== "admin"}
               onClick={speichern}
               className="rounded-xl bg-[var(--bb-accent)] px-6 py-3 font-bold text-[var(--bb-on-accent)] hover:bg-[var(--bb-accent-hover)]"
             >

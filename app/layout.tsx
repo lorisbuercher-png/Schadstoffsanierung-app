@@ -1,3 +1,4 @@
+import CloudGate from "./components/CloudGate";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -23,8 +24,9 @@ export const metadata: Metadata = {
   },
   description:
     "Digitale Baustellen- und Sicherheitsdokumentation der B&B Schadstoffsanierung.",
+  robots: { index: false, follow: false },
   icons: {
-    icon: "/bb-logo.png",
+    icon: "/bb-mark.png",
   },
 };
 
@@ -34,7 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="de"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col"><CloudGate>{children}</CloudGate></body>
     </html>
   );
 }

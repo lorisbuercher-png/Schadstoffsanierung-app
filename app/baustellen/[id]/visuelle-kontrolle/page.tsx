@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage, speichernBestaetigt } from "../../../lib/cloud-store";
+
 import AppShell from "../../../components/ui/AppShell";
 
 import { useEffect, useState } from "react";
@@ -51,7 +53,7 @@ export default function VisuelleKontrolle() {
 
   useEffect(() => {
     const alle = JSON.parse(
-      localStorage.getItem("baustellen") || "[]"
+      appStorage.getItem("baustellen") || "[]"
     );
 
     const gefunden = alle.find(
@@ -61,7 +63,7 @@ export default function VisuelleKontrolle() {
     setBaustelle(gefunden || null);
 
     const gespeichert = JSON.parse(
-      localStorage.getItem(`as10-${id}`) || "{}"
+      appStorage.getItem(`as10-${id}`) || "{}"
     );
 
     setZone(gespeichert.zone || "");
@@ -125,8 +127,8 @@ export default function VisuelleKontrolle() {
     );
   }
 
-  function speichern() {
-    localStorage.setItem(
+  async function speichern() {
+    appStorage.setItem(
       `as10-${id}`,
       JSON.stringify({
         zone,
@@ -145,7 +147,7 @@ export default function VisuelleKontrolle() {
       })
     );
 
-    alert("AS10 gespeichert.");
+    if (await speichernBestaetigt()) alert("AS10 gespeichert.");
   }
 
   if (!baustelle) {

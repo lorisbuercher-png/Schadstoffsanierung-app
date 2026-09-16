@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage, speichernBestaetigt } from "../../../../lib/cloud-store";
+
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppShell from "../../../../components/ui/AppShell";
@@ -555,7 +557,7 @@ export default function ChecklistenSeite() {
   const [antworten, setAntworten] = useState<Record<string, Antwort>>({});
 
   useEffect(() => {
-    const alle = JSON.parse(localStorage.getItem("baustellen") || "[]");
+    const alle = JSON.parse(appStorage.getItem("baustellen") || "[]");
 
     const gefunden = alle.find((item: Baustelle) => item.id === id);
     if (!gefunden) return;
@@ -587,7 +589,7 @@ export default function ChecklistenSeite() {
 
     try {
       const personen = JSON.parse(
-        localStorage.getItem("mitarbeiter") || "[]"
+        appStorage.getItem("mitarbeiter") || "[]"
       );
 
       if (Array.isArray(personen)) {
@@ -636,8 +638,8 @@ export default function ChecklistenSeite() {
     }));
   }
 
-  function speichern(abschliessen: boolean) {
-    const alle = JSON.parse(localStorage.getItem("baustellen") || "[]");
+  async function speichern(abschliessen: boolean) {
+    const alle = JSON.parse(appStorage.getItem("baustellen") || "[]");
 
     // Instruktionshistorie bei abgeschlossenem AS5 / AS7
     if (
@@ -646,7 +648,7 @@ export default function ChecklistenSeite() {
       mitarbeiterId
     ) {
       const historie = JSON.parse(
-        localStorage.getItem("instruktionshistorie") || "[]"
+        appStorage.getItem("instruktionshistorie") || "[]"
       );
 
       const mitarbeiter = team.find(
@@ -675,7 +677,7 @@ export default function ChecklistenSeite() {
 
         historie.push(neuerEintrag);
 
-        localStorage.setItem(
+        appStorage.setItem(
           "instruktionshistorie",
           JSON.stringify(historie)
         );
@@ -718,7 +720,8 @@ export default function ChecklistenSeite() {
       };
     });
 
-    localStorage.setItem("baustellen", JSON.stringify(aktualisiert));
+    appStorage.setItem("baustellen", JSON.stringify(aktualisiert));
+    if (!(await speichernBestaetigt())) return;
     router.push(`/baustellen/${id}`);
   }
 

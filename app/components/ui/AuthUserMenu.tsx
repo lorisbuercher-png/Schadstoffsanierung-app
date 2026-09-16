@@ -7,7 +7,7 @@ import { istSupabaseKonfiguriert } from "../../lib/supabase/config";
 
 export default function AuthUserMenu() {
   const router = useRouter();
-  const [name, setName] = useState("Loris Bürcher");
+  const [name, setName] = useState("B&B");
   const konfiguriert = istSupabaseKonfiguriert();
 
   useEffect(() => {
@@ -29,7 +29,8 @@ export default function AuthUserMenu() {
 
   async function abmelden() {
     const supabase = createClient();
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) { alert("Abmelden fehlgeschlagen. Bitte erneut versuchen."); return; }
     router.push("/login");
     router.refresh();
   }
@@ -49,7 +50,7 @@ export default function AuthUserMenu() {
         <button
           type="button"
           onClick={abmelden}
-          className="hidden rounded-lg px-2 py-1 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:block"
+          className="rounded-lg px-2 py-1 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-900"
         >
           Abmelden
         </button>

@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage } from "../../../lib/cloud-store";
+
 import AppShell from "../../../components/ui/AppShell";
 
 import { useEffect, useMemo, useState } from "react";
@@ -43,7 +45,7 @@ export default function GeraetePage() {
   const storageKey = `geraete-${id}`;
 
   useEffect(() => {
-    const raw = localStorage.getItem(storageKey);
+    const raw = appStorage.getItem(storageKey);
 
     if (raw) {
       try {
@@ -55,7 +57,7 @@ export default function GeraetePage() {
 
   function speichern(neu: Geraet[]) {
     setGeraete(neu);
-    localStorage.setItem(storageKey, JSON.stringify(neu));
+    appStorage.setItem(storageKey, JSON.stringify(neu));
   }
 
   function geraetErstellen() {

@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage, speichernBestaetigt } from "../../../lib/cloud-store";
+
 import AppShell from "../../../components/ui/AppShell";
 
 import { useEffect, useState } from "react";
@@ -97,7 +99,7 @@ export default function Sanierungsplan() {
 
   useEffect(() => {
     const alle = JSON.parse(
-      localStorage.getItem("baustellen") || "[]"
+      appStorage.getItem("baustellen") || "[]"
     );
 
     const gefunden = alle.find(
@@ -107,7 +109,7 @@ export default function Sanierungsplan() {
     setBaustelle(gefunden || null);
 
     const gespeichert = JSON.parse(
-      localStorage.getItem(`sanierungsplan-${id}`) || "{}"
+      appStorage.getItem(`sanierungsplan-${id}`) || "{}"
     );
 
     if (gespeichert.startZonenbau)
@@ -143,8 +145,8 @@ export default function Sanierungsplan() {
     );
   }
 
-  function speichern() {
-    localStorage.setItem(
+  async function speichern() {
+    appStorage.setItem(
       `sanierungsplan-${id}`,
       JSON.stringify({
         startZonenbau,
@@ -155,7 +157,7 @@ export default function Sanierungsplan() {
       })
     );
 
-    alert("Sanierungsplan gespeichert.");
+    if (await speichernBestaetigt()) alert("Sanierungsplan gespeichert.");
   }
 
   if (!baustelle) {

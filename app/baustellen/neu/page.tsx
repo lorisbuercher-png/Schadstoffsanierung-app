@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage, speichernBestaetigt } from "../../lib/cloud-store";
+
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -52,7 +54,7 @@ export default function NeueBaustelle() {
     if (fehler) setFehler("");
   }
 
-  function speichern(event: FormEvent<HTMLFormElement>) {
+  async function speichern(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!form.projektname.trim()) {
@@ -69,7 +71,7 @@ export default function NeueBaustelle() {
 
     try {
       const vorhandene = JSON.parse(
-        localStorage.getItem("baustellen") || "[]"
+        appStorage.getItem("baustellen") || "[]"
       );
 
       const id = Date.now().toString();
@@ -115,12 +117,13 @@ export default function NeueBaustelle() {
         ],
       };
 
-      localStorage.setItem(
+      appStorage.setItem(
         "baustellen",
         JSON.stringify([...vorhandene, neueBaustelle])
       );
 
-      router.push(`/baustellen/${id}`);
+      if (!(await speichernBestaetigt())) return;
+    router.push(`/baustellen/${id}`);
     } catch {
       setSpeichert(false);
       setFehler("Die Baustelle konnte nicht gespeichert werden.");

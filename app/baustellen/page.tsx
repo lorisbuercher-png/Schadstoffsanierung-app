@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage } from "../lib/cloud-store";
+
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import AppShell from "../components/ui/AppShell";
@@ -34,7 +36,7 @@ export default function Baustellen() {
 
   useEffect(() => {
     try {
-      const daten = JSON.parse(localStorage.getItem("baustellen") || "[]");
+      const daten = JSON.parse(appStorage.getItem("baustellen") || "[]");
       setBaustellen(Array.isArray(daten) ? daten : []);
     } catch {
       setBaustellen([]);

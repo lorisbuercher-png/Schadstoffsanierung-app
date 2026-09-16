@@ -1,4 +1,5 @@
 "use client";
+import { appStorage } from "../../../lib/cloud-store";
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -28,11 +29,11 @@ export default function Zonenplan() {
   const [ladeFehler, setLadeFehler] = useState(false);
 
   useEffect(() => {
-    const alle = JSON.parse(localStorage.getItem("baustellen") || "[]") as Baustelle[];
+    const alle = JSON.parse(appStorage.getItem("baustellen") || "[]") as Baustelle[];
     setBaustelle(alle.find((eintrag) => eintrag.id === id) || null);
 
     try {
-      const gespeichert = JSON.parse(localStorage.getItem(`zonenplan-${id}`) || "null");
+      const gespeichert = JSON.parse(appStorage.getItem(`zonenplan-${id}`) || "null");
 
       if (gespeichert?.datei) {
         setPlan(gespeichert.datei);
@@ -45,7 +46,7 @@ export default function Zonenplan() {
   }, [id]);
 
   function dateiSpeichern(datei: ZonenplanDatei) {
-    zonenplanAblegen(localStorage, id, datei, plan?.id ?? null);
+    zonenplanAblegen(appStorage, id, datei, plan?.id ?? null);
     setPlan(datei);
     setStatus("gespeichert");
   }
@@ -88,7 +89,7 @@ export default function Zonenplan() {
     if (!confirm("Soll der aktive Zonenplan entfernt werden? Weitere Dateien im Ordner bleiben erhalten.")) return;
     setFehler("");
     try {
-      zonenplanAblegen(localStorage, id, null, plan?.id ?? null);
+      zonenplanAblegen(appStorage, id, null, plan?.id ?? null);
       setPlan(null);
       setStatus("leer");
     } catch {

@@ -1,6 +1,7 @@
 "use client";
 
-import Image from "next/image";
+import { sicheresWeiterleitungsziel } from "../lib/auth-policy";
+import BrandLogo from "../components/ui/BrandLogo";
 import { useState } from "react";
 import { createClient } from "../lib/supabase/client";
 import { erlaubteEmailDomain, istSupabaseKonfiguriert } from "../lib/supabase/config";
@@ -17,7 +18,7 @@ export default function LoginPage() {
     setFehler("");
 
     const nextParameter = new URLSearchParams(window.location.search).get("next");
-    const next = nextParameter?.startsWith("/") ? nextParameter : "/";
+    const next = sicheresWeiterleitungsziel(nextParameter);
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "azure",
@@ -38,7 +39,7 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-[#f5f7f6] p-5">
       <div className="grid w-full max-w-5xl overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-xl lg:grid-cols-[0.9fr_1.1fr]">
         <section className="bg-[#18212b] p-8 text-white sm:p-12">
-          <Image src="/bb-logo.png" alt="B&B Schadstoffsanierung" width={220} height={121} priority className="h-auto w-44 brightness-0 invert" />
+          <div aria-label="B&B Schadstoffsanierung"><BrandLogo /></div>
           <div className="mt-12 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--bb-accent-ink)]">Digitales Arbeitsportal</div>
           <h1 className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">Sicher arbeiten.<br />Einfach dokumentieren.</h1>
           <p className="mt-5 max-w-md text-sm leading-7 text-slate-300">
@@ -74,7 +75,7 @@ export default function LoginPage() {
 
           {!konfiguriert && (
             <div className="mt-5 rounded-2xl border border-[var(--bb-accent-border)] bg-[var(--bb-accent-soft)] p-4 text-sm font-semibold text-[var(--bb-accent-ink)]">
-              Die Verbindung wird vorbereitet. Supabase-Projekt-URL und Publishable Key fehlen noch.
+              Das Arbeitsportal wird eingerichtet. Bitte wende dich an die Geschäftsleitung.
             </div>
           )}
 

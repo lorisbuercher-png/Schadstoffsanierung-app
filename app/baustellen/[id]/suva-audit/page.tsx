@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage } from "../../../lib/cloud-store";
+
 import AppShell from "../../../components/ui/AppShell";
 
 import { useEffect, useMemo, useState } from "react";
@@ -334,7 +336,7 @@ export default function SuvaAuditPage() {
   const storageKey = `suva-audit-${id}`;
 
   useEffect(() => {
-    const daten = localStorage.getItem(storageKey);
+    const daten = appStorage.getItem(storageKey);
 
     if (daten) {
       try {
@@ -407,7 +409,7 @@ export default function SuvaAuditPage() {
 
       if (punkt) {
         const maengelKey = `maengel-${id}`;
-        const raw = localStorage.getItem(maengelKey);
+        const raw = appStorage.getItem(maengelKey);
 
         let maengel = [];
 
@@ -445,7 +447,7 @@ export default function SuvaAuditPage() {
             erstelltAm: new Date().toISOString(),
           };
 
-          localStorage.setItem(
+          appStorage.setItem(
             maengelKey,
             JSON.stringify([neuerMangel, ...maengel])
           );
@@ -469,7 +471,7 @@ export default function SuvaAuditPage() {
   }
 
   function speichern() {
-    localStorage.setItem(storageKey, JSON.stringify(antworten));
+    appStorage.setItem(storageKey, JSON.stringify(antworten));
     setGespeichert(true);
   }
 

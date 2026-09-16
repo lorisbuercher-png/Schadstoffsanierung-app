@@ -1,5 +1,7 @@
 "use client";
 
+import { appStorage } from "../lib/cloud-store";
+
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -100,13 +102,13 @@ export default function Instruktionen() {
   useEffect(() => {
     try {
       const gespeicherteHistorie = JSON.parse(
-        localStorage.getItem("instruktionshistorie") || "[]"
+        appStorage.getItem("instruktionshistorie") || "[]"
       );
       const gespeicherteMitarbeiter = JSON.parse(
-        localStorage.getItem("mitarbeiter") || "[]"
+        appStorage.getItem("mitarbeiter") || "[]"
       );
       const gespeicherteBaustellen = JSON.parse(
-        localStorage.getItem("baustellen") || "[]"
+        appStorage.getItem("baustellen") || "[]"
       );
 
       setHistorie(
@@ -262,12 +264,12 @@ export default function Instruktionen() {
       b.datum.localeCompare(a.datum)
     );
     setHistorie(neueHistorie);
-    localStorage.setItem("instruktionshistorie", JSON.stringify(neueHistorie));
+    appStorage.setItem("instruktionshistorie", JSON.stringify(neueHistorie));
 
     const dokumentKey = `dokumente-${baustelle.id}`;
     try {
       const bestehendeDokumente = JSON.parse(
-        localStorage.getItem(dokumentKey) || "[]"
+        appStorage.getItem(dokumentKey) || "[]"
       );
       const dokument: Dokument = {
         id: crypto.randomUUID(),
@@ -277,7 +279,7 @@ export default function Instruktionen() {
         typ: "Instruktionsnachweis",
         instruktionId: id,
       };
-      localStorage.setItem(
+      appStorage.setItem(
         dokumentKey,
         JSON.stringify([
           dokument,
