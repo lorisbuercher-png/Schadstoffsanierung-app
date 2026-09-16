@@ -5,7 +5,7 @@ import { cloudState, appStorage } from "../../lib/cloud-store";
 
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import BrandLogo from "./BrandLogo";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import AuthUserMenu from "./AuthUserMenu";
@@ -94,7 +94,7 @@ export default function AppShell({ children, title, subtitle, backHref, backLabe
       <a className="bb-skip-link" href="#bb-main-content">Zum Inhalt</a>
       <aside className={`bb-sidebar ${menuOffen ? "mobile-open" : ""}`}>
         <button type="button" className="bb-sidebar-close" onClick={() => setMenuOffen(false)} aria-label="Menü schliessen">×</button>
-        <Link href="/" className="bb-brand bb-brand-logo" aria-label="B&B Schadstoffsanierung – Übersicht"><Image src="/bb-logo.png" alt="B&B Schadstoffsanierung" width={546} height={300} priority /></Link>
+        <Link href="/" className="bb-brand bb-brand-logo" aria-label="B&B Schadstoffsanierung – Übersicht"><BrandLogo /></Link>
         <div className="bb-sidebar-role"><span>{role === "admin" ? "Geschäftsleitung" : "Baustellenmodus"}</span><strong>{role === "admin" ? "Admin-Cockpit" : "Vorarbeiter"}</strong></div>
         <nav id="bb-navigation" className="bb-nav" aria-label="Hauptnavigation">
           {navigation.map((eintrag) => <Link key={eintrag.label} aria-current={istAktiv(eintrag.href) ? "page" : undefined} title={eintrag.label} href={eintrag.href} onClick={() => setMenuOffen(false)} className={`${istAktiv(eintrag.href) ? "active" : ""} ${eintrag.priority ? "priority" : ""}`}><Icon name={eintrag.icon} /><span className="bb-nav-label">{eintrag.label}</span>{!!eintrag.badge && <b className="bb-nav-badge">{eintrag.badge}</b>}</Link>)}

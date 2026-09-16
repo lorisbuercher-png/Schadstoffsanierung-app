@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     "Digitale Baustellen- und Sicherheitsdokumentation der B&B Schadstoffsanierung.",
   robots: { index: false, follow: false },
   icons: {
-    icon: "/bb-logo.png",
+    icon: "/bb-mark.png",
   },
 };
 
